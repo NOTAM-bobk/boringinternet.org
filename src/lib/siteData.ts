@@ -17,10 +17,18 @@ export interface Site {
   launched?: string;
 }
 
+export interface SiteCollection {
+  id: string;
+  title: string;
+  description: string;
+  siteSlugs: string[];
+}
+
 export interface SitesConfig {
   site?: string;
   tagline?: string;
   categories: SiteCategory[];
+  collections?: SiteCollection[];
   sites: Site[];
 }
 
@@ -32,6 +40,16 @@ function normalizeConfig(config: unknown): SitesConfig {
     categories: Array.isArray(parsed?.categories)
       ? parsed.categories
       : [{ id: "all", label: "All" }],
+    collections: Array.isArray(parsed?.collections)
+      ? parsed.collections.map((collection) => ({
+          id: collection.id ?? crypto.randomUUID(),
+          title: collection.title ?? "Collection",
+          description: collection.description ?? "",
+          siteSlugs: Array.isArray(collection.siteSlugs)
+            ? collection.siteSlugs
+            : [],
+        }))
+      : [],
     sites: Array.isArray(parsed?.sites)
       ? parsed.sites.map((site) => ({
           id: site.id ?? crypto.randomUUID(),
@@ -53,6 +71,7 @@ const config = normalizeConfig(sitesJson);
 export const siteName = config.site;
 export const siteTagline = config.tagline;
 export const categories = config.categories;
+export const collections = config.collections ?? [];
 export const sites = config.sites;
 
 export function sitesByCategory(categoryId: string): Site[] {
@@ -62,15 +81,33 @@ export function sitesByCategory(categoryId: string): Site[] {
   return sites.filter((site) => site.category === categoryId);
 }
 
-export function trendingSites(count = 6): Site[] {
+/** Highest trending score first, newest launch as the tie-breaker. */
+function byTrending(a: Site, b: Site): number {
+  const at = a.trending ?? 0;
+  const bt = b.trending ?? 0;
+  if (bt !== at) return bt - at;
+  return (b.launched ?? "").localeCompare(a.launched ?? "");
+}
+
+export function trendingSites(count = 6, offset = 0): Site[] {
+  return [...sites].sort(byTrending).slice(offset, offset + count);
+}
+
+/** Newest launch date first. */
+export function newAdditions(count = 10, offset = 0): Site[] {
   return [...sites]
-    .sort((a, b) => {
-      const at = a.trending ?? 0;
-      const bt = b.trending ?? 0;
-      if (bt !== at) return bt - at;
-      return (a.launched ?? "").localeCompare(b.launched ?? "");
-    })
-    .slice(0, count);
+    .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
+    .slice(offset, offset + count);
+}
+
+export function sitesBySlugs(slugs: string[]): Site[] {
+  return slugs
+    .map((slug) => sites.find((site) => site.slug === slug))
+    .filter((site): site is Site => Boolean(site));
+}
+
+export function collectionSites(collection: SiteCollection): Site[] {
+  return sitesBySlugs(collection.siteSlugs);
 }
 
 export function searchSites(query: string): Site[] {

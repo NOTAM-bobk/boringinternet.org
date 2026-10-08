@@ -1,30 +1,7 @@
 import { Link } from "react-router";
 import { SeoHead } from "../components/SeoHead";
 import { siteName } from "../lib/siteData";
-
-const posts = [
-  {
-    slug: "what-counts-as-launched",
-    title: "What counts as launched?",
-    date: "2026-10-04",
-    excerpt:
-      "A live URL, a working sign-in, and nothing else half-finished. That is the bar this directory uses before a site goes up.",
-  },
-  {
-    slug: "why-the-list-stays-small",
-    title: "Why the list stays small",
-    date: "2026-09-28",
-    excerpt:
-      "Directories get worse as they get bigger. We cap the index on purpose and let old entries drop off rather than pile up.",
-  },
-  {
-    slug: "editing-the-directory-by-hand",
-    title: "Editing the directory by hand",
-    date: "2026-09-20",
-    excerpt:
-      "Every entry lives in one plain JSON file, reviewed before it ships. No submissions queue, no scraping, no autopilot.",
-  },
-];
+import { formatDate, posts } from "../lib/posts";
 
 export default function Blog() {
   return (
@@ -55,11 +32,7 @@ export default function Blog() {
               style={{ borderColor: "var(--ink)" }}
             >
               <span className="text-[11px] font-mono" style={{ color: "var(--accent)" }}>
-                {new Date(post.date).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
+                {formatDate(post.date)}
               </span>
               <h2 className="text-xl font-bold">{post.title}</h2>
               <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>

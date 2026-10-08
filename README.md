@@ -11,10 +11,13 @@ counts trending votes.
 - `site` / `tagline` — brand text used in the header, footer, and SEO tags
 - `categories` — the chips shown above the grid
 - `sites[]` — `name`, `slug`, `url`, `description`, `category`, `tags`,
-  `trending` (ranking score), `launched` (date)
+  `trending` (vote seed / ranking score), `launched` (date)
+- `collections[]` — `title`, `description`, `siteSlugs[]`, rendered as the
+  collection cards on the home page
 
-Add an entry, redeploy, done. The site icon for each row is a monogram tile
-generated from the name, so there is nothing to upload per site.
+Add an entry, redeploy, done. There is nothing to upload per site: each row
+tries the site's own `/favicon.ico`, then a keyless icon lookup for the domain,
+then falls back to a monogram tile built from the name.
 
 ## Scripts
 
@@ -42,18 +45,34 @@ writes:
 points at `og.png`; change the brand colours in the script and re-run it if the
 palette moves.
 
-## Trending votes
+## Trending votes, submissions, and admin
 
-`src/pages/Trending.tsx` lists the top 51 sites as a stack. Vote counts live in
-the Worker at `cloudflare/votes-worker.js`, backed by Workers KV.
+The Worker at `cloudflare/votes-worker.js` does three things, all on Workers KV:
 
-1. `cd cloudflare && wrangler kv namespace create VOTES`
-2. Paste the printed id into `cloudflare/wrangler.toml`
-3. `wrangler deploy`
-4. Set the site's `VITE_VOTES_API_URL` to the deployed Worker URL
-   (e.g. `https://boring-internet-votes.<account>.workers.dev`) and set
-   `ALLOWED_ORIGIN` in `wrangler.toml` to the site's origin
-5. Redeploy the site
+| Route | Who | What |
+| --- | --- | --- |
+| `GET /counts` | public | vote counts per site slug |
+| `POST /vote`, `POST /unvote` | public | add or remove one vote |
+| `POST /submit` | public | store a pending site submission (`/submit` page) |
+| `POST /admin/submissions` | password | list submissions for review (`/admin` page) |
+| `POST /admin/review` | password | set a submission to `approved` / `rejected` |
+| `GET /health` | public | liveness + whether the admin password is set |
 
-Until `VITE_VOTES_API_URL` is set the page says so and keeps votes in the
-browser's localStorage, so the UI is usable but votes are not shared.
+Deployed at `https://boring-internet-votes.sawyerbobk563.workers.dev`.
+
+Setup notes:
+
+1. `wrangler kv namespace create VOTES`, then paste the id into
+   `cloudflare/wrangler.toml`
+2. `wrangler secret put ADMIN_PASSWORD` — the review queue password, kept as a
+   Worker secret (never in the repo or the browser bundle)
+3. `wrangler deploy --config cloudflare/wrangler.toml`
+4. Set the site's `VITE_VOTES_API_URL` to the Worker URL
+
+Until `VITE_VOTES_API_URL` is set the pages say so: votes fall back to
+localStorage and the submit form is disabled.
+
+Two KV behaviours are worth knowing: writes take up to ~60 seconds to appear
+in reads from other locations (the admin page therefore polls every 30s while
+unlocked), and neither `/submit` nor `/vote` is rate limited yet, so treat the
+queue as trustworthy only behind the password.

@@ -1,13 +1,13 @@
 name = "boring-internet-votes"
 main = "votes-worker.js"
 compatibility_date = "2026-10-01"
+workers_dev = true
 
-# 1) create the namespace:  wrangler kv namespace create VOTES
-# 2) paste the printed id below
-# 3) lock CORS to the deployed site:  wrangler secret put ALLOWED_ORIGIN
+# Reads and votes are public; /admin/* requires the ADMIN_PASSWORD secret.
+# `wrangler secret put ADMIN_PASSWORD` sets it (never commit the value).
 [[kv_namespaces]]
 binding = "VOTES"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "36580dc8d626443cbe3783979036b9b9"
 
 [vars]
-ALLOWED_ORIGIN = "https://boringinternet.org"
+ALLOWED_ORIGIN = "*"

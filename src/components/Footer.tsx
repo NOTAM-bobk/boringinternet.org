@@ -56,6 +56,11 @@ export function Footer() {
                   Trending <span aria-hidden="true">🔥</span>
                 </Link>
               </li>
+              <li>
+                <Link to="/submit" className="nav-link">
+                  Submit your site
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -93,7 +98,15 @@ export function Footer() {
           className="flex flex-col gap-2 text-[11px] border-t pt-6"
           style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
         >
-          <p>© {new Date().getFullYear()} Boring Internet.</p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p>© {new Date().getFullYear()} Boring Internet.</p>
+            <Link
+              to="/admin"
+              className="nav-link text-[10px] font-bold tracking-[0.16em] uppercase"
+            >
+              Admin panel
+            </Link>
+          </div>
           <p>
             Sites are curated by their creators. This directory links out;
             it does not host them.

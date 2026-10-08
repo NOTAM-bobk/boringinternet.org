@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { SiteSeo } from "../components/SeoHead";
+import { SiteIcon } from "../components/SiteIcon";
 import { trendingSites, type Site } from "../lib/siteData";
-import { siteDomain, siteInitials, siteTileStyle } from "../lib/siteTile";
+import { siteDomain } from "../lib/siteTile";
 import {
   castVote,
   fetchSharedCounts,
@@ -114,9 +115,7 @@ export default function Trending() {
                   {index + 1}
                 </span>
 
-                <span className="site-tile" style={siteTileStyle(site.slug)} aria-hidden="true">
-                  {siteInitials(site.name)}
-                </span>
+                <SiteIcon site={site} size={44} label={false} />
 
                 <div className="min-w-0 flex flex-col gap-0.5">
                   <a

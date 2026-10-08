@@ -18,7 +18,7 @@ export function AppShell() {
     <div className="min-h-screen flex flex-col">
       <header
         className="sticky top-0 z-20 border-b"
-        style={{ backgroundColor: "var(--bg)", borderColor: "var(--ink)" }}
+        style={{ backgroundColor: "#ffffff", borderColor: "var(--ink)" }}
       >
         <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
           {/* Left: brand */}
@@ -52,13 +52,27 @@ export function AppShell() {
           </nav>
 
           {/* Right: account */}
-          <Link
-            to="/auth"
-            className="justify-self-end text-[10px] sm:text-[11px] font-bold tracking-[0.14em] uppercase border px-2 py-1.5 transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
-            style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
-          >
-            Sign in
-          </Link>
+          <div className="justify-self-end flex items-center gap-2">
+            <Link
+              to="/submit"
+              className="text-[10px] sm:text-[11px] font-bold tracking-[0.14em] uppercase border px-2 py-1.5 transition-transform hover:-translate-y-px whitespace-nowrap"
+              style={{
+                backgroundColor: "var(--accent)",
+                borderColor: "var(--ink)",
+                color: "var(--on-accent)",
+              }}
+            >
+              <span className="sm:hidden">Submit</span>
+              <span className="hidden sm:inline">Submit your site</span>
+            </Link>
+            <Link
+              to="/auth"
+              className="text-[10px] sm:text-[11px] font-bold tracking-[0.14em] uppercase border px-2 py-1.5 transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee] whitespace-nowrap"
+              style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
+            >
+              Sign in
+            </Link>
+          </div>
         </div>
       </header>
 

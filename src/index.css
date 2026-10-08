@@ -315,3 +315,238 @@ hr {
     transition: none;
   }
 }
+
+/* ---------- home sections ---------- */
+
+.site-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ink);
+  background: #fff;
+  padding: 3px;
+  overflow: hidden;
+  flex: none;
+}
+
+.site-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+
+.cover {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-bottom: 1px solid var(--ink);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.cover-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cover-copy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--ink);
+  max-width: calc(100% - 1.7rem);
+}
+
+.cover-domain {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.cover-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.cover-line {
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.feature-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-top: 1px solid var(--ink);
+  background: var(--surface);
+}
+
+.site-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px dashed var(--rule);
+  transition: background 0.15s ease;
+}
+
+.site-row:hover {
+  background: #fffdf8;
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pager:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.pager:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.promo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--ink);
+  background: linear-gradient(120deg, var(--surface) 0%, #fdeee0 100%);
+}
+
+.collection-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+}
+
+.tile-cluster {
+  display: flex;
+  align-items: center;
+}
+
+.tile-cluster > * {
+  position: relative;
+  margin-left: -9px;
+  border: 1px solid var(--ink);
+}
+
+.tile-cluster > *:first-child {
+  margin-left: 0;
+}
+
+.tile-cluster > *:nth-child(1) { z-index: 6; }
+.tile-cluster > *:nth-child(2) { z-index: 5; }
+.tile-cluster > *:nth-child(3) { z-index: 4; }
+.tile-cluster > *:nth-child(4) { z-index: 3; }
+.tile-cluster > *:nth-child(5) { z-index: 2; }
+.tile-cluster > *:nth-child(6) { z-index: 1; }
+
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.save-btn:hover {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.save-btn[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--ink);
+}
+
+@media (max-width: 560px) {
+  .site-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+}
+
+/* ---------- form switch ---------- */
+
+.switch {
+  position: relative;
+  width: 3.25rem;
+  height: 1.75rem;
+  flex: none;
+  border: 1px solid var(--ink);
+  background: #fff;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease;
+}
+
+.switch .switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1.75rem - 6px);
+  height: calc(1.75rem - 6px);
+  background: var(--ink);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.switch[aria-checked="true"] {
+  background: var(--accent);
+}
+
+.switch[aria-checked="true"] .switch-knob {
+  background: var(--on-accent);
+  transform: translateX(calc(3.25rem - 1.75rem));
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}

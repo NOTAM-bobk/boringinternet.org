@@ -5,7 +5,7 @@ const TILES: CSSProperties[] = [
   { backgroundColor: "var(--ink)", color: "var(--surface)", borderColor: "var(--ink)" },
   { backgroundColor: "var(--accent)", color: "var(--surface)", borderColor: "var(--ink)" },
   { backgroundColor: "var(--surface)", color: "var(--ink)", borderColor: "var(--ink)" },
-  { backgroundColor: "var(--cream, #f7e0c6)", color: "var(--ink)", borderColor: "var(--ink)" },
+  { backgroundColor: "var(--bg)", color: "var(--ink)", borderColor: "var(--ink)" },
 ];
 
 /** First letters of up to two words: "One Line Diary" -> "OL". */
