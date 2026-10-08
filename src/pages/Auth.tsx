@@ -2,7 +2,7 @@ import { Link } from "react-router";
 
 export default function Auth() {
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-16 flex flex-col items-center gap-6 text-center">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10 sm:py-16 flex flex-col items-center gap-6 text-center">
       <span
         className="text-[11px] font-bold tracking-[0.2em] uppercase border px-3 py-2"
         style={{ borderColor: "var(--ink)" }}
@@ -17,7 +17,7 @@ export default function Auth() {
         account to browse launched sites.
       </p>
 
-      <div className="card p-6 w-full max-w-sm space-y-3 text-left">
+      <div className="card p-5 sm:p-6 w-full max-w-sm space-y-3 text-left">
         <input
           type="email"
           placeholder="you@boringinternet.example"

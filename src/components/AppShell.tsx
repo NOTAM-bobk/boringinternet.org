@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { AccountMenu } from "./AccountMenu";
 import { Footer } from "./Footer";
@@ -41,6 +41,35 @@ function useSlideDirection(pathname: string): "left" | "right" {
     previous.current = { path: pathname, direction };
   }
   return previous.current.direction;
+}
+
+/** A phone-friendly "back to the top" button for the long directory page. */
+function BackToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setVisible(window.scrollY > 900);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const toTop = useCallback(() => {
+    const reduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button type="button" className="to-top" onClick={toTop} aria-label="Back to top">
+      <span aria-hidden="true">↑</span>
+    </button>
+  );
 }
 
 export function AppShell() {
@@ -99,6 +128,8 @@ export function AppShell() {
       </div>
 
       {FOOTER_ROUTES.has(path) && <Footer />}
+
+      <BackToTop />
     </div>
   );
 }

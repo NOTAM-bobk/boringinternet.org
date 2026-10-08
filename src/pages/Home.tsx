@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Highlight } from "../components/Highlight";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import {
+  categories,
   categoryById,
   categoryFilters,
   categoryLabel,
@@ -14,6 +15,8 @@ import {
   featuredSites,
   newAdditions,
   searchSites,
+  siteDescription,
+  siteName,
   sites,
   sitesByCategory,
   trendingSites,
@@ -26,6 +29,9 @@ import { screenshotUrl } from "../lib/shots";
 
 /** Only the newest handful of posts get a card in the home page's article row. */
 const FEATURED_POSTS = posts.slice(0, 3);
+
+/** How many directory cards a phone loads before it offers the rest. */
+const SITE_PAGE = 9;
 
 function hash(value: string): number {
   let h = 0;
@@ -95,7 +101,7 @@ function CoverArt({ site }: { site: Site }) {
  * The top picks get a real screenshot, rendered server-side by thum.io, with the
  * generated cover art kept as the fallback if that service is unreachable.
  */
-function SitePreview({ site }: { site: Site }) {
+function SitePreview({ site, priority = false }: { site: Site; priority?: boolean }) {
   const [failed, setFailed] = useState(false);
 
   if (failed) return <CoverArt site={site} />;
@@ -103,11 +109,14 @@ function SitePreview({ site }: { site: Site }) {
   return (
     <span className="cover shot">
       <img
-        src={screenshotUrl(site.url)}
+        src={screenshotUrl(site.url, 960, 800)}
+        srcSet={`${screenshotUrl(site.url, 640, 533)} 640w, ${screenshotUrl(site.url, 960, 800)} 960w`}
+        sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
         alt={`Screenshot of ${site.name}`}
         width={960}
         height={600}
-        loading="eager"
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         decoding="async"
         referrerPolicy="no-referrer"
         onError={() => setFailed(true)}
@@ -117,11 +126,11 @@ function SitePreview({ site }: { site: Site }) {
   );
 }
 
-function FeatureCard({ site }: { site: Site }) {
+function FeatureCard({ site, priority = false }: { site: Site; priority?: boolean }) {
   return (
     <article className="feature-card">
       <a href={site.url} target="_blank" rel="noopener noreferrer" className="block">
-        <SitePreview site={site} />
+        <SitePreview site={site} priority={priority} />
       </a>
       <div className="feature-foot">
         <SiteIcon site={site} size={32} />
@@ -182,7 +191,10 @@ function SectionHead({
   onNext: () => void;
 }) {
   return (
-    <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
+    <div
+      className="sec-head flex items-end justify-between gap-4 border-b pb-3"
+      style={{ borderColor: "var(--rule)" }}
+    >
       <div className="flex items-baseline gap-3">
         <h2 className="text-xl font-bold tracking-[-0.01em]">{title}</h2>
         {note && (
@@ -395,12 +407,65 @@ function useSavedCollections(): [string[], (id: string) => void] {
 
 /* ---------------- page ---------------- */
 
+/** The top of the page: what this is, how big the list is, and where to start. */
+function Hero() {
+  const stats = [
+    { value: sites.length, label: "sites listed" },
+    { value: categories.length, label: "categories" },
+    { value: collections.length, label: "collections" },
+  ];
+
+  return (
+    <section className="hero">
+      <div className="hero-copy">
+        <span className="hero-eyebrow">
+          <span className="hero-blip" aria-hidden="true" />
+          {siteName} — the list
+        </span>
+        <h1 className="hero-title">
+          A <span className="hero-em">quiet</span> corner of the web, kept small on purpose.
+        </h1>
+        <p className="hero-lede">{siteDescription}</p>
+        <div className="hero-actions">
+          <a href="#all-sites" className="btn accent">
+            Browse the list
+          </a>
+          <Link to="/submit" className="btn ghost">
+            Submit your site
+          </Link>
+        </div>
+        <dl className="hero-stats">
+          {stats.map((stat) => (
+            <div key={stat.label} className="hero-stat">
+              <dt>{stat.label}</dt>
+              <dd>{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div className="hero-art">
+        <div className="hero-bars" aria-hidden="true">
+          <span className="hero-bar" />
+          <span className="hero-bar hero-bar-accent" />
+          <span className="hero-bar hero-bar-short" />
+        </div>
+        <p className="hero-art-note">
+          <span className="hero-art-kicker">edited by hand</span>
+          No growth tactics, no infinite scroll, no accounts required.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   // ?q= and ?category= keep the side navigation and this page in sync.
   const [params, setParams] = useSearchParams();
   const query = params.get("q") ?? "";
   const selectedCategory = params.get("category") ?? "all";
   const [savedCollections, toggleSaved] = useSavedCollections();
+  const [showAllSites, setShowAllSites] = useState(false);
 
   const featured = useMemo(() => featuredSites(), []);
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
@@ -409,6 +474,11 @@ export default function Home() {
   const filtered = useMemo(() => {
     if (query.trim()) return searchSites(query);
     return sitesByCategory(selectedCategory);
+  }, [query, selectedCategory]);
+
+  // A fresh search or category starts collapsed again.
+  useEffect(() => {
+    setShowAllSites(false);
   }, [query, selectedCategory]);
 
   const trending = trendingSites(exploreConfig.trendingPreviewCount);
@@ -424,17 +494,35 @@ export default function Home() {
       <label htmlFor="site-search" className="sr-only">
         Search launched sites
       </label>
-      <input
-        id="site-search"
-        type="search"
-        placeholder={`Search ${sites.length} sites, tags, categories…`}
-        value={query}
-        onChange={(e) => {
-          updateParams({ q: e.target.value, category: undefined });
-        }}
-        className="field text-base"
-        style={{ borderColor: "var(--ink)" }}
-      />
+      <div className="search-box">
+        <span className="search-glyph" aria-hidden="true">
+          ⌕
+        </span>
+        <input
+          id="site-search"
+          type="search"
+          placeholder={`Search ${sites.length} sites, tags, categories…`}
+          value={query}
+          onChange={(e) => {
+            updateParams({ q: e.target.value, category: undefined });
+          }}
+          enterKeyHint="search"
+          autoComplete="off"
+          spellCheck={false}
+          className="field search-field text-base"
+          style={{ borderColor: "var(--ink)" }}
+        />
+        {query.length > 0 && (
+          <button
+            type="button"
+            className="search-clear"
+            onClick={() => updateParams({ q: undefined })}
+            aria-label="Clear search"
+          >
+            ✕
+          </button>
+        )}
+      </div>
       {query.trim() && (
         <p className="flex flex-wrap items-center gap-3 text-sm" style={{ color: "var(--muted)" }}>
           <span>
@@ -451,7 +539,7 @@ export default function Home() {
           </button>
         </p>
       )}
-      <div className="flex flex-wrap gap-2">
+      <div className="chip-row" role="group" aria-label="Filter the list by category">
         {categoryFilters.map((cat) => (
           <button
             key={cat.id}
@@ -540,14 +628,16 @@ export default function Home() {
       <HomepageSeo />
       <div
         id="explore"
-        className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col gap-12 scroll-mt-24"
+        className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-10 flex flex-col gap-8 sm:gap-12 scroll-mt-24"
       >
+        <Hero />
+
         {switcher}
 
         {/* Featured band */}
         <section className="grid gap-5 sm:grid-cols-2">
-          {featured.map((site) => (
-            <FeatureCard key={site.id} site={site} />
+          {featured.map((site, index) => (
+            <FeatureCard key={site.id} site={site} priority={index === 0} />
           ))}
         </section>
 
@@ -557,8 +647,11 @@ export default function Home() {
         {/* Collections */}
         {collections.length > 0 && (
           <section id="collections" className="space-y-4 scroll-mt-24">
-            <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
-              <h2 className="text-xl font-bold tracking-[-0.01em]">Latest Collections</h2>
+          <div
+            className="sec-head flex items-end justify-between gap-4 border-b pb-3"
+            style={{ borderColor: "var(--rule)" }}
+          >
+            <h2 className="text-xl font-bold tracking-[-0.01em]">Latest Collections</h2>
               <Link
                 to="/collections"
                 className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text"
@@ -581,7 +674,10 @@ export default function Home() {
 
         {/* Blog */}
         <section className="space-y-4">
-          <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
+          <div
+            className="sec-head flex items-end justify-between gap-4 border-b pb-3"
+            style={{ borderColor: "var(--rule)" }}
+          >
             <h2 className="text-xl font-bold tracking-[-0.01em]">Featured Articles</h2>
             <Link to="/blog" className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text">
               All notes →
@@ -609,7 +705,10 @@ export default function Home() {
         {/* Trending trio */}
         {trending.length > 0 && (
           <section className="space-y-4">
-            <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
+            <div
+              className="sec-head flex items-end justify-between gap-4 border-b pb-3"
+              style={{ borderColor: "var(--rule)" }}
+            >
               <h2 className="text-xl font-bold tracking-[-0.01em]">
                 Trending <span aria-hidden="true">🔥</span>
               </h2>
@@ -644,7 +743,10 @@ export default function Home() {
 
         {/* Full directory */}
         <section id="all-sites" className="space-y-4 scroll-mt-24">
-          <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
+          <div
+            className="sec-head flex items-end justify-between gap-4 border-b pb-3"
+            style={{ borderColor: "var(--rule)" }}
+          >
             <h2 className="text-xl font-bold tracking-[-0.01em]">
               {query ? "Search results" : selectedCategory === "all" ? "All sites" : categoryLabel(selectedCategory)}
             </h2>
@@ -654,11 +756,25 @@ export default function Home() {
           </div>
 
           {filtered.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((site) => (
-                <SiteCard key={site.id} site={site} query={query} />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {(showAllSites ? filtered : filtered.slice(0, SITE_PAGE)).map((site) => (
+                  <SiteCard key={site.id} site={site} query={query} />
+                ))}
+              </div>
+
+              {!showAllSites && filtered.length > SITE_PAGE && (
+                <div className="show-more-row">
+                  <button
+                    type="button"
+                    className="btn ghost"
+                    onClick={() => setShowAllSites(true)}
+                  >
+                    Show the other {filtered.length - SITE_PAGE} sites
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div
               className="border p-8 text-center text-sm"
@@ -669,26 +785,28 @@ export default function Home() {
           )}
         </section>
 
-        {/* Edit hint */}
-        <section
-          className="border-t pt-8 text-sm text-center"
-          style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
-        >
-          Want to add a site? Edit{" "}
-          <code
-            className="border px-1.5 py-0.5 text-[13px] font-mono"
-            style={{ borderColor: "var(--rule)", backgroundColor: "var(--surface)" }}
-          >
-            config/sites.json
-          </code>{" "}
-          and redeploy. Sites, categories, trending, and collections each have their own file in{" "}
-          <code
-            className="border px-1.5 py-0.5 text-[13px] font-mono"
-            style={{ borderColor: "var(--rule)", backgroundColor: "var(--surface)" }}
-          >
-            config/
-          </code>
-          .
+        {/* Closing call to action */}
+        <section className="cta-band">
+          <div className="cta-copy">
+            <span className="hero-eyebrow">
+              <span className="hero-blip" aria-hidden="true" />
+              Add yourself
+            </span>
+            <h2 className="text-2xl font-bold tracking-[-0.02em]">Built something quiet?</h2>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+              If your site loads fast, skips the growth tactics, and respects attention, it belongs
+              on the list. Every submission is read by hand — there is no queue, no paid placement,
+              and no account to make.
+            </p>
+          </div>
+          <div className="cta-actions">
+            <Link to="/submit" className="btn accent">
+              Submit your site
+            </Link>
+            <Link to="/trending" className="btn ghost">
+              See what’s trending
+            </Link>
+          </div>
         </section>
       </div>
     </>

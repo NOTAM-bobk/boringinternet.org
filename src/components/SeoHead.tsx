@@ -49,7 +49,7 @@ export function SeoHead({
     <>
       <title>{siteTitle}</title>
       <meta name="description" content={pageDescription} />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       {keywordList.length > 0 && <meta name="keywords" content={keywordList.join(", ")} />}
       <meta
         name="robots"

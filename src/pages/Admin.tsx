@@ -191,7 +191,7 @@ export default function Admin() {
         description="Review submitted sites."
         path="/admin"
       />
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 flex flex-col gap-8">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
           <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">Admin</span>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">Submitted sites</h1>
@@ -201,7 +201,7 @@ export default function Admin() {
         </header>
 
         {!unlocked ? (
-          <form className="card p-6 flex flex-col gap-4" onSubmit={unlock}>
+          <form className="card p-5 sm:p-6 flex flex-col gap-4" onSubmit={unlock}>
             <label htmlFor="admin-password" className="text-[12px] font-bold tracking-[0.12em] uppercase">
               Password
             </label>

@@ -19,7 +19,7 @@ export default function Collections() {
         keywords={["site collections", "curated lists", "reading lists"]}
       />
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-12 flex flex-col gap-8">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
           <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">
             Collections
@@ -38,7 +38,7 @@ export default function Collections() {
             <li key={collection.id}>
               <Link
                 to={`/collections/${collection.id}`}
-                className="card card-link p-6 flex h-full flex-col gap-4"
+                className="card card-link p-5 sm:p-6 flex h-full flex-col gap-4"
               >
                 <div className="tile-cluster">
                   {members.slice(0, 5).map((site) => (

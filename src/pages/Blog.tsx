@@ -38,7 +38,7 @@ export default function Blog() {
         ]}
       />
 
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 flex flex-col gap-8">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
           <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">Blog</span>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">
@@ -53,7 +53,7 @@ export default function Blog() {
         <ul className="flex flex-col gap-5">
           {posts.map((post) => (
             <li key={post.slug}>
-              <Link to={`/blog/${post.slug}`} className="card card-link p-6 flex flex-col gap-3">
+              <Link to={`/blog/${post.slug}`} className="card card-link p-5 sm:p-6 flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-3">
                   <time className="text-[11px] font-mono accent-text" dateTime={post.date}>
                     {formatDate(post.date)}

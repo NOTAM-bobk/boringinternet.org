@@ -105,7 +105,7 @@ export default function Submit() {
           description={`Your site was submitted to ${siteName} for review.`}
           path="/submit"
         />
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 py-16 flex flex-col gap-5 text-center">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10 sm:py-16 flex flex-col gap-5 text-center">
           <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">
             Submission received
           </span>
@@ -136,7 +136,7 @@ export default function Submit() {
         description={`Add your launched site to ${siteName}. Every submission is reviewed by hand.`}
         path="/submit"
       />
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 flex flex-col gap-8">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
           <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">
             Submit your site

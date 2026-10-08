@@ -79,7 +79,7 @@ export default function Trending() {
         path="/trending"
         keywords={["trending sites", "site ranking", "vote for sites"]}
       />
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 flex flex-col gap-8">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">
             {trendingConfig.title} <span aria-hidden="true">🔥</span>
