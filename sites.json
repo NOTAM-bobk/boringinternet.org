@@ -1,0 +1,79 @@
+{
+  "site": "Boring Internet",
+  "tagline": "A quiet list of launched sites, kept small on purpose.",
+  "categories": [
+    { "id": "all", "label": "All" },
+    { "id": "tools", "label": "Tools" },
+    { "id": "reading", "label": "Reading" },
+    { "id": "culture", "label": "Culture" },
+    { "id": "experiment", "label": "Experiment" }
+  ],
+  "sites": [
+    {
+      "id": "one",
+      "name": "One Line Diary",
+      "slug": "one-line-diary",
+      "url": "https://example.com/one-line-diary",
+      "description": "One sentence a day, kept in a single scrolling page.",
+      "category": "reading",
+      "tags": ["writing", "minimal", "daily"],
+      "trending": 120,
+      "launched": "2026-09-18"
+    },
+    {
+      "id": "two",
+      "name": "Press Kit Generator",
+      "slug": "press-kit-generator",
+      "url": "https://example.com/press-kit-generator",
+      "description": "Drop in a project name and get a plain text press kit out.",
+      "category": "tools",
+      "tags": ["tools", "publishers", "text"],
+      "trending": 94,
+      "launched": "2026-09-21"
+    },
+    {
+      "id": "three",
+      "name": "Slow Bookmarking",
+      "slug": "slow-bookmarking",
+      "url": "https://example.com/slow-bookmarking",
+      "description": "A bookmark list that only lets you keep ten links at a time.",
+      "category": "tools",
+      "tags": ["tools", "browser", "focus"],
+      "trending": 71,
+      "launched": "2026-10-01"
+    },
+    {
+      "id": "four",
+      "name": "The Morning Page",
+      "slug": "the-morning-page",
+      "url": "https://example.com/the-morning-page",
+      "description": "A single blank page that loads first thing in the morning.",
+      "category": "experiment",
+      "tags": ["experiment", "writing", "routine"],
+      "trending": 58,
+      "launched": "2026-10-03"
+    },
+    {
+      "id": "five",
+      "name": "Shared Notes Index",
+      "slug": "shared-notes-index",
+      "url": "https://example.com/shared-notes-index",
+      "description": "A thin index of public notes from a small group.",
+      "category": "reading",
+      "tags": ["reading", "notes", "public"],
+      "trending": 33,
+      "launched": "2026-10-05"
+    },
+    {
+      "id": "six",
+      "name": "Link Letter",
+      "slug": "link-letter",
+      "url": "https://example.com/link-letter",
+      "description": "A weekly letter of five links, no images, no noise.",
+      "category": "culture",
+      "tags": ["culture", "weekly", "links"],
+      "trending": 27,
+      "launched": "2026-10-06"
+    }
+  ]
+}
