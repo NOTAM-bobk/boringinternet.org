@@ -1,6 +1,73 @@
 {
   "posts": [
     {
+      "slug": "boring-ideas-that-keep-sites-alive",
+      "title": "Boring ideas that keep small sites alive",
+      "description": "A practical checklist for keeping tiny websites useful for years instead of weeks.",
+      "date": "2026-10-08",
+      "author": "Boring Internet",
+      "tags": ["maintenance", "small-web"],
+      "excerpt": "The sites that survive are usually the least dramatic: clear scope, clear owner, and a fixed maintenance rhythm.",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Most small sites do not die because of bad code. They die because no one knows what to cut, what to ignore, or when to do maintenance. The fix is ordinary process, not heroics."
+        },
+        { "type": "h2", "text": "Set one job for each page" },
+        {
+          "type": "p",
+          "text": "If a page has two or three goals, people leave without finishing any of them. Keep each page focused on one primary action and remove everything that competes with it."
+        },
+        { "type": "h2", "text": "Use a maintenance cadence" },
+        {
+          "type": "ul",
+          "items": [
+            "Weekly: check links and obvious breakage.",
+            "Monthly: trim stale copy and screenshots.",
+            "Quarterly: remove features nobody uses."
+          ]
+        },
+        {
+          "type": "quote",
+          "text": "Longevity is mostly maintenance, not momentum."
+        }
+      ]
+    },
+    {
+      "slug": "how-to-write-better-site-descriptions",
+      "title": "How to write site descriptions people can trust",
+      "description": "A short style guide for one-line descriptions that explain what a site does without sounding like marketing copy.",
+      "date": "2026-10-06",
+      "author": "Boring Internet",
+      "tags": ["writing", "editorial"],
+      "excerpt": "Good descriptions say what the site does, who it helps, and what makes it different in one plain sentence.",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Directory blurbs are often the weakest part of good projects. If the sentence is vague, readers assume the product is vague too."
+        },
+        { "type": "h2", "text": "A reliable one-line formula" },
+        {
+          "type": "p",
+          "text": "Start with the user, then the job, then the constraint. Example shape: \"For people who need X, this site does Y without Z.\" It is plain, specific, and easy to compare."
+        },
+        { "type": "h2", "text": "Words to avoid" },
+        {
+          "type": "ul",
+          "items": [
+            "Revolutionary",
+            "AI-powered (unless that is the core utility)",
+            "Platform (when it is one feature)",
+            "Seamless"
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Clear language does not make a project sound smaller. It makes it sound real."
+        }
+      ]
+    },
+    {
       "slug": "what-counts-as-launched",
       "title": "What counts as launched?",
       "description": "A live URL, a working sign-in, and nothing else half-finished — the bar a site has to clear before it appears in this directory.",
