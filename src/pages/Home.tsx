@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
+import { Highlight } from "../components/Highlight";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import {
@@ -275,7 +276,7 @@ function CollectionCard({
         </button>
       </div>
 
-      <h3 className="mt-4 text-lg font-bold leading-snug">{collection.title}</h3>
+      <h3 className="mt-6 text-lg font-bold leading-snug">{collection.title}</h3>
       <p className="mt-1 text-[14px] leading-relaxed" style={{ color: "var(--muted)" }}>
         {collection.description}
       </p>
@@ -292,7 +293,7 @@ function CollectionCard({
   );
 }
 
-function SiteCard({ site }: { site: Site }) {
+function SiteCard({ site, query = "" }: { site: Site; query?: string }) {
   return (
     <article className="card p-5 flex flex-col gap-3 text-left">
       <div className="flex items-center gap-3">
@@ -305,7 +306,7 @@ function SiteCard({ site }: { site: Site }) {
             className="text-base font-bold block truncate hover:underline underline-offset-4"
             style={{ color: "var(--ink)" }}
           >
-            {site.name}
+            <Highlight text={site.name} query={query} />
           </a>
           <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
             {siteDomain(site.url)}
@@ -314,7 +315,7 @@ function SiteCard({ site }: { site: Site }) {
       </div>
 
       <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-        {site.description}
+        <Highlight text={site.description} query={query} />
       </p>
 
       <div className="flex flex-wrap gap-2 mt-auto">
@@ -324,7 +325,7 @@ function SiteCard({ site }: { site: Site }) {
             className="text-[11px] font-mono border px-2 py-0.5"
             style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
           >
-            {tag}
+            <Highlight text={tag} query={query} />
           </span>
         ))}
       </div>
@@ -428,6 +429,22 @@ export default function Home() {
             className="field text-base"
             style={{ borderColor: "var(--ink)" }}
           />
+          {query.trim() && (
+            <p className="flex flex-wrap items-center gap-3 text-sm" style={{ color: "var(--muted)" }}>
+              <span>
+                <strong style={{ color: "var(--ink)" }}>{filtered.length}</strong>{" "}
+                {filtered.length === 1 ? "site matches" : "sites match"} “
+                <mark className="hl">{query.trim()}</mark>”
+              </span>
+              <button
+                type="button"
+                className="nav-btn"
+                onClick={() => updateParams({ q: undefined })}
+              >
+                Clear search
+              </button>
+            </p>
+          )}
           <div className="flex flex-wrap gap-2">
             {categoryFilters.map((cat) => (
               <button
@@ -554,7 +571,7 @@ export default function Home() {
           {filtered.length > 0 ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((site) => (
-                <SiteCard key={site.id} site={site} />
+                <SiteCard key={site.id} site={site} query={query} />
               ))}
             </div>
           ) : (

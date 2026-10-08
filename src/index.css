@@ -1232,3 +1232,285 @@ hr {
 .chip:hover {
   transform: translateY(-1px);
 }
+
+/* ---------- header account box + sign-in dropdown ---------- */
+
+.account {
+  position: relative;
+}
+
+.account-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 2px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: 0 2px 0 0 var(--ink);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.account-box:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lift);
+}
+
+.account-box img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: calc(var(--radius-sm) - 3px);
+  background: var(--bg);
+}
+
+.account-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border: 1px solid var(--ink);
+  border-radius: calc(var(--radius-sm) - 3px);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 70;
+  width: 14rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+  animation: menu-pop 0.16s ease both;
+}
+
+@keyframes menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.account-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.3rem 0.6rem;
+  margin-bottom: 0.3rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.account-head .account-fallback {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.25rem;
+}
+
+.account-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.account-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.account-item {
+  display: block;
+  padding: 0.5rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+}
+
+.account-item:hover {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+.account-item-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 0 0 var(--ink);
+}
+
+.account-item-primary:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-lift);
+}
+
+/* ---------- search match highlight ---------- */
+
+mark.hl {
+  padding: 0 2px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* ---------- sliding route panes (explore / trending / blog) ---------- */
+
+.route-pane {
+  animation-duration: 0.36s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.route-pane.slide-right {
+  animation-name: pane-from-right;
+}
+
+.route-pane.slide-left {
+  animation-name: pane-from-left;
+}
+
+@keyframes pane-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(38px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pane-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-38px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-pane {
+    animation: none;
+  }
+
+  .account-menu {
+    animation: none;
+  }
+}
+
+/* ---------- side nav search results ---------- */
+
+.sidenav-search-wrap {
+  position: relative;
+}
+
+.sidenav-results {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 20;
+  max-height: 17rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.35rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: var(--shadow-float);
+}
+
+.sidenav-result {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.45rem;
+  border-radius: 8px;
+}
+
+.sidenav-result:hover {
+  background: var(--surface);
+}
+
+.sidenav-result-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.sidenav-result-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidenav-result-domain {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+.sidenav-results-empty {
+  padding: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.sidenav-results-all {
+  margin-top: 0.2rem;
+  padding: 0.45rem;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  background: transparent;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.sidenav-results-all:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* keep the account box small on the narrowest phones */
+@media (max-width: 400px) {
+  .account-box {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+}

@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet } from "react-router";
+import { useRef, useState, type ReactNode } from "react";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { AccountMenu } from "./AccountMenu";
 import { Footer } from "./Footer";
 import { MobileNav, HamburgerButton } from "./MobileNav";
 import { SideNav } from "./SideNav";
@@ -16,8 +17,33 @@ function NavItem({ to, children }: { to: string; children: ReactNode }) {
   );
 }
 
+/** Left-to-right order of the top-level tabs, so we can slide in the right direction. */
+const TAB_ORDER = ["/", "/trending", "/blog", "/submit", "/admin", "/auth"];
+
+function tabIndex(pathname: string): number {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  if (path === "/") return 0;
+  const index = TAB_ORDER.findIndex(
+    (tab) => tab !== "/" && (path === tab || path.startsWith(`${tab}/`)),
+  );
+  return index === -1 ? TAB_ORDER.length : index;
+}
+
+/** Remember the tab we came from so the new pane slides the right way. */
+function useSlideDirection(pathname: string): "left" | "right" {
+  const previous = useRef({ path: pathname, direction: "right" as "left" | "right" });
+  if (previous.current.path !== pathname) {
+    const direction =
+      tabIndex(pathname) >= tabIndex(previous.current.path) ? "right" : "left";
+    previous.current = { path: pathname, direction };
+  }
+  return previous.current.direction;
+}
+
 export function AppShell() {
   const [navOpen, setNavOpen] = useState(false);
+  const location = useLocation();
+  const direction = useSlideDirection(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -47,9 +73,7 @@ export function AppShell() {
               <span className="hidden sm:inline">Submit your site</span>
               <span className="sm:hidden">Submit</span>
             </Link>
-            <Link to="/auth" className="nav-btn hidden sm:inline-flex">
-              Sign in
-            </Link>
+            <AccountMenu />
             <HamburgerButton open={navOpen} onClick={() => setNavOpen(true)} />
           </div>
         </div>
@@ -60,7 +84,9 @@ export function AppShell() {
 
       <div className="flex-1 flex flex-col lg:pl-[19rem]">
         <main className="flex-1">
-          <Outlet />
+          <div key={location.pathname} className={`route-pane slide-${direction}`}>
+            <Outlet />
+          </div>
         </main>
         <Footer />
       </div>

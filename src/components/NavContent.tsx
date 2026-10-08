@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { Highlight } from "./Highlight";
+import { SiteIcon } from "./SiteIcon";
 import {
   categoryCount,
   categoryFilters,
+  searchSites,
   siteName,
   siteTagline,
   sites,
 } from "../lib/siteData";
+import { siteDomain } from "../lib/siteTile";
 import { posts } from "../lib/posts";
+
+/** How many quick matches the side search shows while you type. */
+const SEARCH_PREVIEW = 6;
 
 /** The four top-level places in the site. */
 const SECTIONS = [
@@ -67,8 +74,10 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const pendingSection = useRef<string | null>(null);
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [hash, setHash] = useState(() =>
     typeof window === "undefined" ? "" : window.location.hash,
   );
@@ -103,6 +112,22 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       window.clearTimeout(timer);
     };
   }, [location.key, location.pathname, location.search, location.hash]);
+
+  // Live matches for the nav search box: names, tags, descriptions, category.
+  const matches = useMemo(
+    () => (query.trim() ? searchSites(query) : []),
+    [query],
+  );
+
+  // Close the results list when the pointer goes elsewhere.
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onPointerDown(event: MouseEvent) {
+      if (!searchRef.current?.contains(event.target as Node)) setSearchOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [searchOpen]);
 
   // ⌘K / Ctrl+K focuses the search field.
   useEffect(() => {
@@ -168,8 +193,11 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   function runSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = query.trim();
+    setSearchOpen(false);
     go(trimmed ? `/?q=${encodeURIComponent(trimmed)}#explore` : "/#explore");
   }
+
+  const showResults = searchOpen && query.trim().length > 0;
 
   return (
     <div className="sidenav-body">
@@ -180,25 +208,66 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         <p className="sidenav-tagline">{siteTagline}</p>
       </div>
 
-      <form className="sidenav-search" onSubmit={runSearch} role="search">
-        <span aria-hidden="true" className="sidenav-search-icon">
-          ⌕
-        </span>
-        <label htmlFor="nav-search" className="sr-only">
-          Search sites
-        </label>
-        <input
-          id="nav-search"
-          ref={inputRef}
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={`Search ${sites.length} sites`}
-        />
-        <span className="keycap" aria-hidden="true">
-          ⌘K
-        </span>
-      </form>
+      <div className="sidenav-search-wrap" ref={searchRef}>
+        <form className="sidenav-search" onSubmit={runSearch} role="search">
+          <span aria-hidden="true" className="sidenav-search-icon">
+            ⌕
+          </span>
+          <label htmlFor="nav-search" className="sr-only">
+            Search sites by title, tag, or description
+          </label>
+          <input
+            id="nav-search"
+            ref={inputRef}
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setSearchOpen(true);
+            }}
+            onFocus={() => setSearchOpen(true)}
+            placeholder={`Search ${sites.length} sites`}
+          />
+          <span className="keycap" aria-hidden="true">
+            ⌘K
+          </span>
+        </form>
+
+        {showResults && (
+          <div className="sidenav-results">
+            {matches.length > 0 ? (
+              matches.slice(0, SEARCH_PREVIEW).map((site) => (
+                <a
+                  key={site.id}
+                  href={site.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sidenav-result"
+                  onClick={() => {
+                    setSearchOpen(false);
+                    onNavigate?.();
+                  }}
+                >
+                  <SiteIcon site={site} size={22} label={false} />
+                  <span className="sidenav-result-copy">
+                    <span className="sidenav-result-name">
+                      <Highlight text={site.name} query={query} />
+                    </span>
+                    <span className="sidenav-result-domain">{siteDomain(site.url)}</span>
+                  </span>
+                </a>
+              ))
+            ) : (
+              <p className="sidenav-results-empty">No sites match “{query.trim()}”.</p>
+            )}
+            <button type="button" className="sidenav-results-all" onClick={() => go(`/?q=${encodeURIComponent(query.trim())}#explore`)}>
+              {matches.length > 0
+                ? `See all ${matches.length} results →`
+                : "Search the full directory →"}
+            </button>
+          </div>
+        )}
+      </div>
 
       <nav aria-label="Site" className="sidenav-links">
         {SECTIONS.map((section) => {
