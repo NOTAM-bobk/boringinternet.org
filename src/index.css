@@ -764,6 +764,21 @@ hr {
   }
 }
 
+/* keep the phone header on one line down to ~320px */
+@media (max-width: 400px) {
+  .brand-mark {
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .nav-cta {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 0.45rem 0.55rem;
+  }
+}
+
 /* ---------- mobile drawer ---------- */
 
 .drawer-root {

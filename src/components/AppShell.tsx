@@ -47,7 +47,7 @@ export function AppShell() {
               <span className="hidden sm:inline">Submit your site</span>
               <span className="sm:hidden">Submit</span>
             </Link>
-            <Link to="/auth" className="nav-btn">
+            <Link to="/auth" className="nav-btn hidden sm:inline-flex">
               Sign in
             </Link>
             <HamburgerButton open={navOpen} onClick={() => setNavOpen(true)} />
