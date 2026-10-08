@@ -1,29 +1,41 @@
 import { Link } from "react-router";
+import { FeatureBadges } from "./FeatureBadges";
+
+/** Link columns, kept apart from the markup so the footer stays readable. */
+const DIRECTORY_LINKS: { to: string; label: string }[] = [
+  { to: "/", label: "Home" },
+  { to: "/blog", label: "Blog" },
+  { to: "/collections", label: "Collections" },
+  { to: "/trending", label: "Trending 🔥" },
+  { to: "/submit", label: "Submit your site" },
+];
+
+const CONNECT_LINKS: { href: string; label: string }[] = [
+  { href: "mailto:hello@boringinternet.example", label: "Contact" },
+  { href: "https://github.com/NOTAM-bobk/boringinternet.org", label: "GitHub" },
+];
 
 export function Footer() {
   return (
     <footer
-      className="border-t mt-auto"
+      className="footer w-full border-t mt-auto"
       style={{ backgroundColor: "#ffffff", borderColor: "var(--ink)" }}
     >
-      <div
-        className="mx-auto max-w-5xl px-6 py-10 flex flex-col gap-8 text-sm"
-        style={{ color: "var(--muted)" }}
-      >
-        <div className="flex flex-col gap-2 text-center sm:text-left">
-          <span
-            className="text-[11px] font-bold tracking-[0.2em] uppercase"
-            style={{ color: "var(--ink)" }}
-          >
-            Boring Internet
-          </span>
-          <p className="max-w-xl leading-relaxed">
-            A small directory of launched sites. Edited by hand, kept
-            minimal on purpose.
-          </p>
-        </div>
+      <div className="w-full px-5 sm:px-8 lg:px-12 py-10 sm:py-12 flex flex-col gap-10 text-sm">
+        <div className="grid gap-9 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
+          <div className="flex flex-col gap-3">
+            <span
+              className="text-[11px] font-bold tracking-[0.2em] uppercase"
+              style={{ color: "var(--ink)" }}
+            >
+              Boring Internet
+            </span>
+            <p className="max-w-md leading-relaxed" style={{ color: "var(--muted)" }}>
+              A small directory of launched sites. Edited by hand, kept minimal on purpose.
+            </p>
+            <FeatureBadges />
+          </div>
 
-        <div className="grid grid-cols-2 gap-8 text-left">
           <div>
             <p
               className="text-[11px] font-bold tracking-[0.2em] uppercase"
@@ -32,35 +44,13 @@ export function Footer() {
               Directory
             </p>
             <ul className="mt-3 space-y-2">
-              <li>
-                <Link
-                  to="/"
-                  className="nav-link"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/blog"
-                  className="nav-link"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/trending"
-                  className="nav-link"
-                >
-                  Trending <span aria-hidden="true">🔥</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/submit" className="nav-link">
-                  Submit your site
-                </Link>
-              </li>
+              {DIRECTORY_LINKS.map((link) => (
+                <li key={link.to}>
+                  <Link to={link.to} className="nav-link">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -72,24 +62,19 @@ export function Footer() {
               Connect
             </p>
             <ul className="mt-3 space-y-2">
-              <li>
-                <a
-                  href="mailto:hello@boringinternet.example"
-                  className="nav-link"
-                >
-                  Contact
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/NOTAM-bobk/boringinternet.org"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nav-link"
-                >
-                  GitHub
-                </a>
-              </li>
+              {CONNECT_LINKS.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    {...(link.href.startsWith("http")
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                    className="nav-link"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -108,8 +93,7 @@ export function Footer() {
             </Link>
           </div>
           <p>
-            Sites are curated by their creators. This directory links out;
-            it does not host them.
+            Sites are curated by their creators. This directory links out; it does not host them.
           </p>
         </div>
       </div>

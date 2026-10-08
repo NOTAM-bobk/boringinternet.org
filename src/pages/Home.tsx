@@ -24,6 +24,9 @@ import { formatDate, posts } from "../lib/posts";
 import { siteDomain, siteTileStyle } from "../lib/siteTile";
 import { screenshotUrl } from "../lib/shots";
 
+/** Only the newest handful of posts get a card in the home page's article row. */
+const FEATURED_POSTS = posts.slice(0, 3);
+
 function hash(value: string): number {
   let h = 0;
   for (let i = 0; i < value.length; i++) h = (h * 31 + value.charCodeAt(i)) % 100000;
@@ -474,7 +477,7 @@ export default function Home() {
         <HomepageSeo />
         <div
           id="explore"
-          className="mx-auto max-w-6xl px-6 py-10 flex flex-col gap-8 scroll-mt-24"
+          className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col gap-8 scroll-mt-24"
         >
           {switcher}
 
@@ -537,7 +540,7 @@ export default function Home() {
       <HomepageSeo />
       <div
         id="explore"
-        className="mx-auto max-w-6xl px-6 py-10 flex flex-col gap-12 scroll-mt-24"
+        className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col gap-12 scroll-mt-24"
       >
         {switcher}
 
@@ -585,8 +588,12 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid gap-5 sm:grid-cols-3">
-            {posts.map((post) => (
-              <Link key={post.slug} to="/blog" className="card p-5 flex flex-col gap-2">
+            {FEATURED_POSTS.map((post) => (
+              <Link
+                key={post.slug}
+                to={`/blog/${post.slug}`}
+                className="card p-5 flex flex-col gap-2"
+              >
                 <span className="text-[11px] font-mono" style={{ color: "var(--accent)" }}>
                   {formatDate(post.date)}
                 </span>
@@ -613,10 +620,8 @@ export default function Home() {
             <ol className="grid gap-5 sm:grid-cols-3">
               {trending.map((site, index) => (
                 <li key={site.id} className="card p-5 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono" style={{ color: "var(--accent)" }}>
-                      #{index + 1}
-                    </span>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={`rank rank-top rank-${index + 1}`}>{index + 1}</span>
                     <SiteIcon site={site} size={26} label={false} />
                   </div>
                   <a

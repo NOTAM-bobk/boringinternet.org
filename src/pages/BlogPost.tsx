@@ -48,7 +48,7 @@ export default function BlogPost() {
           path={`/blog/${slug}`}
           noindex
         />
-        <div className="mx-auto max-w-2xl px-6 py-16 flex flex-col gap-4 text-center">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 py-16 flex flex-col gap-4 text-center">
           <h1 className="text-3xl font-bold">Post not found</h1>
           <p className="text-base" style={{ color: "var(--muted)" }}>
             Nothing is published at <code className="font-mono text-[13px]">/blog/{slug}</code>.
@@ -75,7 +75,7 @@ export default function BlogPost() {
         excerpt={post.excerpt}
       />
 
-      <article className="mx-auto max-w-3xl px-6 py-12 flex flex-col">
+      <article className="mx-auto max-w-3xl px-4 sm:px-6 py-12 flex flex-col">
         <nav aria-label="Breadcrumb" className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
           <Link to="/" className="hover:underline">
             Home

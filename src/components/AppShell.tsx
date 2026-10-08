@@ -83,17 +83,22 @@ export function AppShell() {
         </div>
       </header>
 
-      <SideNav />
       <MobileNav open={navOpen} onClose={() => setNavOpen(false)} />
 
-      <div className="flex-1 flex flex-col lg:pl-[19rem]">
-        <main className="flex-1">
+      {/*
+        One grid row holds the side nav and the page, so the nav sticks while you
+        scroll the page but ends where the content does — above the footer.
+      */}
+      <div className="flex-1 w-full lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]">
+        <SideNav />
+        <main className="min-w-0">
           <div key={location.pathname} className={`route-pane slide-${direction}`}>
             <Outlet />
           </div>
         </main>
-        {FOOTER_ROUTES.has(path) && <Footer />}
       </div>
+
+      {FOOTER_ROUTES.has(path) && <Footer />}
     </div>
   );
 }

@@ -171,7 +171,7 @@ a {
 
 .stack-row {
   display: grid;
-  grid-template-columns: 2.25rem 2.75rem minmax(0, 1fr) auto;
+  grid-template-columns: auto 2.75rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.85rem;
   padding: 0.8rem 1rem;
@@ -191,6 +191,50 @@ a {
   background: #fffdf8;
   transform: translateX(3px);
   box-shadow: -6px 0 0 var(--accent);
+}
+
+/* rank numbers in the trending list; the top three get a medal-ish badge */
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.rank-top {
+  justify-content: center;
+  width: 3.05rem;
+  height: 3.05rem;
+  min-width: 0;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(165deg, #ef7f38 0%, var(--accent) 58%, #b74b14 100%);
+  box-shadow: 0 3px 0 0 var(--ink), 0 14px 24px -12px rgba(26, 18, 11, 0.55);
+  color: var(--on-accent);
+  font-family: var(--futura);
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(26, 18, 11, 0.45);
+  transform: rotate(-4deg);
+}
+
+.rank-1 {
+  transform: rotate(-4deg) scale(1.1);
+  box-shadow: 0 3px 0 0 var(--ink), 0 18px 30px -12px rgba(217, 96, 31, 0.75);
+}
+
+.rank-2 {
+  transform: rotate(3deg);
+}
+
+.rank-3 {
+  transform: rotate(-2deg) scale(0.96);
 }
 
 .site-tile {
@@ -235,14 +279,21 @@ a {
   color: var(--on-accent);
 }
 
+/* the trending rows keep their numbers on a phone, just smaller */
 @media (max-width: 560px) {
   .stack-row {
-    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
     gap: 0.6rem;
+    padding: 0.7rem 0.8rem;
   }
 
-  .stack-row .rank {
-    display: none;
+  .rank-top {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+
+  .vote-btn {
+    padding: 0.45rem 0.55rem;
   }
 }
 
@@ -889,17 +940,23 @@ hr {
   display: none;
 }
 
-/* Pinned to the viewport, so the panel stays put while the page scrolls. */
+/*
+ * It lives in the same grid row as the page, so it sticks while you scroll the
+ * page but its bottom edge lands where the content ends — never over the
+ * full-width footer. The height is capped by that row, so short pages do not
+ * leave a tall empty panel behind.
+ */
 @media (min-width: 1024px) {
   .sidenav {
     display: block;
-    position: fixed;
+    position: sticky;
     top: 5.25rem;
-    bottom: auto;
-    left: 1.1rem;
+    align-self: start;
+    justify-self: start;
+    margin-left: 1.1rem;
     width: 16.5rem;
     height: calc(100vh - 7rem);
-    height: calc(100dvh - 7rem);
+    height: min(calc(100dvh - 7rem), 100%);
     z-index: 30;
     perspective: 1400px;
   }
@@ -1454,5 +1511,91 @@ mark.hl {
   .account-box {
     width: 2.1rem;
     height: 2.1rem;
+  }
+}
+
+/* ---------- "featured on" badge carousel (footer) ---------- */
+
+.footer-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.footer-badges-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* All slides share one grid cell, so the strip is as tall as its tallest badge. */
+.badge-viewport {
+  display: grid;
+  width: 100%;
+  max-width: 15.25rem;
+}
+
+.badge-slide {
+  grid-area: 1 / 1;
+  justify-self: start;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.badge-slide-active {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.badge-slide img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.badge-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.badge-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.badge-dot:hover {
+  background: var(--accent-soft);
+}
+
+.badge-dot-active {
+  background: var(--accent);
+  transform: scale(1.2);
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 480px) {
+  body {
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-slide,
+  .badge-dot {
+    transition: none;
   }
 }

@@ -20,7 +20,7 @@ export default function CollectionDetail() {
     return (
       <>
         <SiteSeo title="Collection not found" path={`/collections/${id}`} noindex />
-        <div className="mx-auto max-w-3xl px-6 py-16 flex flex-col items-center gap-4 text-center">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 flex flex-col items-center gap-4 text-center">
           <span
             className="text-[11px] font-bold tracking-[0.2em] uppercase border px-3 py-2"
             style={{ borderColor: "var(--ink)" }}
@@ -81,7 +81,7 @@ export default function CollectionDetail() {
         ]}
       />
 
-      <div className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-8">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
           <Link
             to="/collections"
