@@ -3,17 +3,17 @@ import { Link } from "react-router";
 export function Footer() {
   return (
     <footer
-      className="border-t border-[#0b0b0b] mt-auto"
-      style={{ backgroundColor: "#fafafa" }}
+      className="border-t mt-auto"
+      style={{ backgroundColor: "#ffffff", borderColor: "var(--ink)" }}
     >
       <div
         className="mx-auto max-w-5xl px-6 py-10 flex flex-col gap-8 text-sm"
-        style={{ color: "#5b5b5b" }}
+        style={{ color: "var(--muted)" }}
       >
         <div className="flex flex-col gap-2 text-center sm:text-left">
           <span
             className="text-[11px] font-bold tracking-[0.2em] uppercase"
-            style={{ color: "#0b0b0b" }}
+            style={{ color: "var(--ink)" }}
           >
             Boring Internet
           </span>
@@ -27,7 +27,7 @@ export function Footer() {
           <div>
             <p
               className="text-[11px] font-bold tracking-[0.2em] uppercase"
-              style={{ color: "#0b0b0b" }}
+              style={{ color: "var(--ink)" }}
             >
               Directory
             </p>
@@ -35,25 +35,25 @@ export function Footer() {
               <li>
                 <Link
                   to="/"
-                  className="text-[#0b0b0b] hover:underline underline-offset-4"
+                  className="nav-link"
                 >
                   Home
                 </Link>
               </li>
               <li>
-                <a
-                  href="/archive"
-                  className="text-[#0b0b0b] hover:underline underline-offset-4"
+                <Link
+                  to="/blog"
+                  className="nav-link"
                 >
-                  Archive
-                </a>
+                  Blog
+                </Link>
               </li>
               <li>
                 <a
-                  href="/submit"
-                  className="text-[#0b0b0b] hover:underline underline-offset-4"
+                  href="/#trending"
+                  className="nav-link"
                 >
-                  Submit a site
+                  Trending
                 </a>
               </li>
             </ul>
@@ -62,7 +62,7 @@ export function Footer() {
           <div>
             <p
               className="text-[11px] font-bold tracking-[0.2em] uppercase"
-              style={{ color: "#0b0b0b" }}
+              style={{ color: "var(--ink)" }}
             >
               Connect
             </p>
@@ -70,24 +70,29 @@ export function Footer() {
               <li>
                 <a
                   href="mailto:hello@boringinternet.example"
-                  className="text-[#0b0b0b] hover:underline underline-offset-4"
+                  className="nav-link"
                 >
                   Contact
                 </a>
               </li>
               <li>
                 <a
-                  href="/updates"
-                  className="text-[#0b0b0b] hover:underline underline-offset-4"
+                  href="https://github.com/NOTAM-bobk/boringinternet.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-link"
                 >
-                  Updates
+                  GitHub
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 text-[11px] text-[#5b5b5b] border-t border-[#d8d8d8] pt-6">
+        <div
+          className="flex flex-col gap-2 text-[11px] border-t pt-6"
+          style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
+        >
           <p>© {new Date().getFullYear()} Boring Internet.</p>
           <p>
             Sites are curated by their creators. This directory links out;

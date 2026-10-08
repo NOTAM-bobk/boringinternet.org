@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from "react-router";
 import "./index.css";
 import { AppShell } from "./components/AppShell.tsx";
 import Home from "./pages/Home.tsx";
+import Blog from "./pages/Blog.tsx";
 import Auth from "./pages/Auth.tsx";
 
 const router = createBrowserRouter([
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: "blog",
+        element: <Blog />,
       },
       {
         path: "auth",

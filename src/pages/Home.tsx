@@ -21,36 +21,36 @@ function SiteCard({ site }: { site: Site }) {
   return (
     <article
       className="card p-5 flex flex-col gap-2 text-left"
-      style={{ borderColor: "#0b0b0b" }}
+      style={{ borderColor: "var(--ink)" }}
     >
       <footer className="flex items-center justify-between gap-3">
         <Link
           to={`/site/${site.slug}`}
           className="text-base font-bold hover:underline underline-offset-4"
-          style={{ color: "#0b0b0b" }}
+          style={{ color: "var(--ink)" }}
         >
           {site.name}
         </Link>
-        <span className="text-[11px] font-mono" style={{ color: "#5b5b5b" }}>
+        <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
           {domain}
         </span>
       </footer>
-      <p className="text-sm leading-relaxed" style={{ color: "#5b5b5b" }}>
+      <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
         {site.description}
       </p>
       <div className="flex flex-wrap gap-2 mt-1">
         {site.tags.slice(0, 3).map((tag) => (
           <span
             key={tag}
-            className="text-[11px] font-mono border border-[#d8d8d8] px-2 py-0.5"
-            style={{ color: "#5b5b5b" }}
+            className="text-[11px] font-mono border px-2 py-0.5"
+            style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
           >
             {tag}
           </span>
         ))}
       </div>
       {site.launched && (
-        <p className="text-[11px] font-mono mt-1" style={{ color: "#5b5b5b" }}>
+        <p className="text-[11px] font-mono mt-1" style={{ color: "var(--muted)" }}>
           Launched {new Date(site.launched).toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
@@ -62,8 +62,8 @@ function SiteCard({ site }: { site: Site }) {
         href={site.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-1 inline-flex text-[11px] font-bold tracking-wider uppercase border border-[#0b0b0b] px-3 py-1 hover:bg-[#0b0b0b] hover:text-white transition-colors"
-        style={{ color: "#0b0b0b" }}
+        className="mt-1 inline-flex text-[11px] font-bold tracking-wider uppercase border px-3 py-1 transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
+        style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
       >
         Visit site
         <span aria-hidden="true"> →</span>
@@ -91,31 +91,70 @@ export default function Home() {
       <HomepageSeo />
       <div className="mx-auto max-w-5xl px-6 py-12 flex flex-col gap-10">
         {/* Hero */}
-        <section className="border-b border-[#d8d8d8] pb-10">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-3 text-[11px] font-bold tracking-[0.2em] uppercase border border-[#0b0b0b] px-3 py-2">
-              <span className="w-2 h-2 bg-[#0b0b0b]" />
+        <section
+          className="border-b pb-12 text-center"
+          style={{ borderColor: "var(--rule)" }}
+        >
+          <div className="max-w-2xl mx-auto flex flex-col items-center">
+            <div
+              className="flex items-center gap-3 text-[11px] font-bold tracking-[0.2em] uppercase border px-3 py-2"
+              style={{ borderColor: "var(--ink)" }}
+            >
+              <span
+                className="w-2 h-2"
+                style={{ backgroundColor: "var(--accent)" }}
+              />
               <span>Directory — live</span>
             </div>
-            <h1 className="mt-6 text-4xl sm:text-5xl font-bold leading-[0.95] tracking-[-0.02em]">
-              Launched sites, kept flat.
+
+            <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold leading-[0.95] tracking-[-0.02em]">
+              Find your next{" "}
+              <span className="highlight-accent">launch</span>
             </h1>
-            <p className="mt-4 text-lg leading-relaxed" style={{ color: "#5b5b5b" }}>
-              A small list of sites people are launching now. Edit{" "}
-              <code className="border border-[#d8d8d8] bg-white px-1.5 py-0.5 text-[13px] font-mono">
+
+            <p
+              className="mt-5 text-lg leading-relaxed"
+              style={{ color: "var(--muted)" }}
+            >
+              A small list of sites people are launching right now. Edit{" "}
+              <code
+                className="border px-1.5 py-0.5 text-[13px] font-mono"
+                style={{
+                  borderColor: "var(--rule)",
+                  backgroundColor: "var(--surface)",
+                }}
+              >
                 sites.json
               </code>{" "}
               to add your own.
             </p>
+
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <a
+                href="/#explore"
+                className="text-[12px] font-bold tracking-[0.14em] uppercase px-5 py-3 border transition-transform hover:-translate-y-px"
+                style={{
+                  backgroundColor: "var(--accent)",
+                  borderColor: "var(--ink)",
+                  color: "var(--on-accent)",
+                }}
+              >
+                Browse the directory
+              </a>
+              <Link
+                to="/blog"
+                className="text-[12px] font-bold tracking-[0.14em] uppercase px-5 py-3 border transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
+                style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
+              >
+                Read the blog
+              </Link>
+            </div>
           </div>
         </section>
 
         {/* Search */}
         <section className="space-y-4">
-          <label
-            htmlFor="site-search"
-            className="sr-only"
-          >
+          <label htmlFor="site-search" className="sr-only">
             Search launched sites
           </label>
           <input
@@ -128,10 +167,10 @@ export default function Home() {
               setSelectedCategory("all");
             }}
             className="field text-base"
-            style={{ borderColor: "#0b0b0b" }}
+            style={{ borderColor: "var(--ink)" }}
           />
           {query && (
-            <p className="text-sm" style={{ color: "#5b5b5b" }}>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
               {filtered.length} result{filtered.length === 1 ? "" : "s"}
               {query.trim() ? ` for “${query}”` : ""}
             </p>
@@ -149,12 +188,15 @@ export default function Home() {
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className="border border-[#0b0b0b] px-3 py-1.5 text-sm font-bold transition-colors hover:bg-[#0b0b0b] hover:text-white"
+                className="border px-3 py-1.5 text-sm font-bold transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
                 style={{
+                  borderColor: "var(--ink)",
                   backgroundColor:
-                    selectedCategory === cat.id ? "#0b0b0b" : "#fff",
+                    selectedCategory === cat.id ? "var(--accent)" : "#ffffff",
                   color:
-                    selectedCategory === cat.id ? "#fff" : "#0b0b0b",
+                    selectedCategory === cat.id
+                      ? "var(--on-accent)"
+                      : "var(--ink)",
                 }}
               >
                 {cat.label}
@@ -164,7 +206,7 @@ export default function Home() {
         </section>
 
         {/* Site grid */}
-        <section className="space-y-4">
+        <section id="explore" className="space-y-4 scroll-mt-24">
           <div className="flex items-baseline justify-between">
             <h2 className="text-xl font-bold">
               {selectedCategory === "all"
@@ -172,7 +214,7 @@ export default function Home() {
                 : categories.find((c) => c.id === selectedCategory)?.label ??
                   selectedCategory}
             </h2>
-            <span className="text-sm" style={{ color: "#5b5b5b" }}>
+            <span className="text-sm" style={{ color: "var(--muted)" }}>
               {filtered.length} site{filtered.length === 1 ? "" : "s"}
             </span>
           </div>
@@ -185,8 +227,8 @@ export default function Home() {
             </div>
           ) : (
             <div
-              className="border border-[#d8d8d8] p-8 text-center text-sm"
-              style={{ color: "#5b5b5b" }}
+              className="border p-8 text-center text-sm"
+              style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
             >
               No sites match that search. Try a different term or clear the
               search box.
@@ -196,10 +238,16 @@ export default function Home() {
 
         {/* Trending */}
         {trending.length > 0 && (
-          <section className="border-t border-[#d8d8d8] pt-10 space-y-4">
+          <section
+            id="trending"
+            className="border-t pt-10 space-y-4 scroll-mt-24"
+            style={{ borderColor: "var(--rule)" }}
+          >
             <div className="flex items-baseline justify-between">
-              <h2 className="text-xl font-bold">Trending</h2>
-              <span className="text-sm" style={{ color: "#5b5b5b" }}>
+              <h2 className="text-xl font-bold">
+                Trending <span aria-hidden="true">🔥</span>
+              </h2>
+              <span className="text-sm" style={{ color: "var(--muted)" }}>
                 Most active this week
               </span>
             </div>
@@ -208,17 +256,20 @@ export default function Home() {
                 <li
                   key={site.id}
                   className="card p-5 flex flex-col gap-2 text-left"
-                  style={{ borderColor: "#0b0b0b" }}
+                  style={{ borderColor: "var(--ink)" }}
                 >
                   <div className="flex items-center justify-between">
                     <span
                       className="text-[11px] font-mono"
-                      style={{ color: "#5b5b5b" }}
+                      style={{ color: "var(--accent)" }}
                     >
                       #{index + 1}
                     </span>
                     {site.trending != null && (
-                      <span className="text-[11px] font-mono" style={{ color: "#5b5b5b" }}>
+                      <span
+                        className="text-[11px] font-mono"
+                        style={{ color: "var(--muted)" }}
+                      >
                         {site.trending}
                       </span>
                     )}
@@ -226,11 +277,14 @@ export default function Home() {
                   <Link
                     to={`/site/${site.slug}`}
                     className="text-base font-bold hover:underline underline-offset-4"
-                    style={{ color: "#0b0b0b" }}
+                    style={{ color: "var(--ink)" }}
                   >
                     {site.name}
                   </Link>
-                  <p className="text-sm leading-relaxed" style={{ color: "#5b5b5b" }}>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: "var(--muted)" }}
+                  >
                     {site.description}
                   </p>
                 </li>
@@ -240,9 +294,18 @@ export default function Home() {
         )}
 
         {/* Edit hint */}
-        <section className="border-t border-[#d8d8d8] pt-8 text-sm text-center" style={{ color: "#5b5b5b" }}>
+        <section
+          className="border-t pt-8 text-sm text-center"
+          style={{ color: "var(--muted)", borderColor: "var(--rule)" }}
+        >
           Want to add a site? Edit{" "}
-          <code className="border border-[#d8d8d8] bg-white px-1.5 py-0.5 text-[13px] font-mono">
+          <code
+            className="border px-1.5 py-0.5 text-[13px] font-mono"
+            style={{
+              borderColor: "var(--rule)",
+              backgroundColor: "var(--surface)",
+            }}
+          >
             sites.json
           </code>{" "}
           and redeploy. Categories, tags, and trending scores all live there.
