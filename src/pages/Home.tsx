@@ -90,66 +90,29 @@ export default function Home() {
     <>
       <HomepageSeo />
       <div className="mx-auto max-w-5xl px-6 py-12 flex flex-col gap-10">
-        {/* Hero */}
+        {/* Quick actions */}
         <section
-          className="border-b pb-12 text-center"
+          className="border-b pb-8 flex flex-wrap items-center justify-center gap-3"
           style={{ borderColor: "var(--rule)" }}
         >
-          <div className="max-w-2xl mx-auto flex flex-col items-center">
-            <div
-              className="flex items-center gap-3 text-[11px] font-bold tracking-[0.2em] uppercase border px-3 py-2"
-              style={{ borderColor: "var(--ink)" }}
-            >
-              <span
-                className="w-2 h-2"
-                style={{ backgroundColor: "var(--accent)" }}
-              />
-              <span>Directory — live</span>
-            </div>
-
-            <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold leading-[0.95] tracking-[-0.02em]">
-              Find your next{" "}
-              <span className="highlight-accent">launch</span>
-            </h1>
-
-            <p
-              className="mt-5 text-lg leading-relaxed"
-              style={{ color: "var(--muted)" }}
-            >
-              A small list of sites people are launching right now. Edit{" "}
-              <code
-                className="border px-1.5 py-0.5 text-[13px] font-mono"
-                style={{
-                  borderColor: "var(--rule)",
-                  backgroundColor: "var(--surface)",
-                }}
-              >
-                sites.json
-              </code>{" "}
-              to add your own.
-            </p>
-
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-              <a
-                href="/#explore"
-                className="text-[12px] font-bold tracking-[0.14em] uppercase px-5 py-3 border transition-transform hover:-translate-y-px"
-                style={{
-                  backgroundColor: "var(--accent)",
-                  borderColor: "var(--ink)",
-                  color: "var(--on-accent)",
-                }}
-              >
-                Browse the directory
-              </a>
-              <Link
-                to="/blog"
-                className="text-[12px] font-bold tracking-[0.14em] uppercase px-5 py-3 border transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
-                style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
-              >
-                Read the blog
-              </Link>
-            </div>
-          </div>
+          <a
+            href="/#explore"
+            className="text-[12px] font-bold tracking-[0.14em] uppercase px-5 py-3 border transition-transform hover:-translate-y-px"
+            style={{
+              backgroundColor: "var(--accent)",
+              borderColor: "var(--ink)",
+              color: "var(--on-accent)",
+            }}
+          >
+            Browse the directory
+          </a>
+          <Link
+            to="/trending"
+            className="text-[12px] font-bold tracking-[0.14em] uppercase px-5 py-3 border transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
+            style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
+          >
+            Top 51 trending <span aria-hidden="true">🔥</span>
+          </Link>
         </section>
 
         {/* Search */}
@@ -243,13 +206,16 @@ export default function Home() {
             className="border-t pt-10 space-y-4 scroll-mt-24"
             style={{ borderColor: "var(--rule)" }}
           >
-            <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline justify-between gap-4">
               <h2 className="text-xl font-bold">
                 Trending <span aria-hidden="true">🔥</span>
               </h2>
-              <span className="text-sm" style={{ color: "var(--muted)" }}>
-                Most active this week
-              </span>
+              <Link
+                to="/trending"
+                className="text-sm font-bold accent-text underline underline-offset-4"
+              >
+                See all 51 →
+              </Link>
             </div>
             <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {trending.map((site, index) => (

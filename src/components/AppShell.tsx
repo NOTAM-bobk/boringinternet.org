@@ -1,13 +1,14 @@
+import type { ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import { Footer } from "./Footer";
 
-function BlogLink() {
+function NavItem({ to, children }: { to: string; children: ReactNode }) {
   return (
     <NavLink
-      to="/blog"
+      to={to}
       className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
     >
-      Blog
+      {children}
     </NavLink>
   );
 }
@@ -42,10 +43,12 @@ export function AppShell() {
             <a href="/#explore" className="nav-link">
               Explore
             </a>
-            <a href="/#trending" className="nav-link whitespace-nowrap">
-              Trending <span aria-hidden="true">🔥</span>
-            </a>
-            <BlogLink />
+            <NavItem to="/trending">
+              <span className="whitespace-nowrap">
+                Trending <span aria-hidden="true">🔥</span>
+              </span>
+            </NavItem>
+            <NavItem to="/blog">Blog</NavItem>
           </nav>
 
           {/* Right: account */}

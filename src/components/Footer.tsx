@@ -49,12 +49,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="/#trending"
+                <Link
+                  to="/trending"
                   className="nav-link"
                 >
-                  Trending
-                </a>
+                  Trending <span aria-hidden="true">🔥</span>
+                </Link>
               </li>
             </ul>
           </div>

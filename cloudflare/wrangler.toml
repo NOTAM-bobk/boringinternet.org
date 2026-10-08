@@ -1,0 +1,13 @@
+name = "boring-internet-votes"
+main = "votes-worker.js"
+compatibility_date = "2026-10-01"
+
+# 1) create the namespace:  wrangler kv namespace create VOTES
+# 2) paste the printed id below
+# 3) lock CORS to the deployed site:  wrangler secret put ALLOWED_ORIGIN
+[[kv_namespaces]]
+binding = "VOTES"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+[vars]
+ALLOWED_ORIGIN = "https://boringinternet.org"
