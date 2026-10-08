@@ -12,7 +12,6 @@ import {
   featuredSites,
   newAdditions,
   searchSites,
-  siteName,
   sites,
   sitesByCategory,
   trendingSites,
@@ -21,6 +20,7 @@ import {
 } from "../lib/siteData";
 import { formatDate, posts } from "../lib/posts";
 import { siteDomain, siteTileStyle } from "../lib/siteTile";
+import { screenshotUrl } from "../lib/shots";
 
 function hash(value: string): number {
   let h = 0;
@@ -86,11 +86,37 @@ function CoverArt({ site }: { site: Site }) {
   );
 }
 
+/**
+ * The top picks get a real screenshot, rendered server-side by thum.io, with the
+ * generated cover art kept as the fallback if that service is unreachable.
+ */
+function SitePreview({ site }: { site: Site }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) return <CoverArt site={site} />;
+
+  return (
+    <span className="cover shot">
+      <img
+        src={screenshotUrl(site.url)}
+        alt={`Screenshot of ${site.name}`}
+        width={960}
+        height={600}
+        loading="eager"
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onError={() => setFailed(true)}
+      />
+      <span className="shot-badge">{siteDomain(site.url)}</span>
+    </span>
+  );
+}
+
 function FeatureCard({ site }: { site: Site }) {
   return (
     <article className="feature-card">
       <a href={site.url} target="_blank" rel="noopener noreferrer" className="block">
-        <CoverArt site={site} />
+        <SitePreview site={site} />
       </a>
       <div className="feature-foot">
         <SiteIcon site={site} size={32} />
@@ -426,28 +452,6 @@ export default function Home() {
           {featured.map((site) => (
             <FeatureCard key={site.id} site={site} />
           ))}
-        </section>
-
-        {/* Promo strip */}
-        <section className="promo">
-          <div className="min-w-0">
-            <p className="text-[11px] font-bold tracking-[0.2em] uppercase" style={{ color: "var(--accent)" }}>
-              The short version
-            </p>
-            <p className="mt-2 text-lg sm:text-xl font-bold leading-snug">
-              {siteName} keeps a running top {trendingAll}. Vote on what should move up.
-            </p>
-            <p className="mt-1 text-[14px]" style={{ color: "var(--muted)" }}>
-              One click per site, no accounts, no tracking pixels.
-            </p>
-          </div>
-          <Link
-            to="/trending"
-            className="shrink-0 text-[12px] font-bold tracking-[0.14em] uppercase px-5 py-3 border transition-transform hover:-translate-y-px"
-            style={{ backgroundColor: "var(--accent)", borderColor: "var(--ink)", color: "var(--on-accent)" }}
-          >
-            Trending 🔥
-          </Link>
         </section>
 
         <PagedRows items={additions} title="New Additions" note="latest launches" />

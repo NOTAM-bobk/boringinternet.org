@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import type { Site } from "../lib/siteData";
 import { siteInitials, siteTileStyle } from "../lib/siteTile";
+import { serverIconUrl } from "../lib/shots";
 
 /**
  * The site's real icon, in order of preference:
- *   1. the site's own /favicon.ico
- *   2. a keyless icon lookup for the domain (catches sites that only declare an
- *      icon in their HTML head)
- *   3. a monogram tile in the brand palette
+ *   1. an icon rendered server-side at the exact size we display (it also picks
+ *      up icons that are only declared in the page's <head>, and it 404s
+ *      cleanly when a domain has no icon at all)
+ *   2. the site's own /favicon.ico
+ *   3. a keyless icon lookup for the domain
+ *   4. a monogram tile in the brand palette
  */
-function attemptsFor(url: string): string[] {
+function attemptsFor(url: string, size: number): string[] {
   try {
     const { origin, hostname } = new URL(url);
     return [
+      serverIconUrl(url, size),
       `${origin}/favicon.ico`,
       `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
     ];
@@ -31,7 +35,7 @@ export function SiteIcon({
   label?: boolean;
 }) {
   const [step, setStep] = useState(0);
-  const attempts = attemptsFor(site.url);
+  const attempts = attemptsFor(site.url, size);
 
   useEffect(() => {
     setStep(0);

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import {
   categoryCount,
   categoryFilters,
@@ -8,6 +8,27 @@ import {
   sites,
 } from "../lib/siteData";
 import { posts } from "../lib/posts";
+
+/** The four top-level places in the site. */
+const SECTIONS = [
+  { id: "explore", to: "/#explore", icon: "◎", label: "Explore" },
+  { id: "articles", to: "/blog", icon: "◫", label: "Articles" },
+  { id: "collections", to: "/#collections", icon: "❐", label: "Collections" },
+  { id: "trending", to: "/trending", icon: "✦", label: "Trending" },
+] as const;
+
+const SECTION_LABELS: Record<string, string> = {
+  explore: "Explore",
+  articles: "Articles",
+  collections: "Collections",
+  trending: "Trending",
+  submit: "Submit your site",
+};
+
+function scrollToSection(id: string) {
+  const element = document.getElementById(id);
+  if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function SectionToggle({
   label,
@@ -44,8 +65,13 @@ function SectionToggle({
  */
 export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
+  const pendingSection = useRef<string | null>(null);
   const [query, setQuery] = useState("");
+  const [hash, setHash] = useState(() =>
+    typeof window === "undefined" ? "" : window.location.hash,
+  );
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     if (typeof window === "undefined") return { categories: true };
     try {
@@ -55,6 +81,28 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       return { categories: true };
     }
   });
+
+  // Keep the fragment in sync: the router changes it on navigation, and plain
+  // in-page anchors fire `hashchange` without the router noticing.
+  useEffect(() => {
+    const sync = () => setHash(window.location.hash);
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [location.key, location.pathname, location.search, location.hash]);
+
+  // After a jump like /#collections, scroll the section into view once it exists.
+  useEffect(() => {
+    const id = pendingSection.current;
+    if (!id) return;
+    pendingSection.current = null;
+    const frame = requestAnimationFrame(() => scrollToSection(id));
+    const timer = window.setTimeout(() => scrollToSection(id), 160);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [location.key, location.pathname, location.search, location.hash]);
 
   // ⌘K / Ctrl+K focuses the search field.
   useEffect(() => {
@@ -67,6 +115,21 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  /** Where the visitor actually is right now. */
+  const activeSection = useMemo(() => {
+    const path = location.pathname.replace(/\/+$/, "") || "/";
+    if (path === "/blog" || path.startsWith("/blog/")) return "articles";
+    if (path === "/trending") return "trending";
+    if (path === "/submit") return "submit";
+    if (path === "/") return hash.includes("collections") ? "collections" : "explore";
+    return "";
+  }, [location.pathname, hash]);
+
+  const activeCategory = useMemo(() => {
+    if (location.pathname !== "/") return "";
+    return new URLSearchParams(location.search).get("category") ?? "";
+  }, [location.pathname, location.search]);
 
   function toggleGroup(id: string) {
     setOpenGroups((current) => {
@@ -82,16 +145,30 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     });
   }
 
+  /** Navigate, and make in-page jumps land on the right section every time. */
+  function go(to: string) {
+    onNavigate?.();
+    const hashIndex = to.indexOf("#");
+    const id = hashIndex === -1 ? "" : to.slice(hashIndex + 1);
+    const href = hashIndex === -1 ? to : `${to.slice(0, hashIndex)}#${id}`;
+    const current = `${location.pathname}${location.search}${location.hash}`;
+
+    if (href === current) {
+      if (id) scrollToSection(id);
+      return;
+    }
+    if (!id) {
+      navigate(to);
+      return;
+    }
+    pendingSection.current = id;
+    navigate(href);
+  }
+
   function runSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = query.trim();
-    navigate(trimmed ? `/?q=${encodeURIComponent(trimmed)}#explore` : "/");
-    onNavigate?.();
-  }
-
-  function go(to: string) {
-    navigate(to);
-    onNavigate?.();
+    go(trimmed ? `/?q=${encodeURIComponent(trimmed)}#explore` : "/#explore");
   }
 
   return (
@@ -124,32 +201,43 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       </form>
 
       <nav aria-label="Site" className="sidenav-links">
-        <button type="button" className="sidenav-item active" onClick={() => go("/#explore")}>
-          <span className="sidenav-icon" aria-hidden="true">
-            ◎
-          </span>
-          Explore
-        </button>
-        <button type="button" className="sidenav-item" onClick={() => go("/blog")}>
-          <span className="sidenav-icon" aria-hidden="true">
-            ◫
-          </span>
-          Articles
-          <span className="sidenav-badge">{posts.length}</span>
-        </button>
-        <button type="button" className="sidenav-item" onClick={() => go("/#collections")}>
-          <span className="sidenav-icon" aria-hidden="true">
-            ❐
-          </span>
-          Collections
-        </button>
-        <button type="button" className="sidenav-item" onClick={() => go("/trending")}>
-          <span className="sidenav-icon" aria-hidden="true">
-            ✦
-          </span>
-          Trending
-        </button>
+        {SECTIONS.map((section) => {
+          const isActive = activeSection === section.id;
+          return (
+            <button
+              key={section.id}
+              type="button"
+              className={`sidenav-item${isActive ? " active" : ""}`}
+              aria-current={isActive ? "page" : undefined}
+              onClick={() => go(section.to)}
+            >
+              <span className="sidenav-icon" aria-hidden="true">
+                {section.icon}
+              </span>
+              <span>{section.label}</span>
+              {section.id === "articles" && (
+                <span className="sidenav-badge">{posts.length}</span>
+              )}
+            </button>
+          );
+        })}
       </nav>
+
+      <p className="sidenav-now" aria-live="polite">
+        <span className="sidenav-now-dot" aria-hidden="true" />
+        <span>
+          Viewing <strong>{SECTION_LABELS[activeSection] ?? siteName}</strong>
+        </span>
+        {activeSection !== "explore" && (
+          <button
+            type="button"
+            className="sidenav-now-back"
+            onClick={() => go("/#explore")}
+          >
+            Back to Explore
+          </button>
+        )}
+      </p>
 
       <div className="sidenav-divider" />
 
@@ -188,7 +276,10 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 <button
                   key={category.id}
                   type="button"
-                  className="sidenav-subitem"
+                  className={`sidenav-subitem${
+                    activeCategory === category.id ? " active-sub" : ""
+                  }`}
+                  aria-current={activeCategory === category.id ? "true" : undefined}
                   onClick={() => go(`/?category=${category.id}#explore`)}
                 >
                   {category.label}
