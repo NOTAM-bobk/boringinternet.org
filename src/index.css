@@ -951,18 +951,6 @@ hr {
   overscroll-behavior: contain;
 }
 
-.sidenav-brandmark {
-  font-size: 0.98rem;
-  font-weight: 700;
-}
-
-.sidenav-tagline {
-  margin-top: 0.2rem;
-  font-size: 0.72rem;
-  line-height: 1.4;
-  color: var(--muted);
-}
-
 .sidenav-search {
   display: flex;
   align-items: center;
@@ -1048,52 +1036,6 @@ hr {
 
 .sidenav-item .sidenav-badge {
   margin-left: auto;
-}
-
-/* "You are here" strip — makes it obvious when you have left Explore. */
-.sidenav-now {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  font-size: 0.72rem;
-  line-height: 1.3;
-  color: var(--muted);
-}
-
-.sidenav-now strong {
-  color: var(--ink);
-}
-
-.sidenav-now-dot {
-  flex: none;
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 999px;
-  background: var(--accent);
-}
-
-.sidenav-now-back {
-  margin-left: auto;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  font: inherit;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-  cursor: pointer;
-}
-
-.sidenav-now-back:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .sidenav-icon {

@@ -14,6 +14,7 @@ const read = (file) => JSON.parse(readFileSync(join(ROOT, "config", file), "utf8
 
 const site = read("site.json");
 const posts = read("blog.json").posts ?? [];
+const collections = read("explore.json").collections ?? [];
 const base = String(site.url ?? "https://example.com").replace(/\/+$/, "");
 
 /** Pages that always exist. */
@@ -21,6 +22,7 @@ const staticPages = [
   { path: "/", priority: "1.0", changefreq: "daily" },
   { path: "/trending", priority: "0.9", changefreq: "daily" },
   { path: "/blog", priority: "0.7", changefreq: "weekly" },
+  { path: "/collections", priority: "0.8", changefreq: "weekly" },
   { path: "/submit", priority: "0.6", changefreq: "monthly" },
 ];
 
@@ -31,7 +33,13 @@ const postPages = posts.map((post) => ({
   lastmod: post.date,
 }));
 
-const urls = [...staticPages, ...postPages];
+const collectionPages = collections.map((collection) => ({
+  path: `/collections/${collection.id}`,
+  priority: "0.7",
+  changefreq: "monthly",
+}));
+
+const urls = [...staticPages, ...collectionPages, ...postPages];
 const today = new Date().toISOString().slice(0, 10);
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>

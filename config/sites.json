@@ -6,7 +6,7 @@
       "slug": "hacker-news",
       "url": "https://news.ycombinator.com",
       "description": "Links and discussion for people who build things, on a page that has barely changed since 2007.",
-      "category": "reading",
+      "category": "news",
       "tags": ["news", "tech", "classic"],
       "trending": 51,
       "launched": "2026-10-03"
@@ -17,7 +17,7 @@
       "slug": "text-npr",
       "url": "https://text.npr.org",
       "description": "NPR's headlines as bare text, with no images, scripts, or ads.",
-      "category": "reading",
+      "category": "news",
       "tags": ["news", "text", "lowdata"],
       "trending": 50,
       "launched": "2026-06-11"
@@ -28,7 +28,7 @@
       "slug": "lite-cnn",
       "url": "https://lite.cnn.com",
       "description": "CNN stripped down to a text-only page that opens instantly on any connection.",
-      "category": "reading",
+      "category": "news",
       "tags": ["news", "text", "fast"],
       "trending": 49,
       "launched": "2026-05-24"
@@ -39,7 +39,7 @@
       "slug": "legible-news",
       "url": "https://legiblenews.com",
       "description": "One screen of world news, rewritten to be readable instead of clickable.",
-      "category": "reading",
+      "category": "news",
       "tags": ["news", "summaries", "calm"],
       "trending": 48,
       "launched": "2026-09-12"
@@ -50,7 +50,7 @@
       "slug": "plain-text-sports",
       "url": "https://plaintextsports.com",
       "description": "Live sports scores rendered as plain text you could read over a terminal.",
-      "category": "reading",
+      "category": "news",
       "tags": ["sports", "scores", "text"],
       "trending": 47,
       "launched": "2026-08-30"
@@ -61,7 +61,7 @@
       "slug": "standard-ebooks",
       "url": "https://standardebooks.org",
       "description": "Volunteers re-typeset public-domain books so the free version looks better than the paid one.",
-      "category": "reading",
+      "category": "books",
       "tags": ["books", "ebooks", "free"],
       "trending": 46,
       "launched": "2026-07-19"
@@ -72,7 +72,7 @@
       "slug": "project-gutenberg",
       "url": "https://www.gutenberg.org",
       "description": "The original library of free public-domain ebooks, still running on plain HTML.",
-      "category": "reading",
+      "category": "books",
       "tags": ["books", "archive", "classic"],
       "trending": 45,
       "launched": "2026-04-02"
@@ -83,7 +83,7 @@
       "slug": "open-library",
       "url": "https://openlibrary.org",
       "description": "A lending library cataloguing nearly every book ever published.",
-      "category": "reading",
+      "category": "books",
       "tags": ["books", "lending", "catalog"],
       "trending": 44,
       "launched": "2026-03-15"
@@ -171,7 +171,7 @@
       "slug": "mdn",
       "url": "https://developer.mozilla.org",
       "description": "The web platform reference, written for humans and kept current by Mozilla.",
-      "category": "reading",
+      "category": "dev",
       "tags": ["docs", "reference", "web"],
       "trending": 36,
       "launched": "2026-02-14"
@@ -259,7 +259,7 @@
       "slug": "compiler-explorer",
       "url": "https://godbolt.org",
       "description": "See the assembly your compiler actually generates, side by side with your source.",
-      "category": "tools",
+      "category": "dev",
       "tags": ["code", "compilers", "dev"],
       "trending": 28,
       "launched": "2026-08-26"
@@ -270,7 +270,7 @@
       "slug": "regex101",
       "url": "https://regex101.com",
       "description": "Build a regular expression and have every character explained back to you.",
-      "category": "tools",
+      "category": "dev",
       "tags": ["regex", "dev", "explain"],
       "trending": 27,
       "launched": "2026-07-31"
@@ -281,7 +281,7 @@
       "slug": "lucide",
       "url": "https://lucide.dev",
       "description": "A consistent open-source icon set you can copy out as a single SVG.",
-      "category": "tools",
+      "category": "design",
       "tags": ["icons", "svg", "design"],
       "trending": 26,
       "launched": "2026-06-05"
@@ -292,7 +292,7 @@
       "slug": "svgl",
       "url": "https://svgl.app",
       "description": "Brand logos as tidy SVGs, searchable and ready to paste into a project.",
-      "category": "tools",
+      "category": "design",
       "tags": ["logos", "svg", "design"],
       "trending": 25,
       "launched": "2026-05-16"
@@ -303,7 +303,7 @@
       "slug": "coolors",
       "url": "https://coolors.co",
       "description": "Generate colour palettes fast, then lock the ones worth keeping.",
-      "category": "tools",
+      "category": "design",
       "tags": ["colour", "palettes", "design"],
       "trending": 24,
       "launched": "2026-04-28"
@@ -314,7 +314,7 @@
       "slug": "every-layout",
       "url": "https://every-layout.dev",
       "description": "Small CSS layout primitives that teach the idea instead of hiding it.",
-      "category": "tools",
+      "category": "design",
       "tags": ["css", "layout", "learning"],
       "trending": 23,
       "launched": "2026-03-08"
@@ -402,7 +402,7 @@
       "slug": "practical-typography",
       "url": "https://practicaltypography.com",
       "description": "A whole book on typography you can read in the browser for free.",
-      "category": "culture",
+      "category": "design",
       "tags": ["typography", "book", "design"],
       "trending": 15,
       "launched": "2026-02-09"
@@ -413,7 +413,7 @@
       "slug": "fonts-in-use",
       "url": "https://fontsinuse.com",
       "description": "A public archive of typography spotted on signage, packaging, and album covers.",
-      "category": "culture",
+      "category": "design",
       "tags": ["typography", "archive", "design"],
       "trending": 14,
       "launched": "2026-01-26"
@@ -424,7 +424,7 @@
       "slug": "music-for-programming",
       "url": "https://musicforprogramming.net",
       "description": "Long, wordless mixes made for working, listed with the notes behind each one.",
-      "category": "culture",
+      "category": "sound",
       "tags": ["music", "focus", "mixes"],
       "trending": 13,
       "launched": "2026-08-14"
@@ -545,7 +545,7 @@
       "slug": "a-soft-murmur",
       "url": "https://asoftmurmur.com",
       "description": "Mix rain, thunder, and wind into a background hum and leave it running.",
-      "category": "experiment",
+      "category": "sound",
       "tags": ["ambient", "sound", "focus"],
       "trending": 2,
       "launched": "2026-01-18"
@@ -556,7 +556,7 @@
       "slug": "rainy-mood",
       "url": "https://rainymood.com",
       "description": "One page that plays rain and does absolutely nothing else.",
-      "category": "experiment",
+      "category": "sound",
       "tags": ["ambient", "rain", "single"],
       "trending": 1,
       "launched": "2026-01-05"

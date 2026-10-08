@@ -6,6 +6,8 @@ import { AppShell } from "./components/AppShell.tsx";
 import Home from "./pages/Home.tsx";
 import Blog from "./pages/Blog.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
+import Collections from "./pages/Collections.tsx";
+import CollectionDetail from "./pages/CollectionDetail.tsx";
 import Trending from "./pages/Trending.tsx";
 import Submit from "./pages/Submit.tsx";
 import Admin from "./pages/Admin.tsx";
@@ -27,6 +29,14 @@ const router = createBrowserRouter([
       {
         path: "blog/:slug",
         element: <BlogPost />,
+      },
+      {
+        path: "collections",
+        element: <Collections />,
+      },
+      {
+        path: "collections/:id",
+        element: <CollectionDetail />,
       },
       {
         path: "trending",

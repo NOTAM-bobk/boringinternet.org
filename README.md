@@ -23,6 +23,11 @@ stable — votes are stored under it), then add the slug to a collection in
 `config/explore.json` or to `boost` in `config/trending.json` if it should rank
 higher out of the gate.
 
+**Open a collection** → every entry in the `collections` array of
+`config/explore.json` gets its own page at `/collections/<id>`, with the
+collection name, its blurb, and a link out to each site. `/collections` lists
+them all. Run `bun run sitemap` so the new pages are indexed.
+
 **Write a post** → append an object to `config/blog.json` with `slug`, `title`,
 `description`, `date`, `tags`, `excerpt`, and `blocks`. It appears on `/blog`
 and gets its own readable page at `/blog/<slug>`.

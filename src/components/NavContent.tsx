@@ -6,8 +6,6 @@ import {
   categoryCount,
   categoryFilters,
   searchSites,
-  siteName,
-  siteTagline,
   sites,
 } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
@@ -20,17 +18,9 @@ const SEARCH_PREVIEW = 6;
 const SECTIONS = [
   { id: "explore", to: "/#explore", icon: "◎", label: "Explore" },
   { id: "articles", to: "/blog", icon: "◫", label: "Articles" },
-  { id: "collections", to: "/#collections", icon: "❐", label: "Collections" },
+  { id: "collections", to: "/collections", icon: "❐", label: "Collections" },
   { id: "trending", to: "/trending", icon: "✦", label: "Trending" },
 ] as const;
-
-const SECTION_LABELS: Record<string, string> = {
-  explore: "Explore",
-  articles: "Articles",
-  collections: "Collections",
-  trending: "Trending",
-  submit: "Submit your site",
-};
 
 function scrollToSection(id: string) {
   const element = document.getElementById(id);
@@ -78,9 +68,6 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const pendingSection = useRef<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [hash, setHash] = useState(() =>
-    typeof window === "undefined" ? "" : window.location.hash,
-  );
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     if (typeof window === "undefined") return { categories: true };
     try {
@@ -91,16 +78,7 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     }
   });
 
-  // Keep the fragment in sync: the router changes it on navigation, and plain
-  // in-page anchors fire `hashchange` without the router noticing.
-  useEffect(() => {
-    const sync = () => setHash(window.location.hash);
-    sync();
-    window.addEventListener("hashchange", sync);
-    return () => window.removeEventListener("hashchange", sync);
-  }, [location.key, location.pathname, location.search, location.hash]);
-
-  // After a jump like /#collections, scroll the section into view once it exists.
+  // After a jump like /#explore, scroll the section into view once it exists.
   useEffect(() => {
     const id = pendingSection.current;
     if (!id) return;
@@ -146,10 +124,11 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     const path = location.pathname.replace(/\/+$/, "") || "/";
     if (path === "/blog" || path.startsWith("/blog/")) return "articles";
     if (path === "/trending") return "trending";
+    if (path === "/collections" || path.startsWith("/collections/")) return "collections";
     if (path === "/submit") return "submit";
-    if (path === "/") return hash.includes("collections") ? "collections" : "explore";
+    if (path === "/") return "explore";
     return "";
-  }, [location.pathname, hash]);
+  }, [location.pathname]);
 
   const activeCategory = useMemo(() => {
     if (location.pathname !== "/") return "";
@@ -201,13 +180,6 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="sidenav-body">
-      <div className="sidenav-brand">
-        <Link to="/" className="sidenav-brandmark" onClick={() => onNavigate?.()}>
-          {siteName}
-        </Link>
-        <p className="sidenav-tagline">{siteTagline}</p>
-      </div>
-
       <div className="sidenav-search-wrap" ref={searchRef}>
         <form className="sidenav-search" onSubmit={runSearch} role="search">
           <span aria-hidden="true" className="sidenav-search-icon">
@@ -291,22 +263,6 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
-
-      <p className="sidenav-now" aria-live="polite">
-        <span className="sidenav-now-dot" aria-hidden="true" />
-        <span>
-          Viewing <strong>{SECTION_LABELS[activeSection] ?? siteName}</strong>
-        </span>
-        {activeSection !== "explore" && (
-          <button
-            type="button"
-            className="sidenav-now-back"
-            onClick={() => go("/#explore")}
-          >
-            Back to Explore
-          </button>
-        )}
-      </p>
 
       <div className="sidenav-divider" />
 

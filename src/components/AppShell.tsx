@@ -18,7 +18,10 @@ function NavItem({ to, children }: { to: string; children: ReactNode }) {
 }
 
 /** Left-to-right order of the top-level tabs, so we can slide in the right direction. */
-const TAB_ORDER = ["/", "/trending", "/blog", "/submit", "/admin", "/auth"];
+const TAB_ORDER = ["/", "/trending", "/blog", "/collections", "/submit", "/admin", "/auth"];
+
+/** Only the main screens keep the full footer; utility pages end with the page. */
+const FOOTER_ROUTES = new Set(["/", "/trending", "/blog"]);
 
 function tabIndex(pathname: string): number {
   const path = pathname.replace(/\/+$/, "") || "/";
@@ -44,6 +47,7 @@ export function AppShell() {
   const [navOpen, setNavOpen] = useState(false);
   const location = useLocation();
   const direction = useSlideDirection(location.pathname);
+  const path = location.pathname.replace(/\/+$/, "") || "/";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -88,7 +92,7 @@ export function AppShell() {
             <Outlet />
           </div>
         </main>
-        <Footer />
+        {FOOTER_ROUTES.has(path) && <Footer />}
       </div>
     </div>
   );

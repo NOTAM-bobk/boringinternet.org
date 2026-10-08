@@ -4,6 +4,7 @@ import { Highlight } from "../components/Highlight";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import {
+  categoryById,
   categoryFilters,
   categoryLabel,
   collectionSites,
@@ -276,7 +277,14 @@ function CollectionCard({
         </button>
       </div>
 
-      <h3 className="mt-6 text-lg font-bold leading-snug">{collection.title}</h3>
+      <h3 className="mt-6 text-lg font-bold leading-snug">
+        <Link
+          to={`/collections/${collection.id}`}
+          className="hover:underline underline-offset-4"
+        >
+          {collection.title}
+        </Link>
+      </h3>
       <p className="mt-1 text-[14px] leading-relaxed" style={{ color: "var(--muted)" }}>
         {collection.description}
       </p>
@@ -285,8 +293,11 @@ function CollectionCard({
         <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
           {members.length} sites
         </span>
-        <Link to="/trending" className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text">
-          See the ranking →
+        <Link
+          to={`/collections/${collection.id}`}
+          className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text"
+        >
+          Open collection →
         </Link>
       </div>
     </article>
@@ -400,6 +411,118 @@ export default function Home() {
   const trending = trendingSites(exploreConfig.trendingPreviewCount);
   const trendingAll = trendingSites(sites.length).length;
 
+  // A chosen category replaces the whole page with that category's sites.
+  const searching = query.trim().length > 0;
+  const category = categoryById(selectedCategory);
+  const browsingCategory = !searching && Boolean(category);
+
+  const switcher = (
+    <section className="flex flex-col gap-4">
+      <label htmlFor="site-search" className="sr-only">
+        Search launched sites
+      </label>
+      <input
+        id="site-search"
+        type="search"
+        placeholder={`Search ${sites.length} sites, tags, categories…`}
+        value={query}
+        onChange={(e) => {
+          updateParams({ q: e.target.value, category: undefined });
+        }}
+        className="field text-base"
+        style={{ borderColor: "var(--ink)" }}
+      />
+      {query.trim() && (
+        <p className="flex flex-wrap items-center gap-3 text-sm" style={{ color: "var(--muted)" }}>
+          <span>
+            <strong style={{ color: "var(--ink)" }}>{filtered.length}</strong>{" "}
+            {filtered.length === 1 ? "site matches" : "sites match"} “
+            <mark className="hl">{query.trim()}</mark>”
+          </span>
+          <button
+            type="button"
+            className="nav-btn"
+            onClick={() => updateParams({ q: undefined })}
+          >
+            Clear search
+          </button>
+        </p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {categoryFilters.map((cat) => (
+          <button
+            key={cat.id}
+            type="button"
+            onClick={() => updateParams({ category: cat.id, q: undefined })}
+            className="chip"
+            aria-pressed={selectedCategory === cat.id}
+            style={{
+              backgroundColor: selectedCategory === cat.id ? "var(--accent)" : "#ffffff",
+              color: selectedCategory === cat.id ? "var(--on-accent)" : "var(--ink)",
+            }}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+
+  if (browsingCategory && category) {
+    return (
+      <>
+        <HomepageSeo />
+        <div
+          id="explore"
+          className="mx-auto max-w-6xl px-6 py-10 flex flex-col gap-8 scroll-mt-24"
+        >
+          {switcher}
+
+          <section className="space-y-5">
+            <div
+              className="flex flex-col gap-2 border-b pb-4"
+              style={{ borderColor: "var(--rule)" }}
+            >
+              <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">
+                Category
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em]">
+                {category.label}
+              </h2>
+              {category.blurb && (
+                <p
+                  className="max-w-2xl text-base leading-relaxed"
+                  style={{ color: "var(--muted)" }}
+                >
+                  {category.blurb}
+                </p>
+              )}
+              <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+                {filtered.length} site{filtered.length === 1 ? "" : "s"}
+              </span>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((site) => (
+                <SiteCard key={site.id} site={site} />
+              ))}
+            </div>
+
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              <button
+                type="button"
+                className="accent-text font-bold underline underline-offset-4"
+                onClick={() => updateParams({ category: "all" })}
+              >
+                ← Back to all {sites.length} sites
+              </button>
+            </p>
+          </section>
+        </div>
+      </>
+    );
+  }
+
   function updateParams(next: { q?: string; category?: string }) {
     const draft = new URLSearchParams(params);
     for (const [key, value] of Object.entries(next)) {
@@ -412,57 +535,11 @@ export default function Home() {
   return (
     <>
       <HomepageSeo />
-      <div className="mx-auto max-w-6xl px-6 py-10 flex flex-col gap-12">
-        {/* Search + filters */}
-        <section className="flex flex-col gap-4">
-          <label htmlFor="site-search" className="sr-only">
-            Search launched sites
-          </label>
-          <input
-            id="site-search"
-            type="search"
-            placeholder={`Search ${sites.length} sites, tags, categories…`}
-            value={query}
-            onChange={(e) => {
-              updateParams({ q: e.target.value, category: undefined });
-            }}
-            className="field text-base"
-            style={{ borderColor: "var(--ink)" }}
-          />
-          {query.trim() && (
-            <p className="flex flex-wrap items-center gap-3 text-sm" style={{ color: "var(--muted)" }}>
-              <span>
-                <strong style={{ color: "var(--ink)" }}>{filtered.length}</strong>{" "}
-                {filtered.length === 1 ? "site matches" : "sites match"} “
-                <mark className="hl">{query.trim()}</mark>”
-              </span>
-              <button
-                type="button"
-                className="nav-btn"
-                onClick={() => updateParams({ q: undefined })}
-              >
-                Clear search
-              </button>
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            {categoryFilters.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => updateParams({ category: cat.id, q: undefined })}
-                className="chip"
-                aria-pressed={selectedCategory === cat.id}
-                style={{
-                  backgroundColor: selectedCategory === cat.id ? "var(--accent)" : "#ffffff",
-                  color: selectedCategory === cat.id ? "var(--on-accent)" : "var(--ink)",
-                }}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </section>
+      <div
+        id="explore"
+        className="mx-auto max-w-6xl px-6 py-10 flex flex-col gap-12 scroll-mt-24"
+      >
+        {switcher}
 
         {/* Featured band */}
         <section className="grid gap-5 sm:grid-cols-2">
@@ -479,9 +556,12 @@ export default function Home() {
           <section id="collections" className="space-y-4 scroll-mt-24">
             <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
               <h2 className="text-xl font-bold tracking-[-0.01em]">Latest Collections</h2>
-              <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-                {collections.length} collections
-              </span>
+              <Link
+                to="/collections"
+                className="text-[11px] font-bold uppercase tracking-[0.14em] accent-text"
+              >
+                All {collections.length} collections →
+              </Link>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               {collections.map((collection) => (
@@ -558,7 +638,7 @@ export default function Home() {
         )}
 
         {/* Full directory */}
-        <section id="explore" className="space-y-4 scroll-mt-24">
+        <section id="all-sites" className="space-y-4 scroll-mt-24">
           <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
             <h2 className="text-xl font-bold tracking-[-0.01em]">
               {query ? "Search results" : selectedCategory === "all" ? "All sites" : categoryLabel(selectedCategory)}

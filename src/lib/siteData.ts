@@ -172,6 +172,10 @@ export function collectionSites(collection: SiteCollection): Site[] {
   return sitesBySlugs(collection.siteSlugs);
 }
 
+export function collectionById(id: string): SiteCollection | undefined {
+  return collections.find((collection) => collection.id === id);
+}
+
 /** Effective ranking score: stored score + any editorial boost. */
 export function rankScore(site: Site): number {
   return (site.trending ?? 0) + (trendingConfig.boost[site.slug] ?? 0);

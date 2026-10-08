@@ -1,24 +1,49 @@
 {
   "categories": [
     {
+      "id": "news",
+      "label": "News",
+      "blurb": "Text-only headlines and scores that open before the page has finished loading."
+    },
+    {
       "id": "reading",
       "label": "Reading",
-      "blurb": "News, essays, and books that respect your time."
+      "blurb": "Essays, notes, and long-form writers worth a whole evening."
+    },
+    {
+      "id": "books",
+      "label": "Books",
+      "blurb": "Public-domain libraries and lending archives, free to read right now."
     },
     {
       "id": "tools",
       "label": "Tools",
-      "blurb": "Small utilities for writing, images, and code."
+      "blurb": "Small utilities for writing, images, and the browser."
+    },
+    {
+      "id": "dev",
+      "label": "Development",
+      "blurb": "Reference docs and tools for the people who write the code."
+    },
+    {
+      "id": "design",
+      "label": "Design",
+      "blurb": "Colour, type, icons, and layout references."
     },
     {
       "id": "culture",
       "label": "Culture",
-      "blurb": "Directories, archives, and the old web kept alive."
+      "blurb": "Directories, archives, and the old web kept alive by hand."
     },
     {
       "id": "experiment",
       "label": "Experiment",
       "blurb": "Interactive explainers, maps, and quiet clocks."
+    },
+    {
+      "id": "sound",
+      "label": "Sound",
+      "blurb": "Ambient audio and wordless mixes for a long afternoon."
     }
   ]
 }
