@@ -1,0 +1,7 @@
+# Boring Internet
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: https://boringinternet.org/sitemap.xml

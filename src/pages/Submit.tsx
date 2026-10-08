@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
-import { categories, siteName } from "../lib/siteData";
+import { categoryFilters, siteName } from "../lib/siteData";
 import { submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
 
 type TextFieldKey =
@@ -64,7 +64,7 @@ export default function Submit() {
   const [badFields, setBadFields] = useState<string[]>([]);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
 
-  const openCategories = categories.filter((category) => category.id !== "all");
+  const openCategories = categoryFilters.filter((category) => category.id !== "all");
 
   function update<K extends keyof SubmissionDraft>(key: K, value: SubmissionDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));

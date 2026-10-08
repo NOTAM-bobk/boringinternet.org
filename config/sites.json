@@ -1,39 +1,4 @@
 {
-  "site": "Boring Internet",
-  "tagline": "A quiet list of launched sites, kept small on purpose.",
-  "categories": [
-    { "id": "all", "label": "All" },
-    { "id": "reading", "label": "Reading" },
-    { "id": "tools", "label": "Tools" },
-    { "id": "culture", "label": "Culture" },
-    { "id": "experiment", "label": "Experiment" }
-  ],
-  "collections": [
-    {
-      "id": "quiet-desk",
-      "title": "Quiet desk tools",
-      "description": "Small utilities that keep the work local: diagrams, images, and text that never leave the tab.",
-      "siteSlugs": ["excalidraw", "squoosh", "regex101", "photopea", "coolors", "every-layout"]
-    },
-    {
-      "id": "short-reading",
-      "title": "Reading that respects your time",
-      "description": "Headlines and link lists that load in milliseconds and stop when you reach the end.",
-      "siteSlugs": ["hacker-news", "text-npr", "lite-cnn", "legible-news", "plain-text-sports", "ooh-directory"]
-    },
-    {
-      "id": "free-library",
-      "title": "A free library, open all night",
-      "description": "Public-domain books, a lending archive, and the long-form writers worth a whole evening.",
-      "siteSlugs": ["standard-ebooks", "project-gutenberg", "open-library", "internet-archive", "gwern", "dan-luu"]
-    },
-    {
-      "id": "old-web",
-      "title": "The old web, kept alive",
-      "description": "Handmade home pages, tiny pages, and the people still publishing without a platform.",
-      "siteSlugs": ["neocities", "512kb-club", "brutalist-websites", "suckless", "micro-blog", "write-as"]
-    }
-  ],
   "sites": [
     {
       "id": "hacker-news",

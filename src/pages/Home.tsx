@@ -1,11 +1,15 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import {
-  categories,
+  categoryFilters,
+  categoryLabel,
   collectionSites,
   collections,
+  exploreConfig,
+  featuredSiteRows,
+  featuredSites,
   newAdditions,
   searchSites,
   siteName,
@@ -17,8 +21,6 @@ import {
 } from "../lib/siteData";
 import { formatDate, posts } from "../lib/posts";
 import { siteDomain, siteTileStyle } from "../lib/siteTile";
-
-const ROWS_PER_PAGE = 10;
 
 function hash(value: string): number {
   let h = 0;
@@ -189,8 +191,9 @@ function SectionHead({
 
 function PagedRows({ items, title, note }: { items: Site[]; title: string; note?: string }) {
   const [page, setPage] = useState(0);
-  const pageCount = Math.max(1, Math.ceil(items.length / ROWS_PER_PAGE));
-  const current = items.slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE);
+  const perPage = exploreConfig.rowsPerPage;
+  const pageCount = Math.max(1, Math.ceil(items.length / perPage));
+  const current = items.slice(page * perPage, page * perPage + perPage);
 
   return (
     <section className="space-y-4">
@@ -352,21 +355,32 @@ function useSavedCollections(): [string[], (id: string) => void] {
 /* ---------------- page ---------------- */
 
 export default function Home() {
-  const [query, setQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  // ?q= and ?category= keep the side navigation and this page in sync.
+  const [params, setParams] = useSearchParams();
+  const query = params.get("q") ?? "";
+  const selectedCategory = params.get("category") ?? "all";
   const [savedCollections, toggleSaved] = useSavedCollections();
 
-  const featured = useMemo(() => trendingSites(2), []);
-  const additions = useMemo(() => newAdditions(40), []);
-  const picks = useMemo(() => trendingSites(40, 2), []);
+  const featured = useMemo(() => featuredSites(), []);
+  const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
+  const picks = useMemo(() => featuredSiteRows(exploreConfig.featuredSitesLimit), []);
 
   const filtered = useMemo(() => {
     if (query.trim()) return searchSites(query);
     return sitesByCategory(selectedCategory);
   }, [query, selectedCategory]);
 
-  const trending = trendingSites(3);
+  const trending = trendingSites(exploreConfig.trendingPreviewCount);
   const trendingAll = trendingSites(sites.length).length;
+
+  function updateParams(next: { q?: string; category?: string }) {
+    const draft = new URLSearchParams(params);
+    for (const [key, value] of Object.entries(next)) {
+      if (!value || value === "all") draft.delete(key);
+      else draft.set(key, value);
+    }
+    setParams(draft, { replace: true, preventScrollReset: true });
+  }
 
   return (
     <>
@@ -383,21 +397,20 @@ export default function Home() {
             placeholder={`Search ${sites.length} sites, tags, categories…`}
             value={query}
             onChange={(e) => {
-              setQuery(e.target.value);
-              setSelectedCategory("all");
+              updateParams({ q: e.target.value, category: undefined });
             }}
             className="field text-base"
             style={{ borderColor: "var(--ink)" }}
           />
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
+            {categoryFilters.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategory(cat.id)}
-                className="border px-3 py-1.5 text-[13px] font-bold transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee]"
+                onClick={() => updateParams({ category: cat.id, q: undefined })}
+                className="chip"
+                aria-pressed={selectedCategory === cat.id}
                 style={{
-                  borderColor: "var(--ink)",
                   backgroundColor: selectedCategory === cat.id ? "var(--accent)" : "#ffffff",
                   color: selectedCategory === cat.id ? "var(--on-accent)" : "var(--ink)",
                 }}
@@ -442,7 +455,7 @@ export default function Home() {
 
         {/* Collections */}
         {collections.length > 0 && (
-          <section className="space-y-4">
+          <section id="collections" className="space-y-4 scroll-mt-24">
             <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
               <h2 className="text-xl font-bold tracking-[-0.01em]">Latest Collections</h2>
               <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
@@ -527,11 +540,7 @@ export default function Home() {
         <section id="explore" className="space-y-4 scroll-mt-24">
           <div className="flex items-end justify-between gap-4 border-b pb-3" style={{ borderColor: "var(--rule)" }}>
             <h2 className="text-xl font-bold tracking-[-0.01em]">
-              {query
-                ? "Search results"
-                : selectedCategory === "all"
-                  ? "All sites"
-                  : (categories.find((c) => c.id === selectedCategory)?.label ?? selectedCategory)}
+              {query ? "Search results" : selectedCategory === "all" ? "All sites" : categoryLabel(selectedCategory)}
             </h2>
             <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
               {filtered.length} site{filtered.length === 1 ? "" : "s"}
@@ -564,9 +573,16 @@ export default function Home() {
             className="border px-1.5 py-0.5 text-[13px] font-mono"
             style={{ borderColor: "var(--rule)", backgroundColor: "var(--surface)" }}
           >
-            sites.json
+            config/sites.json
           </code>{" "}
-          and redeploy. Sites, categories, and collections all live there.
+          and redeploy. Sites, categories, trending, and collections each have their own file in{" "}
+          <code
+            className="border px-1.5 py-0.5 text-[13px] font-mono"
+            style={{ borderColor: "var(--rule)", backgroundColor: "var(--surface)" }}
+          >
+            config/
+          </code>
+          .
         </section>
       </div>
     </>

@@ -4,20 +4,32 @@ A quiet directory of launched sites. Everything on the page comes out of one
 editable file, and the only server-side piece is a small Cloudflare Worker that
 counts trending votes.
 
-## Editing the directory
+## Editing the site: the `config/` folder
 
-`sites.json` at the repo root is the whole catalog:
+Everything on the site comes from six JSON files. Edit them and redeploy —
+there is no CMS and nothing is fetched at build time.
 
-- `site` / `tagline` — brand text used in the header, footer, and SEO tags
-- `categories` — the chips shown above the grid
-- `sites[]` — `name`, `slug`, `url`, `description`, `category`, `tags`,
-  `trending` (vote seed / ranking score), `launched` (date)
-- `collections[]` — `title`, `description`, `siteSlugs[]`, rendered as the
-  collection cards on the home page
+| File | What it controls |
+| --- | --- |
+| `config/site.json` | Brand name, tagline, description, canonical URL, keywords, social links |
+| `config/sites.json` | Every site: `name`, `slug`, `url`, `description`, `category`, `tags`, `trending` (starting score), `launched` |
+| `config/categories.json` | Categories used by the filters, the side navigation, and the counts |
+| `config/trending.json` | `topLimit` for the trending page, plus a `boost` map and an `exclude` list |
+| `config/explore.json` | Home page: featured picks, row size, section limits, and the collections |
+| `config/blog.json` | Posts with their full body (`blocks`: `p`, `h2`, `quote`, `ul`) |
 
-Add an entry, redeploy, done. There is nothing to upload per site: each row
-tries the site's own `/favicon.ico`, then a keyless icon lookup for the domain,
-then falls back to a monogram tile built from the name.
+**Add a site** → append an object to `config/sites.json` (keep `slug` unique and
+stable — votes are stored under it), then add the slug to a collection in
+`config/explore.json` or to `boost` in `config/trending.json` if it should rank
+higher out of the gate.
+
+**Write a post** → append an object to `config/blog.json` with `slug`, `title`,
+`description`, `date`, `tags`, `excerpt`, and `blocks`. It appears on `/blog`
+and gets its own readable page at `/blog/<slug>`.
+
+There is nothing to upload per site: each row tries the site's own
+`/favicon.ico`, then a keyless icon lookup for the domain, then falls back to a
+monogram tile built from the name.
 
 ## Scripts
 
@@ -25,8 +37,11 @@ then falls back to a monogram tile built from the name.
 | --- | --- |
 | `bun run dev` | Vite dev server |
 | `bun run build` | Typecheck and build to `dist/` |
-| `bun run icons` | Regenerate the whole icon set (see below) |
+| `bun run icons` | Regenerate the icon set (see below) |
+| `bun run sitemap` | Regenerate `public/sitemap.xml` and `public/robots.txt` from `config/` |
 | `bun run lint` | oxlint |
+
+Run `bun run sitemap` after adding sites or posts so search engines see them.
 
 ## Icons
 
@@ -44,6 +59,17 @@ writes:
 `index.html` and `src/components/SeoHead.tsx` link all of them. The OG tag
 points at `og.png`; change the brand colours in the script and re-run it if the
 palette moves.
+
+## SEO
+
+- Per-page `<title>`, description, canonical, and Open Graph/Twitter tags come
+  from `src/components/SeoHead.tsx`, using `site.json` for defaults.
+- Blog posts add `BlogPosting` + `BreadcrumbList` JSON-LD and
+  `article:published_time`; the home page adds `WebSite` + `SearchAction`.
+- `public/robots.txt` disallows `/admin` and points at `public/sitemap.xml`,
+  which lists the static pages and every post.
+- Canonical URLs always use the production domain from `config/site.json`, so
+  preview URLs never get indexed.
 
 ## Trending votes, submissions, and admin
 

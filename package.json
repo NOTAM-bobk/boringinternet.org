@@ -20,7 +20,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "icons": "bun scripts/generate-icons.mjs"
+    "icons": "bun scripts/generate-icons.mjs",
+    "sitemap": "bun scripts/generate-sitemap.mjs"
   },
   "type": "module",
   "dependencies": {

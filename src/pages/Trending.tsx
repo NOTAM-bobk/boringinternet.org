@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { trendingSites, type Site } from "../lib/siteData";
+import { trendingConfig, trendingSites, type Site } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 import {
   castVote,
@@ -13,7 +13,7 @@ import {
   writeLocalCount,
 } from "../lib/votes";
 
-const TOP_N = 51;
+const TOP_N = trendingConfig.topLimit;
 
 type VoteMode = "checking" | "shared" | "local" | "unreachable";
 
@@ -74,18 +74,19 @@ export default function Trending() {
   return (
     <>
       <SiteSeo
-        title="Trending"
-        description={`The top ${TOP_N} launched sites, ranked by votes.`}
+        title={trendingConfig.title}
+        description={`${trendingConfig.tagline} The top ${TOP_N} launched sites, ranked by stored votes and a small editorial boost.`}
         path="/trending"
+        keywords={["trending sites", "site ranking", "vote for sites"]}
       />
       <div className="mx-auto max-w-3xl px-6 py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">
-            Trending <span aria-hidden="true">🔥</span>
+            {trendingConfig.title} <span aria-hidden="true">🔥</span>
           </h1>
           <p className="text-base" style={{ color: "var(--muted)" }}>
-            The top {ranked.length} launched sites, stacked in order. One vote
-            each — click to move a site up.
+            {trendingConfig.tagline} The top {ranked.length} launched sites, stacked in order — one
+            vote each.
           </p>
         </header>
 

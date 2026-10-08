@@ -1,6 +1,9 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import { Footer } from "./Footer";
+import { MobileNav, HamburgerButton } from "./MobileNav";
+import { SideNav } from "./SideNav";
+import { siteName } from "../lib/siteData";
 
 function NavItem({ to, children }: { to: string; children: ReactNode }) {
   return (
@@ -14,30 +17,18 @@ function NavItem({ to, children }: { to: string; children: ReactNode }) {
 }
 
 export function AppShell() {
+  const [navOpen, setNavOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header
-        className="sticky top-0 z-20 border-b"
-        style={{ backgroundColor: "#ffffff", borderColor: "var(--ink)" }}
-      >
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4">
-          {/* Left: brand */}
-          <Link to="/" className="justify-self-start flex items-center gap-2">
-            <span
-              className="w-2.5 h-2.5 shrink-0"
-              style={{ backgroundColor: "var(--accent)" }}
-            />
-            <span
-              className="text-[11px] sm:text-[13px] font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase whitespace-nowrap border px-2 py-1"
-              style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
-            >
-              Boring Internet
-            </span>
+      <header className="site-header">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center gap-3">
+          <Link to="/" className="justify-self-start">
+            <span className="brand-mark">{siteName}</span>
           </Link>
 
-          {/* Middle: section links */}
           <nav
-            className="justify-self-center flex items-center gap-3 sm:gap-7 text-[12px] sm:text-sm font-bold"
+            className="hidden lg:flex justify-self-center items-center gap-7 text-[14px] font-bold"
             aria-label="Main"
           >
             <a href="/#explore" className="nav-link">
@@ -51,36 +42,28 @@ export function AppShell() {
             <NavItem to="/blog">Blog</NavItem>
           </nav>
 
-          {/* Right: account */}
           <div className="justify-self-end flex items-center gap-2">
-            <Link
-              to="/submit"
-              className="text-[10px] sm:text-[11px] font-bold tracking-[0.14em] uppercase border px-2 py-1.5 transition-transform hover:-translate-y-px whitespace-nowrap"
-              style={{
-                backgroundColor: "var(--accent)",
-                borderColor: "var(--ink)",
-                color: "var(--on-accent)",
-              }}
-            >
-              <span className="sm:hidden">Submit</span>
+            <Link to="/submit" className="nav-cta">
               <span className="hidden sm:inline">Submit your site</span>
+              <span className="sm:hidden">Submit</span>
             </Link>
-            <Link
-              to="/auth"
-              className="text-[10px] sm:text-[11px] font-bold tracking-[0.14em] uppercase border px-2 py-1.5 transition-colors hover:bg-[#1a120b] hover:text-[#fff7ee] whitespace-nowrap"
-              style={{ color: "var(--ink)", borderColor: "var(--ink)" }}
-            >
+            <Link to="/auth" className="nav-btn">
               Sign in
             </Link>
+            <HamburgerButton open={navOpen} onClick={() => setNavOpen(true)} />
           </div>
         </div>
       </header>
 
-      <main className="flex-1">
-        <Outlet />
-      </main>
+      <SideNav />
+      <MobileNav open={navOpen} onClose={() => setNavOpen(false)} />
 
-      <Footer />
+      <div className="flex-1 flex flex-col lg:pl-[19rem]">
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

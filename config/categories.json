@@ -1,0 +1,24 @@
+{
+  "categories": [
+    {
+      "id": "reading",
+      "label": "Reading",
+      "blurb": "News, essays, and books that respect your time."
+    },
+    {
+      "id": "tools",
+      "label": "Tools",
+      "blurb": "Small utilities for writing, images, and code."
+    },
+    {
+      "id": "culture",
+      "label": "Culture",
+      "blurb": "Directories, archives, and the old web kept alive."
+    },
+    {
+      "id": "experiment",
+      "label": "Experiment",
+      "blurb": "Interactive explainers, maps, and quiet clocks."
+    }
+  ]
+}

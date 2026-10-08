@@ -1,0 +1,153 @@
+{
+  "posts": [
+    {
+      "slug": "what-counts-as-launched",
+      "title": "What counts as launched?",
+      "description": "A live URL, a working sign-in, and nothing else half-finished — the bar a site has to clear before it appears in this directory.",
+      "date": "2026-10-04",
+      "author": "Boring Internet",
+      "tags": ["curation", "launch"],
+      "excerpt": "A live URL, a working sign-in, and nothing else half-finished. That is the bar this directory uses before a site goes up.",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "\"Launch\" gets used for a lot of things: a landing page with a waitlist, a demo video, a tweet with a screenshot. None of those are launched. The word only means one thing here — a stranger can use the thing right now, without you in the room."
+        },
+        { "type": "h2", "text": "The four checks" },
+        {
+          "type": "ul",
+          "items": [
+            "The URL loads for someone who has never heard of you.",
+            "The core action works: read, search, save, publish, whatever it is.",
+            "Sign-in works, or the site genuinely does not need one.",
+            "There is a way to reach a human — an email address is enough."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "If any of those is still \"almost\", the site is in progress, not launched. That is a fine place to be. It is just not this list."
+        },
+        { "type": "h2", "text": "Everything else can wait" },
+        {
+          "type": "p",
+          "text": "No pricing page requirement, no changelog, no polished copy. Half of the sites here have a single page and one feature. What they share is that the one feature works the day they go up."
+        },
+        {
+          "type": "quote",
+          "text": "A small site that works beats a big site that is coming soon."
+        }
+      ]
+    },
+    {
+      "slug": "why-the-list-stays-small",
+      "title": "Why the list stays small",
+      "description": "Directories get worse as they grow. Here is why this one caps its index on purpose instead of accepting every submission.",
+      "date": "2026-09-28",
+      "author": "Boring Internet",
+      "tags": ["curation", "editorial"],
+      "excerpt": "Directories get worse as they get bigger. The index is capped on purpose, and older entries drop off rather than pile up.",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Every directory follows the same curve. It starts useful because a person chose each entry. Then it grows, submissions outpace review, and it becomes a search results page with worse ranking signals."
+        },
+        { "type": "h2", "text": "Small is a feature" },
+        {
+          "type": "p",
+          "text": "A list of fifty-one sites can be read end to end. You can argue with the order. You can notice what is missing. That is only true while the number stays low enough to hold in your head."
+        },
+        {
+          "type": "p",
+          "text": "So the cap is real: entries that stop fitting the brief come out, and new ones go in. Nothing is grandfathered in forever."
+        },
+        { "type": "h2", "text": "What gets cut first" },
+        {
+          "type": "ul",
+          "items": [
+            "Sites that were acquired and quietly stopped working.",
+            "Sites that added an interstitial, a popup, or a paywall in front of the point.",
+            "Duplicates — three tools that do the same job only make the list harder to read."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "None of this is a judgement about the people who built them. It is maintenance, the same way a garden needs weeding to stay a garden."
+        }
+      ]
+    },
+    {
+      "slug": "editing-the-directory-by-hand",
+      "title": "Editing the directory by hand",
+      "description": "How the config folder works: sites, categories, trending, explore, and blog are five plain JSON files you edit and commit.",
+      "date": "2026-09-20",
+      "author": "Boring Internet",
+      "tags": ["config", "howto"],
+      "excerpt": "Every entry lives in one of a handful of plain JSON files, reviewed before it ships. No submissions queue, no scraping, no autopilot.",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "The whole directory is five JSON files in the config/ folder at the root of the repo. Nothing is fetched at build time, nothing is scraped, and no CMS sits in the middle."
+        },
+        { "type": "h2", "text": "The files" },
+        {
+          "type": "ul",
+          "items": [
+            "config/site.json — brand name, tagline, description, canonical URL.",
+            "config/sites.json — every site: name, URL, one-line description, category, tags, trending score, launch date.",
+            "config/categories.json — the categories used by the filters and the side navigation.",
+            "config/trending.json — how many sites the trending page shows and which ones get a boost.",
+            "config/explore.json — the home page: featured picks, row size, and the collections.",
+            "config/blog.json — posts, including the body text readers actually see."
+          ]
+        },
+        { "type": "h2", "text": "To add a site" },
+        {
+          "type": "p",
+          "text": "Open config/sites.json, add an object to the sites array with a unique slug, and commit. The slug is also the key votes are stored under, so it should stay stable once the site is live."
+        },
+        {
+          "type": "p",
+          "text": "Then add the slug to a collection in config/explore.json if it belongs in one, or to the boost map in config/trending.json if it should start near the top."
+        },
+        {
+          "type": "quote",
+          "text": "One JSON file per question: what is here, how is it grouped, what is featured, what is written."
+        }
+      ]
+    },
+    {
+      "slug": "how-voting-works",
+      "title": "How the trending list is decided",
+      "description": "Trending order comes from stored vote counts, a per-site starting score, and a small editorial boost — all served by one Cloudflare Worker.",
+      "date": "2026-10-07",
+      "author": "Boring Internet",
+      "tags": ["trending", "howto"],
+      "excerpt": "Votes are stored in one Worker, counts start from the score in config/sites.json, and a per-site boost in config/trending.json nudges the order.",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "The trending page is the same set of sites, ordered differently. Three things decide that order, and you can see all three in the config folder."
+        },
+        { "type": "h2", "text": "1. The vote button" },
+        {
+          "type": "p",
+          "text": "Each row has one button and one vote. Clicking it sends the slug to a Cloudflare Worker, which stores the count in Workers KV. One vote per browser is enforced in localStorage — good enough for a list like this, and honest about its limits."
+        },
+        { "type": "h2", "text": "2. The starting score" },
+        {
+          "type": "p",
+          "text": "A fresh site has no votes, so each entry carries a trending score in config/sites.json that acts as its starting point. That is why the list looks sensible on day one instead of alphabetical."
+        },
+        { "type": "h2", "text": "3. The boost map" },
+        {
+          "type": "p",
+          "text": "config/trending.json has a small boost map for editorial nudges — a site worth looking at that has not been discovered yet. It is deliberately tiny, and it is public, so nobody has to guess why something moved."
+        },
+        {
+          "type": "p",
+          "text": "Votes are cached at the edge, so a new vote can take up to a minute to appear for everyone else. The count you see immediately is your own."
+        }
+      ]
+    }
+  ]
+}
