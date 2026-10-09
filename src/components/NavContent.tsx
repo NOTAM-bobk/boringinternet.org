@@ -14,15 +14,15 @@ import { posts } from "../lib/posts";
 /** How many quick matches the side search shows while you type. */
 const SEARCH_PREVIEW = 6;
 
-/** The four top-level places in the site. */
-const SECTIONS = [
-  { id: "explore", to: "/#explore", icon: "◎", label: "Explore" },
-  { id: "discover", to: "/discover-websites", icon: "◈", label: "Discover" },
-  { id: "new", to: "/new-websites", icon: "✧", label: "New" },
-  { id: "articles", to: "/blog", icon: "◫", label: "Articles" },
-  { id: "collections", to: "/collections", icon: "❐", label: "Collections" },
+/** The top-level places in the site. Icons are optional — most rows show a plain label. */
+const SECTIONS: ReadonlyArray<{ id: string; to: string; label: string; icon?: string }> = [
+  { id: "explore", to: "/#explore", label: "Explore" },
+  { id: "discover", to: "/discover-websites", label: "Discover" },
+  { id: "new", to: "/new-websites", label: "New" },
+  { id: "articles", to: "/blog", label: "Articles" },
+  { id: "collections", to: "/collections", label: "Collections" },
   { id: "trending", to: "/trending", icon: "🔥", label: "Trending" },
-] as const;
+];
 
 function scrollToSection(id: string) {
   const element = document.getElementById(id);
@@ -256,9 +256,11 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               aria-current={isActive ? "page" : undefined}
               onClick={() => go(section.to)}
             >
-              <span className="sidenav-icon" aria-hidden="true">
-                {section.icon}
-              </span>
+              {section.icon && (
+                <span className="sidenav-icon" aria-hidden="true">
+                  {section.icon}
+                </span>
+              )}
               <span>{section.label}</span>
               {section.id === "articles" && (
                 <span className="sidenav-badge">{posts.length}</span>

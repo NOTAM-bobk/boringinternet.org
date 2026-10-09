@@ -1090,14 +1090,14 @@ hr {
 /* ---------- mobile drawer ---------- */
 
 /*
- * The menu covers the whole screen except the sticky header: the root starts at
- * the header's measured height (`--header-h`, set in AppShell) so the brand, the
- * account box and the hamburger stay visible above it — and the hamburger closes
- * the menu again.
+ * The menu covers the whole screen, header included: the root starts at the very
+ * top and sits above the sticky header (z-index), so the drawer and its backdrop
+ * slide over the brand row. The drawer carries its own "Menu" title and close
+ * button, so nothing needed from the header is hidden.
  */
 .drawer-root {
   position: fixed;
-  top: var(--header-h, 5.5rem);
+  top: 0;
   right: 0;
   bottom: 0;
   left: 0;
@@ -1148,7 +1148,7 @@ hr {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.8rem 1rem;
+  padding: calc(0.8rem + env(safe-area-inset-top)) 1rem 0.8rem;
   border-bottom: 1px solid var(--ink);
 }
 
@@ -2673,6 +2673,23 @@ mark.hl {
   text-transform: uppercase;
 }
 
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--ink);
+  background: #fff;
+  box-shadow: var(--shadow-thick);
+}
+
 .advertise-submit {
   display: flex;
   align-items: center;
@@ -2798,6 +2815,10 @@ mark.hl {
 
 @media (max-width: 800px) {
   .advertise-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-grid {
     grid-template-columns: 1fr;
   }
 

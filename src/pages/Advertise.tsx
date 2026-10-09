@@ -27,6 +27,30 @@ const OPTIONS = [
   },
 ];
 
+/** Extras we can do around a launch, listed under the main placements. */
+const SERVICES = [
+  {
+    name: "SEO audit",
+    description:
+      "A plain-English review of your technical SEO, page speed and on-page basics, returned as a prioritised list of fixes.",
+  },
+  {
+    name: "Pre-launch checklist",
+    description:
+      "Everything to run through before launch day: metadata, redirects, analytics, performance and the easy-to-miss details.",
+  },
+  {
+    name: "Top 100 featured-on cards",
+    description:
+      "A ready-made pack of 100 “featured on” badge cards to drop into your product page or footer.",
+  },
+  {
+    name: "Get listed on 20 other directories",
+    description:
+      "We submit your site to 20 hand-picked directories and launch platforms, so you start with a spread of quality listings.",
+  },
+];
+
 export default function Advertise() {
   return (
     <>
@@ -102,6 +126,28 @@ export default function Advertise() {
                   ))}
                 </ul>
                 <span className="advertise-coming-soon">Coming soon</span>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="advertise-services-heading" className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2 text-center">
+            <h2 id="advertise-services-heading" className="text-2xl sm:text-3xl font-bold">
+              Other services
+            </h2>
+            <p className="text-sm" style={{ color: "var(--muted)" }}>
+              Extra help around a launch, alongside a placement or on its own.
+            </p>
+          </div>
+
+          <div className="service-grid">
+            {SERVICES.map((service) => (
+              <article key={service.name} className="service-card">
+                <h3 className="text-lg font-bold">{service.name}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                  {service.description}
+                </p>
               </article>
             ))}
           </div>
