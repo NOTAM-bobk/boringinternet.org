@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { submitSiteReport, type SiteProblemReportType } from "../lib/submissions";
 
 interface ReportProblemProps {
@@ -56,7 +57,10 @@ export function ReportProblem({
         {triggerLabel}
       </button>
 
-      {open && (
+      {/* Portaled to <body>: the page pane carries a transform from its slide-in
+          transition, and a transformed ancestor becomes the containing block for
+          `position: fixed`, which pinned the dialog to the page instead. */}
+      {open && createPortal(
         <div className="report-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeForm(); }}>
           <section className="report-dialog card" role="dialog" aria-modal="true" aria-labelledby={`report-title-${slug}`}>
             <div className="flex items-start justify-between gap-4">
@@ -101,7 +105,8 @@ export function ReportProblem({
               </div>
             </form>
           </section>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

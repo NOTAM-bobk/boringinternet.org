@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 /**
  * Trending votes.
  *
@@ -93,4 +95,54 @@ export async function castVote(slug: string, direction: "up" | "down" = "up"): P
   } catch {
     return null;
   }
+}
+
+
+/**
+ * One site's vote state: the live count, whether this browser has voted, and a
+ * `vote()` that updates locally first and then syncs with the shared Worker.
+ * Used by the site page and its bottom bar.
+ */
+export function useSiteVote(slug: string, fallbackCount = 0) {
+  const [count, setCount] = useState(() => readLocalCounts()[slug] ?? fallbackCount);
+  const [voted, setVoted] = useState(() => readVotedSlugs().includes(slug));
+  const [pending, setPending] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    fetchSharedCounts().then((remote) => {
+      if (!active || !remote) return;
+      setShared(true);
+      const value = remote[slug];
+      if (typeof value === "number") setCount(value);
+    });
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  async function vote() {
+    if (pending || readVotedSlugs().includes(slug)) {
+      setVoted(true);
+      return;
+    }
+
+    const nextCount = count + 1;
+    setCount(nextCount);
+    setVoted(true);
+    setPending(true);
+    markVoted(slug);
+    writeLocalCount(slug, nextCount);
+
+    const sharedCount = await castVote(slug, "up");
+    if (sharedCount !== null) {
+      setShared(true);
+      setCount(sharedCount);
+      writeLocalCount(slug, sharedCount);
+    }
+    setPending(false);
+  }
+
+  return { count, voted, pending, shared, vote };
 }

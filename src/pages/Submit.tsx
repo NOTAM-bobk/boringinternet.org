@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
+import { VoteGate, VOTES_REQUIRED } from "../components/VoteGate";
 import { categoryFilters, siteName, siteUrl } from "../lib/siteData";
+import { readVotedSlugs } from "../lib/votes";
 import { autofillSite, submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
 
 type TextFieldKey =
@@ -102,6 +104,11 @@ export default function Submit() {
   const [copyError, setCopyError] = useState(false);
   const [autofillBusy, setAutofillBusy] = useState(false);
   const [autofillMessage, setAutofillMessage] = useState<string | null>(null);
+  const [votesCast, setVotesCast] = useState(() => readVotedSlugs().length);
+
+  /* The gate below is the last step: five votes before a submission can go out. */
+  const votesReady = votesCast >= VOTES_REQUIRED;
+  const votesLeft = Math.max(0, VOTES_REQUIRED - votesCast);
 
   const openCategories = categoryFilters.filter((category) => category.id !== "all");
 
@@ -462,6 +469,8 @@ export default function Submit() {
             </button>
           </div>
 
+          <VoteGate onCast={setVotesCast} />
+
           {error && (
             <p
               className="text-[13px] border px-4 py-3"
@@ -476,12 +485,14 @@ export default function Submit() {
             <button
               type="submit"
               className="btn"
-              disabled={busy || !submissionsConnected}
+              disabled={busy || !submissionsConnected || !votesReady}
             >
               {busy ? "Sending…" : "Submit for review"}
             </button>
             <span className="text-[12px]" style={{ color: "var(--muted)" }}>
-              No account needed. Only what you type here is stored.
+              {votesReady
+                ? "No account needed. Only what you type here is stored."
+                : `Vote for ${votesLeft} more ${votesLeft === 1 ? "site" : "sites"} above to unlock submitting.`}
             </span>
           </div>
         </form>

@@ -1,8 +1,11 @@
+import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router";
 import { ReportProblem } from "../components/ReportProblem";
 import { SiteIcon } from "../components/SiteIcon";
 import { SiteSeo } from "../components/SeoHead";
 import { useAuth } from "../lib/auth";
+import { screenshotUrl } from "../lib/shots";
+import { useSiteVote } from "../lib/votes";
 import {
   categoryLabel,
   collections,
@@ -36,6 +39,7 @@ export default function SiteDetail() {
   const { slug = "" } = useParams();
   const { user, toggleSaved } = useAuth();
   const site = siteBySlug(slug);
+  const vote = useSiteVote(slug, site?.trending ?? 0);
 
   if (!site) {
     return (
@@ -65,9 +69,11 @@ export default function SiteDetail() {
     if (rightOrder === -1) return -1;
     return leftOrder - rightOrder;
   });
-  const visibleExtras = extras.filter(([key]) => key !== "tagline");
+  const details = extras.filter(([key, value]) => key !== "tagline" && value.trim().length > 0);
   const pageUrl = `${siteUrl}/sites/${site.slug}`;
   const launched = site.launched ? formatDate(site.launched) : "Not listed";
+  const tagline = site.extras?.tagline?.trim();
+  const saved = Boolean(user?.saved.includes(site.slug));
 
   return (
     <>
@@ -102,99 +108,92 @@ export default function SiteDetail() {
         ]}
       />
 
-      <main className="site-detail-page mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
-        <Link to="/" className="site-detail-back">
-          <span aria-hidden="true">←</span> All {sites.length} sites
-        </Link>
+      <div className="site-detail-page">
+        {/* The site itself is the backdrop: a live shot of the page, veiled so the
+            name, blurb and actions stay readable on top of it. */}
+        <section className="site-detail-hero" aria-labelledby="site-detail-title">
+          <span
+            className="site-detail-hero-shot"
+            aria-hidden="true"
+            style={{ backgroundImage: `url("${screenshotUrl(site.url, 1400, 900)}")` }}
+          />
+          <span className="site-detail-hero-veil" aria-hidden="true" />
 
-        <article className="site-detail-hero">
-          <div className="site-detail-hero-top">
-            <span className="site-detail-kicker">{categoryLabel(site.category)} · Small web directory</span>
-            <span className="site-detail-rank">#{rank || "—"} in the directory</span>
-          </div>
+          <div className="site-detail-hero-inner mx-auto w-full max-w-5xl px-4 sm:px-6">
+            <div className="site-detail-identity">
+              <SiteIcon site={site} size={64} label={false} />
+              <div className="site-detail-title-block">
+                <h1 id="site-detail-title">{site.name}</h1>
+                <a
+                  href={site.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="site-detail-domain"
+                >
+                  {domain} <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </div>
 
-          <div className="site-detail-identity">
-            <SiteIcon site={site} size={68} label={false} />
-            <div className="site-detail-title-block">
-              <h1>{site.name}</h1>
-              <a href={site.url} target="_blank" rel="noopener noreferrer" className="site-detail-domain">
-                {domain} <span aria-hidden="true">↗</span>
+            {tagline && <p className="site-detail-tagline">{tagline}</p>}
+            <p className="site-detail-lede">{site.description}</p>
+
+            {site.tags.length > 0 && (
+              <ul className="site-detail-tags" aria-label="Site tags">
+                {site.tags.map((tag) => <li key={tag}>{tag}</li>)}
+              </ul>
+            )}
+
+            <div className="site-detail-actions">
+              <a
+                href={site.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn accent"
+              >
+                Visit {domain} <span aria-hidden="true">→</span>
               </a>
+              {user ? (
+                <button type="button" className="btn ghost" onClick={() => void toggleSaved(site.slug)}>
+                  {saved ? "Saved ✓" : "Save site"}
+                </button>
+              ) : (
+                <Link to="/auth" className="btn ghost">Sign in to save</Link>
+              )}
+              <ReportProblem siteName={site.name} siteUrl={site.url} slug={site.slug} />
             </div>
           </div>
-
-          <p className="site-detail-tagline">
-            {site.extras?.tagline || `A quiet corner of the web, filed under ${categoryLabel(site.category)}.`}
-          </p>
-
-          {site.tags.length > 0 && (
-            <ul className="site-detail-tags" aria-label="Site tags">
-              {site.tags.map((tag) => <li key={tag}>{tag}</li>)}
-            </ul>
-          )}
-
-          <div className="site-detail-actions">
-            <a href={site.url} target="_blank" rel="noopener noreferrer" className="btn accent">
-              Visit {domain} <span aria-hidden="true">→</span>
-            </a>
-            <Link to={`/?category=${site.category}#explore`} className="btn ghost">
-              More {categoryLabel(site.category)}
-            </Link>
-            {user ? (
-              <button type="button" className="btn ghost" onClick={() => void toggleSaved(site.slug)}>
-                {user.saved.includes(site.slug) ? "Saved ✓" : "Save site"}
-              </button>
-            ) : (
-              <Link to="/auth" className="btn ghost">Sign in to save</Link>
-            )}
-            <ReportProblem siteName={site.name} siteUrl={site.url} slug={site.slug} />
-          </div>
-        </article>
-
-        <section className="site-detail-facts" aria-label="Listing facts">
-          <div><span>Category</span><strong>{categoryLabel(site.category)}</strong></div>
-          <div><span>Launched</span><strong>{launched}</strong></div>
-          <div><span>Community votes</span><strong>{site.trending ?? 0}</strong></div>
-          <div><span>Directory rank</span><strong>{rank > 0 ? `#${rank} of ${sites.length}` : "—"}</strong></div>
         </section>
 
-        <div className="site-detail-content">
-          <section className="site-detail-section site-detail-about">
-            <span className="section-eyebrow">A little context</span>
-            <h2>About {site.name}</h2>
-            <p>{site.description}</p>
-            <a href={site.url} target="_blank" rel="noopener noreferrer" className="site-detail-canonical">
-              {site.url}
-            </a>
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pt-5 sm:px-6">
+          <Link to="/" className="site-detail-back">
+            <span aria-hidden="true">←</span> All {sites.length} sites
+          </Link>
+
+          <section className="site-detail-facts" aria-label="Listing facts">
+            <div><span>Category</span><strong>{categoryLabel(site.category)}</strong></div>
+            <div><span>Launched</span><strong>{launched}</strong></div>
+            <div><span>Votes</span><strong>{vote.count}</strong></div>
+            <div><span>Rank</span><strong>{rank > 0 ? `#${rank} of ${sites.length}` : "—"}</strong></div>
           </section>
 
-          <section className="site-detail-section">
-            <div className="site-detail-section-heading">
-              <span className="section-eyebrow">The listing</span>
-              <h2>More to know</h2>
-            </div>
-            {visibleExtras.length > 0 ? (
+          {details.length > 0 && (
+            <section className="site-detail-section">
+              <h2>Details</h2>
               <dl className="site-detail-extra-grid">
-                {visibleExtras.map(([key, value]) => (
+                {details.map(([key, value]) => (
                   <div className="site-detail-extra" key={key}>
                     <dt>{humanizeKey(key)}</dt>
                     <dd>{value}</dd>
                   </div>
                 ))}
               </dl>
-            ) : (
-              <p className="site-detail-empty-note">
-                This listing has the essentials for now. We add details like pricing, features, and FAQs as they come in.
-              </p>
-            )}
-          </section>
+            </section>
+          )}
 
           {lists.length > 0 && (
             <section className="site-detail-section">
-              <div className="site-detail-section-heading">
-                <span className="section-eyebrow">Hand-picked paths</span>
-                <h2>In these collections</h2>
-              </div>
+              <h2>In collections</h2>
               <ul className="site-detail-collection-list">
                 {lists.map((collection) => (
                   <li key={collection.id}>
@@ -209,11 +208,8 @@ export default function SiteDetail() {
           )}
 
           {neighbours.length > 0 && (
-            <section className="site-detail-section site-detail-related">
-              <div className="site-detail-section-heading">
-                <span className="section-eyebrow">Keep wandering</span>
-                <h2>More in {categoryLabel(site.category)}</h2>
-              </div>
+            <section className="site-detail-section">
+              <h2>More in {categoryLabel(site.category)}</h2>
               <ul className="site-detail-related-grid">
                 {neighbours.map((entry) => (
                   <li key={entry.id}>
@@ -231,7 +227,46 @@ export default function SiteDetail() {
             </section>
           )}
         </div>
-      </main>
+      </div>
+
+      {/*
+        Phones get the two things a visitor actually does here. It is portaled to
+        <body> because the page's slide-in transition leaves an identity
+        transform on the route pane, and a transform turns the pane into the
+        containing block for `position: fixed` — the bar would sit at the bottom
+        of the document instead of the bottom of the screen.
+      */}
+      {createPortal(
+        <div className="site-detail-bar">
+          <button
+            type="button"
+            className={`site-detail-bar-vote${vote.voted ? " is-voted" : ""}`}
+            onClick={() => void vote.vote()}
+            disabled={vote.voted || vote.pending}
+            aria-label={
+              vote.voted
+                ? `You voted for ${site.name}, ${vote.count} votes`
+                : `Vote for ${site.name}, ${vote.count} votes`
+            }
+          >
+            <span aria-hidden="true">{vote.voted ? "✓" : "▲"}</span>
+            <span className="site-detail-bar-copy">
+              <strong>{vote.pending ? "Counting…" : vote.voted ? "Voted" : "Vote"}</strong>
+              <small>{vote.count} {vote.count === 1 ? "vote" : "votes"}</small>
+            </span>
+          </button>
+          <a
+            className="site-detail-bar-visit"
+            href={site.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visit <span className="site-detail-bar-domain">{domain}</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>,
+        document.body,
+      )}
     </>
   );
 }
