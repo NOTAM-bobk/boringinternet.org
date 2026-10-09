@@ -1,47 +1,29 @@
 import launchesJson from "../../config/launches.json";
+import { sites, type Site } from "./siteData";
 
-/**
- * A launch is a site that went live this week. It is deliberately independent
- * of `config/sites.json`: add it here first and it shows up in the home page
- * ticker the next time the site is built.
- */
-export interface Launch {
-  id: string;
-  name: string;
-  /** Drives the monogram tile and the icon lookup, like a site slug. */
-  slug: string;
-  url: string;
-  description: string;
-}
-
-type LaunchesConfig = { title?: string; items?: Partial<Launch>[] };
-
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_LAUNCHES = 5;
+type LaunchesConfig = { title?: string };
 const config = launchesJson as LaunchesConfig;
-
-/** "One Line Diary!" -> "one-line-diary"; used for stable keys and tiles. */
-function slugify(value: string): string {
-  const slug = value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return slug || "launch";
-}
-
-function normalizeLaunches(value: unknown): Launch[] {
-  if (!Array.isArray(value)) return [];
-  return (value as Partial<Launch>[]).map((item) => {
-    const name = item.name ?? item.url ?? "Untitled";
-    return {
-      id: item.id ?? item.slug ?? slugify(name),
-      name,
-      slug: item.slug ?? slugify(name),
-      url: item.url ?? "#",
-      description: item.description ?? "",
-    };
-  });
-}
 
 /** Heading over the ticker; rename it in config/launches.json. */
 export const launchesTitle = config.title ?? "Launches this week";
 
-export const launches: Launch[] = normalizeLaunches(config.items);
+/**
+ * The ticker is derived from site `launched` dates, newest first. The rolling
+ * seven-day window includes today and never shows more than five listings.
+ */
+export function launchesThisWeek(now = new Date()): Site[] {
+  const todayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const weekStart = todayStart - (6 * DAY_MS);
+  const todayEnd = todayStart + DAY_MS - 1;
+
+  return sites
+    .filter((site) => {
+      if (!site.launched || !/^\d{4}-\d{2}-\d{2}$/.test(site.launched)) return false;
+      const launchedAt = Date.parse(`${site.launched}T00:00:00.000Z`);
+      return Number.isFinite(launchedAt) && launchedAt >= weekStart && launchedAt <= todayEnd;
+    })
+    .sort((a, b) => (b.launched ?? "").localeCompare(a.launched ?? ""))
+    .slice(0, MAX_LAUNCHES);
+}

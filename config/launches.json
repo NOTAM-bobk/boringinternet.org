@@ -1,20 +1,3 @@
 {
-  "title": "Launches this week",
-  "items": [
-    {
-      "name": "Derek Sivers",
-      "url": "https://sive.rs",
-      "description": "Very short notes and books from a programmer who writes to think."
-    },
-    {
-      "name": "Legible News",
-      "url": "https://legiblenews.com",
-      "description": "One screen of world news, rewritten to be readable instead of clickable."
-    },
-    {
-      "name": "Miniflux",
-      "url": "https://miniflux.app",
-      "description": "A tiny self-hosted RSS reader with a keyboard-first interface."
-    }
-  ]
+  "title": "Launches this week"
 }

@@ -13,6 +13,13 @@
     "are-na",
     "music-for-programming"
   ],
+  "editorsPickSlugs": [
+    "weather-gov",
+    "openstreetmap",
+    "practical-typography",
+    "fonts-in-use",
+    "a-soft-murmur"
+  ],
   "collections": [
     {
       "id": "quiet-desk",

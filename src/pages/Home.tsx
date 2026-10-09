@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { AvatarRow } from "../components/AvatarRow";
 import { Highlight } from "../components/Highlight";
 import { LaunchesThisWeek } from "../components/LaunchesThisWeek";
+import { NeedsSomeVotes } from "../components/NeedsSomeVotes";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import {
@@ -11,6 +12,7 @@ import {
   categoryLabel,
   collectionSites,
   collections,
+  editorsPicks,
   exploreConfig,
   featuredSiteRows,
   interestingSites,
@@ -407,6 +409,7 @@ export default function Home() {
 
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
   const interesting = useMemo(() => interestingSites(), []);
+  const editorPickSites = useMemo(() => editorsPicks(), []);
   const picks = useMemo(() => featuredSiteRows(exploreConfig.featuredSitesLimit), []);
   const seoNewSites = useMemo(
     () => additions.slice(0, 10).map((site) => ({ name: site.name, url: site.url, description: site.description })),
@@ -420,11 +423,6 @@ export default function Home() {
   const filtered = useMemo(() => {
     if (query.trim()) return searchSites(query);
     return sitesByCategory(selectedCategory);
-  }, [query, selectedCategory]);
-
-  // A fresh search or category starts collapsed again.
-  useEffect(() => {
-    setShowAllSites(false);
   }, [query, selectedCategory]);
 
   const trending = trendingSites(exploreConfig.trendingPreviewCount);
@@ -448,6 +446,16 @@ export default function Home() {
     if (!pick) return;
     lastRandom.current = pick.id;
     window.open(pick.url, "_blank", "noopener,noreferrer");
+  }
+
+  function updateParams(next: { q?: string; category?: string }) {
+    const draft = new URLSearchParams(params);
+    for (const [key, value] of Object.entries(next)) {
+      if (!value || value === "all") draft.delete(key);
+      else draft.set(key, value);
+    }
+    setShowAllSites(false);
+    setParams(draft, { replace: true, preventScrollReset: true });
   }
 
   const switcher = (
@@ -626,13 +634,60 @@ export default function Home() {
     );
   }
 
-  function updateParams(next: { q?: string; category?: string }) {
-    const draft = new URLSearchParams(params);
-    for (const [key, value] of Object.entries(next)) {
-      if (!value || value === "all") draft.delete(key);
-      else draft.set(key, value);
-    }
-    setParams(draft, { replace: true, preventScrollReset: true });
+  if (searching) {
+    return (
+      <>
+        <HomepageSeo
+          newSites={seoNewSites}
+          featuredSites={seoFeaturedSites}
+          trendingSites={seoTrendingSites}
+        />
+        <h1 className="sr-only">Search sites on {siteName}</h1>
+        <div
+          id="explore"
+          className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col gap-8 scroll-mt-28"
+        >
+          {switcher}
+          <section id="all-sites" className="space-y-4 scroll-mt-28" aria-live="polite">
+            <div
+              className="sec-head flex items-end justify-between gap-4 border-b pb-3"
+              style={{ borderColor: "var(--rule)" }}
+            >
+              <div>
+                <span className="section-eyebrow">Matching your search</span>
+                <h2 className="text-xl font-bold tracking-[-0.01em]">
+                  Results for “{query.trim()}”
+                </h2>
+              </div>
+              <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+                {filtered.length} site{filtered.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            {filtered.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {(showAllSites ? filtered : filtered.slice(0, SITE_PAGE)).map((site) => (
+                    <SiteCard key={site.id} site={site} query={query} />
+                  ))}
+                </div>
+                {!showAllSites && filtered.length > SITE_PAGE && (
+                  <div className="show-more-row">
+                    <button type="button" className="btn ghost" onClick={() => setShowAllSites(true)}>
+                      Show the other {filtered.length - SITE_PAGE} sites
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="search-empty-state">
+                <span aria-hidden="true">⌕</span>
+                <p>No sites match “{query.trim()}”. Try another name, tag, or category.</p>
+              </div>
+            )}
+          </section>
+        </div>
+      </>
+    );
   }
 
   return (
@@ -659,6 +714,10 @@ export default function Home() {
           <PagedRows items={interesting} title="Very Interesting" note="worth a detour" />
         )}
 
+        {editorPickSites.length > 0 && (
+          <PagedRows items={editorPickSites} title="Editors’ Picks" note="chosen by the editors" />
+        )}
+
         {/* Collections */}
         {collections.length > 0 && (
           <section id="collections" className="space-y-4 scroll-mt-28">
@@ -674,7 +733,7 @@ export default function Home() {
                 All {collections.length} collections →
               </Link>
             </div>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="home-collections-swipe grid grid-cols-1 gap-5 sm:grid-cols-2">
               {collections.map((collection) => (
                 <CollectionCard
                   key={collection.id}
@@ -755,6 +814,8 @@ export default function Home() {
             </ol>
           </section>
         )}
+
+        <NeedsSomeVotes />
 
         {/* Full directory */}
         <section id="all-sites" className="space-y-4 scroll-mt-28">
