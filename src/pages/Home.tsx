@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Highlight } from "../components/Highlight";
+import { LaunchesThisWeek } from "../components/LaunchesThisWeek";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import {
@@ -11,7 +12,6 @@ import {
   collections,
   exploreConfig,
   featuredSiteRows,
-  featuredSites,
   newAdditions,
   searchSites,
   siteName,
@@ -23,20 +23,13 @@ import {
   type SiteCollection,
 } from "../lib/siteData";
 import { formatDate, posts } from "../lib/posts";
-import { siteDomain, siteTileStyle } from "../lib/siteTile";
-import { screenshotUrl } from "../lib/shots";
+import { siteDomain } from "../lib/siteTile";
 
 /** Only the newest handful of posts get a card in the home page's article row. */
 const FEATURED_POSTS = posts.slice(0, 3);
 
 /** How many directory cards a phone loads before it offers the rest. */
 const SITE_PAGE = 9;
-
-function hash(value: string): number {
-  let h = 0;
-  for (let i = 0; i < value.length; i++) h = (h * 31 + value.charCodeAt(i)) % 100000;
-  return h;
-}
 
 /* ---------------- pieces ---------------- */
 
@@ -54,101 +47,6 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
     >
       <path d="M6 3h12v18l-6-5-6 5z" />
     </svg>
-  );
-}
-
-/** Generated cover art — geometric shapes instead of stock photos. */
-function CoverArt({ site }: { site: Site }) {
-  const variant = hash(site.slug) % 3;
-  const tint = siteTileStyle(site.slug).backgroundColor as string;
-
-  return (
-    <div className="cover" style={{ backgroundColor: tint }}>
-      <svg className="cover-art" viewBox="0 0 200 120" aria-hidden="true">
-        {variant === 0 && (
-          <>
-            <rect x="-20" y="78" width="150" height="14" rx="7" fill="var(--surface)" opacity="0.9" />
-            <rect x="26" y="52" width="120" height="14" rx="7" fill="rgba(255,255,255,0.65)" />
-            <rect x="-10" y="26" width="170" height="14" rx="7" fill="rgba(255,255,255,0.35)" />
-          </>
-        )}
-        {variant === 1 && (
-          <>
-            <circle cx="46" cy="60" r="34" fill="var(--surface)" opacity="0.85" />
-            <circle cx="118" cy="44" r="18" fill="rgba(255,255,255,0.55)" />
-            <circle cx="150" cy="86" r="12" fill="rgba(255,255,255,0.4)" />
-          </>
-        )}
-        {variant === 2 && (
-          <>
-            <path d="M-10 110 L70 -10 L110 -10 L30 110 Z" fill="var(--surface)" opacity="0.85" />
-            <path d="M60 110 L140 -10 L162 -10 L82 110 Z" fill="rgba(255,255,255,0.45)" />
-          </>
-        )}
-      </svg>
-
-      <div className="cover-copy">
-        <span className="cover-domain">{siteDomain(site.url)}</span>
-        <span className="cover-name">{site.name}</span>
-        <span className="cover-line">{site.description}</span>
-      </div>
-    </div>
-  );
-}
-
-/**
- * The top picks get a real screenshot, rendered server-side by thum.io, with the
- * generated cover art kept as the fallback if that service is unreachable.
- */
-function SitePreview({ site, priority = false }: { site: Site; priority?: boolean }) {
-  const [failed, setFailed] = useState(false);
-
-  if (failed) return <CoverArt site={site} />;
-
-  return (
-    <span className="cover shot">
-      <img
-        src={screenshotUrl(site.url, 960, 800)}
-        srcSet={`${screenshotUrl(site.url, 640, 533)} 640w, ${screenshotUrl(site.url, 960, 800)} 960w`}
-        sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
-        alt={`Screenshot of ${site.name}`}
-        width={960}
-        height={600}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        decoding="async"
-        referrerPolicy="no-referrer"
-        onError={() => setFailed(true)}
-      />
-      <span className="shot-badge">{siteDomain(site.url)}</span>
-    </span>
-  );
-}
-
-function FeatureCard({ site, priority = false }: { site: Site; priority?: boolean }) {
-  return (
-    <article className="feature-card">
-      <a href={site.url} target="_blank" rel="noopener noreferrer" className="block">
-        <SitePreview site={site} priority={priority} />
-      </a>
-      <div className="feature-foot">
-        <SiteIcon site={site} size={32} />
-        <div className="min-w-0">
-          <a
-            href={site.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 font-bold hover:underline underline-offset-4"
-            style={{ color: "var(--ink)" }}
-          >
-            <span className="truncate">{site.name}</span>
-          </a>
-          <p className="text-[12px] truncate" style={{ color: "var(--muted)" }}>
-            {site.description}
-          </p>
-        </div>
-      </div>
-    </article>
   );
 }
 
@@ -417,7 +315,6 @@ export default function Home() {
   const [savedCollections, toggleSaved] = useSavedCollections();
   const [showAllSites, setShowAllSites] = useState(false);
 
-  const featured = useMemo(() => featuredSites(), []);
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
   const picks = useMemo(() => featuredSiteRows(exploreConfig.featuredSitesLimit), []);
 
@@ -587,12 +484,7 @@ export default function Home() {
       >
         {switcher}
 
-        {/* Featured band */}
-        <section className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {featured.map((site, index) => (
-            <FeatureCard key={site.id} site={site} priority={index === 0} />
-          ))}
-        </section>
+        <LaunchesThisWeek />
 
         <PagedRows items={additions} title="New Additions" note="latest launches" />
         <PagedRows items={picks} title="Featured Sites" note="top ranked" />

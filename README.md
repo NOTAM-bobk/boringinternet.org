@@ -17,6 +17,12 @@ there is no CMS and nothing is fetched at build time.
 | `config/trending.json` | `topLimit` for the trending page, plus a `boost` map and an `exclude` list |
 | `config/explore.json` | Home page: featured picks, row size, section limits, and the collections |
 | `config/blog.json` | Posts with their full body (`blocks`: `p`, `h2`, `quote`, `ul`) |
+| `config/launches.json` | The "Launches this week" ticker at the top of the home page: a `title` and an `items` list |
+
+**Add a launch** → append `{ "name", "url", "description" }` to `items` in
+`config/launches.json`. The home page shows one entry at a time and slides to
+the next every five seconds, so keep descriptions to a sentence. The section
+stays out of the page entirely while `items` is empty.
 
 **Add a site** → append an object to `config/sites.json` (keep `slug` unique and
 stable — votes are stored under it), then add the slug to a collection in

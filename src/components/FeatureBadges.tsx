@@ -1,16 +1,9 @@
 import { useEffect, useState } from "react";
 import { featureBadges } from "../lib/badges";
+import { prefersReducedMotion } from "../lib/motion";
 
 /** How long a badge stays up before the carousel moves on. */
-const ROTATE_MS = 5200;
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
-}
+const ROTATE_MS = 7000;
 
 /**
  * The "featured on" strip: one badge at a time, rotating on a timer and pausing
@@ -65,12 +58,12 @@ export function FeatureBadges() {
       </div>
 
       {count > 1 && (
-        <div className="badge-dots" aria-label="Choose a featured-on badge">
+        <div className="carousel-dots" aria-label="Choose a featured-on badge">
           {featureBadges.map((badge, i) => (
             <button
               key={badge.id}
               type="button"
-              className={`badge-dot${i === index ? " badge-dot-active" : ""}`}
+              className={`carousel-dot${i === index ? " carousel-dot-active" : ""}`}
               aria-label={`Show the ${badge.name} badge`}
               aria-current={i === index ? "true" : undefined}
               onClick={() => setIndex(i)}

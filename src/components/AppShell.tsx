@@ -115,10 +115,6 @@ export function AppShell() {
           </nav>
 
           <div className="justify-self-end flex items-center gap-2">
-            <Link to="/submit" className="nav-cta">
-              <span className="hidden sm:inline">Submit your site</span>
-              <span className="sm:hidden">Submit</span>
-            </Link>
             <AccountMenu />
             <HamburgerButton open={navOpen} onClick={() => setNavOpen(true)} />
           </div>
