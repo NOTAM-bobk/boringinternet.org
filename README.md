@@ -12,7 +12,7 @@ there is no CMS and nothing is fetched at build time.
 | File | What it controls |
 | --- | --- |
 | `config/site.json` | Brand name, tagline, description, canonical URL, keywords, social links |
-| `config/sites.json` | Every site: `name`, `slug`, `url`, `description`, `category`, `tags`, `trending` (starting score), `launched` |
+| `config/sites.json` | Every site: `name`, `slug`, `url`, `description`, `category`, `tags`, `trending` (starting score), `launched`, plus any extra detail fields |
 | `config/categories.json` | Categories used by the filters, the side navigation, and the counts |
 | `config/trending.json` | `topLimit` for the trending page, plus a `boost` map and an `exclude` list |
 | `config/explore.json` | Home page: featured picks, row size, section limits, and the collections |
@@ -29,10 +29,21 @@ stable — votes are stored under it), then add the slug to a collection in
 `config/explore.json` or to `boost` in `config/trending.json` if it should rank
 higher out of the gate.
 
+**Open a site's page** → every listing gets its own screen at `/sites/<slug>`:
+the name, the link out, the category, tags, launch date, votes, rank, the
+collections it sits in, and anything else the listing carries. Any field beyond
+the ones above is printed there as-is (for example `tagline`, `pricing`,
+`faq`), so details that came in with a submission can be pasted straight into
+`config/sites.json`.
+
 **Open a collection** → every entry in the `collections` array of
 `config/explore.json` gets its own page at `/collections/<id>`, with the
 collection name, its blurb, and a link out to each site. `/collections` lists
 them all. Run `bun run sitemap` so the new pages are indexed.
+
+**Compare two sites** → `/this-or-that` frames two random listings side by side
+and takes one vote for whichever is better; the winner gets the same vote the
+trending list counts. No config: the pairs are drawn from `config/sites.json`.
 
 **Write a post** → append an object to `config/blog.json` with `slug`, `title`,
 `description`, `date`, `tags`, `excerpt`, and `blocks`. It appears on `/blog`

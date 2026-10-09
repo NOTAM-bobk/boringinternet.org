@@ -7,6 +7,8 @@ Primary crawl targets:
 - /discover-websites — Intent-focused page to jump website to website.
 - /new-websites — New and upcoming website launches.
 - /trending — Ranked sites by community voting.
+- /sites/<slug> — One page per listed site: its link, category, tags, launch date, votes, and details.
+- /this-or-that — Two sites framed side by side; visitors vote for the better one.
 - /collections — Curated collections of related websites.
 - /blog — Editorial notes about launches and curation.
 - /submit — Submission page for new launches.
@@ -18,3 +20,6 @@ Priority keywords:
 - find websites
 - launch new websites
 - new and upcoming websites
+- compare websites
+- this or that
+- site directory pages

@@ -14,6 +14,8 @@ import Admin from "./pages/Admin.tsx";
 import Auth from "./pages/Auth.tsx";
 import DiscoverWebsites from "./pages/DiscoverWebsites.tsx";
 import NewWebsites from "./pages/NewWebsites.tsx";
+import SiteDetail from "./pages/SiteDetail.tsx";
+import ThisOrThat from "./pages/ThisOrThat.tsx";
 
 const router = createBrowserRouter([
   {
@@ -55,6 +57,14 @@ const router = createBrowserRouter([
       {
         path: "new-websites",
         element: <NewWebsites />,
+      },
+      {
+        path: "sites/:slug",
+        element: <SiteDetail />,
+      },
+      {
+        path: "this-or-that",
+        element: <ThisOrThat />,
       },
       {
         path: "admin",

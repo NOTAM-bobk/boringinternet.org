@@ -55,19 +55,27 @@ function SiteRow({ site }: { site: Site }) {
     <li className="site-row">
       <SiteIcon site={site} size={36} />
       <div className="min-w-0">
-        <a
-          href={site.url}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          to={`/sites/${site.slug}`}
           className="text-[15px] font-bold truncate block hover:underline underline-offset-4"
           style={{ color: "var(--ink)" }}
         >
           {site.name}
-        </a>
+        </Link>
         <p className="text-[13px] truncate" style={{ color: "var(--muted)" }}>
           {site.description}
         </p>
       </div>
+      <a
+        href={site.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="site-row-visit"
+        title={`Open ${site.name} in a new tab`}
+        aria-label={`Open ${site.name} in a new tab`}
+      >
+        ↗
+      </a>
     </li>
   );
 }
@@ -225,15 +233,13 @@ function SiteCard({ site, query = "" }: { site: Site; query?: string }) {
       <div className="flex items-center gap-3">
         <SiteIcon site={site} size={34} />
         <div className="min-w-0">
-          <a
-            href={site.url}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            to={`/sites/${site.slug}`}
             className="text-base font-bold block truncate hover:underline underline-offset-4"
             style={{ color: "var(--ink)" }}
           >
             <Highlight text={site.name} query={query} />
-          </a>
+          </Link>
           <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
             {siteDomain(site.url)}
           </span>
@@ -372,7 +378,10 @@ export default function Home() {
         >
           <span aria-hidden="true">🎲</span> I’m bored
         </button>
-        <span className="bored-note">Opens one random site in a new tab.</span>
+        <Link to="/this-or-that" className="bored-btn">
+          <span aria-hidden="true">🆚</span> This or that
+        </Link>
+        <span className="bored-note">One random site, or two to vote on.</span>
       </div>
 
       <label htmlFor="site-search" className="sr-only">

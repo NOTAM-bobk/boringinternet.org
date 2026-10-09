@@ -20,6 +20,12 @@ export interface Site {
   tags: string[];
   trending?: number;
   launched?: string;
+  /**
+   * Any field beyond the ones above, kept as readable text. Listings carry the
+   * details that came in with a submission (tagline, pricing, FAQ, …), and the
+   * site page prints whatever is there without needing a code change.
+   */
+  extras?: Record<string, string>;
 }
 
 export interface SiteCollection {
@@ -49,8 +55,52 @@ export interface ExploreConfig {
 
 /* ---------------- normalising the config files ---------------- */
 
+/** The fields a listing is expected to have; everything else is extra detail. */
+const SITE_FIELDS = new Set([
+  "id",
+  "name",
+  "slug",
+  "url",
+  "description",
+  "category",
+  "tags",
+  "trending",
+  "launched",
+]);
+
+/** Any JSON value as one line of readable text, or "" when there is nothing to show. */
+function describeValue(value: unknown): string {
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : "";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) {
+    return value.map(describeValue).filter(Boolean).join(", ");
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value as Record<string, unknown>)
+      .map(([key, entry]) => {
+        const text = describeValue(entry);
+        return text ? `${humanizeKey(key)}: ${text}` : "";
+      })
+      .filter(Boolean)
+      .join(" · ");
+  }
+  return "";
+}
+
+/** Extra listing detail, keyed the way it was written in the JSON. */
+function extraDetails(site: Record<string, unknown>): Record<string, string> | undefined {
+  const extras: Record<string, string> = {};
+  for (const [key, value] of Object.entries(site)) {
+    if (SITE_FIELDS.has(key)) continue;
+    const text = describeValue(value);
+    if (text) extras[key] = text;
+  }
+  return Object.keys(extras).length > 0 ? extras : undefined;
+}
+
 function normalizeSites(value: unknown): Site[] {
-  const parsed = value as { sites?: Partial<Site>[] } | null | undefined;
+  const parsed = value as { sites?: Array<Partial<Site> & Record<string, unknown>> } | null | undefined;
   if (!Array.isArray(parsed?.sites)) return [];
   return parsed.sites.map((site) => ({
     id: site.id ?? site.slug ?? crypto.randomUUID(),
@@ -62,6 +112,7 @@ function normalizeSites(value: unknown): Site[] {
     tags: Array.isArray(site.tags) ? site.tags : [],
     trending: typeof site.trending === "number" ? site.trending : undefined,
     launched: site.launched,
+    extras: extraDetails(site),
   }));
 }
 
@@ -142,6 +193,26 @@ export const categoryFilters: SiteCategory[] = [
 
 export function categoryById(id: string): SiteCategory | undefined {
   return categories.find((category) => category.id === id);
+}
+
+/** Short words that read better in caps when a listing uses them lowercase. */
+const ACRONYMS = new Set(["faq", "seo", "url", "api", "rss", "id", "ui", "ux", "css", "html"]);
+
+/** "targetAudience" -> "Target Audience", "faq" -> "FAQ", "FAQ" stays "FAQ". */
+export function humanizeKey(key: string): string {
+  const words = key
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return words
+    .map((word) => {
+      const lower = word.toLowerCase();
+      if (ACRONYMS.has(lower)) return lower.toUpperCase();
+      return /^[A-Z0-9]{2,}$/.test(word) ? word : word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
 }
 
 export function categoryLabel(id: string): string {
