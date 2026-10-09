@@ -153,6 +153,36 @@ a {
   border: 1px solid var(--ink);
 }
 
+.card,
+.feature-card,
+.collection-card {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  background-image: linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 42%);
+}
+
+.card::before,
+.feature-card::before,
+.collection-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .card:hover,
+  .feature-card:hover,
+  .collection-card:hover {
+    transform: translateY(-4px) rotateX(0.5deg);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
 /* accent text + inline highlight */
 .accent-text {
   color: var(--accent);
@@ -500,6 +530,10 @@ hr {
   background: #fffdf8;
 }
 
+.home-mobile-swipe {
+  display: none;
+}
+
 .pager {
   display: inline-flex;
   align-items: center;
@@ -581,6 +615,73 @@ hr {
 @media (max-width: 560px) {
   .site-row {
     grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+
+  .home-desktop-grid {
+    display: none;
+  }
+
+  .home-mobile-swipe {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 0.25rem 0.25rem 0.9rem;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-mobile-swipe::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-mobile-swipe-item,
+  .home-mobile-more {
+    flex: 0 0 min(82vw, 19rem);
+    scroll-snap-align: start;
+  }
+
+  .home-mobile-swipe-item .site-row,
+  .home-mobile-more {
+    min-height: 5rem;
+    padding: 0.9rem;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-thick);
+  }
+
+  .home-mobile-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-mobile-more .btn {
+    width: 100%;
+    padding-inline: 0.75rem;
+  }
+
+  .home-article-swipe {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 0.25rem 0.25rem 1rem;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-article-swipe::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-article-swipe > a {
+    flex: 0 0 min(86vw, 22rem);
+    min-height: 13rem;
+    scroll-snap-align: start;
   }
 }
 

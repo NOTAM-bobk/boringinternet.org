@@ -143,9 +143,11 @@ function SectionHead({
 
 function PagedRows({ items, title, note }: { items: Site[]; title: string; note?: string }) {
   const [page, setPage] = useState(0);
+  const [showAllMobile, setShowAllMobile] = useState(false);
   const perPage = exploreConfig.rowsPerPage;
   const pageCount = Math.max(1, Math.ceil(items.length / perPage));
   const current = items.slice(page * perPage, page * perPage + perPage);
+  const mobileItems = showAllMobile ? items : items.slice(0, 5);
 
   return (
     <section className="space-y-4">
@@ -157,10 +159,24 @@ function PagedRows({ items, title, note }: { items: Site[]; title: string; note?
         onPrev={() => setPage((p) => Math.max(0, p - 1))}
         onNext={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
       />
-      <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
+      <ul className="home-desktop-grid grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
         {current.map((site) => (
           <SiteRow key={site.id} site={site} />
         ))}
+      </ul>
+      <ul className="home-mobile-swipe" aria-label={`${title} mobile list`}>
+        {mobileItems.map((site) => (
+          <li key={site.id} className="home-mobile-swipe-item">
+            <SiteRow site={site} />
+          </li>
+        ))}
+        {!showAllMobile && items.length > 5 && (
+          <li className="home-mobile-more">
+            <button type="button" className="btn ghost" onClick={() => setShowAllMobile(true)}>
+              Show all {items.length} sites
+            </button>
+          </li>
+        )}
       </ul>
     </section>
   );
@@ -608,7 +624,7 @@ export default function Home() {
               All notes →
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div className="home-article-swipe grid grid-cols-1 gap-5 sm:grid-cols-3">
             {FEATURED_POSTS.map((post) => (
               <Link
                 key={post.slug}
