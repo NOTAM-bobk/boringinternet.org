@@ -318,6 +318,14 @@ export default function Home() {
 
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
   const picks = useMemo(() => featuredSiteRows(exploreConfig.featuredSitesLimit), []);
+  const seoNewSites = useMemo(
+    () => additions.slice(0, 10).map((site) => ({ name: site.name, url: site.url, description: site.description })),
+    [additions],
+  );
+  const seoFeaturedSites = useMemo(
+    () => picks.slice(0, 10).map((site) => ({ name: site.name, url: site.url, description: site.description })),
+    [picks],
+  );
 
   const filtered = useMemo(() => {
     if (query.trim()) return searchSites(query);
@@ -331,6 +339,10 @@ export default function Home() {
 
   const trending = trendingSites(exploreConfig.trendingPreviewCount);
   const trendingAll = trendingSites(sites.length).length;
+  const seoTrendingSites = useMemo(
+    () => trending.slice(0, 10).map((site) => ({ name: site.name, url: site.url, description: site.description })),
+    [trending],
+  );
 
   // A chosen category replaces the whole page with that category's sites.
   const searching = query.trim().length > 0;
@@ -437,7 +449,11 @@ export default function Home() {
   if (browsingCategory && category) {
     return (
       <>
-        <HomepageSeo />
+        <HomepageSeo
+          newSites={seoNewSites}
+          featuredSites={seoFeaturedSites}
+          trendingSites={seoTrendingSites}
+        />
         <div
           id="explore"
           className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col gap-8 scroll-mt-28"
@@ -500,7 +516,11 @@ export default function Home() {
 
   return (
     <>
-      <HomepageSeo />
+      <HomepageSeo
+        newSites={seoNewSites}
+        featuredSites={seoFeaturedSites}
+        trendingSites={seoTrendingSites}
+      />
       {/* The page keeps a heading for search engines and screen readers. */}
       <h1 className="sr-only">{`${siteName} — ${siteTagline}`}</h1>
       <div
@@ -508,10 +528,30 @@ export default function Home() {
         className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-10 flex flex-col gap-8 sm:gap-12 scroll-mt-28"
       >
         {switcher}
+        <section className="space-y-3">
+          <p className="text-[11px] font-bold tracking-[0.2em] uppercase accent-text">
+            Discover and find websites
+          </p>
+          <p className="max-w-4xl text-base leading-relaxed" style={{ color: "var(--muted)" }}>
+            Use this directory as a calm bored button to jump website to website, discover new
+            launches, and find upcoming websites worth bookmarking.
+          </p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Want focused lists?{" "}
+            <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
+              Discover websites by use case
+            </Link>{" "}
+            or{" "}
+            <Link to="/new-websites" className="accent-text font-bold underline underline-offset-4">
+              browse new and upcoming websites
+            </Link>
+            .
+          </p>
+        </section>
 
         <LaunchesThisWeek />
 
-        <PagedRows items={additions} title="New Additions" note="latest launches" />
+        <PagedRows items={additions} title="New and Upcoming Websites" note="latest launches" />
         <PagedRows items={picks} title="Featured Sites" note="top ranked" />
 
         {/* Collections */}

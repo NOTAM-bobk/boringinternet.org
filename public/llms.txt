@@ -1,0 +1,20 @@
+# Boring Internet
+
+Purpose: Human-curated directory to discover websites, find new launches, and submit new and upcoming websites.
+
+Primary crawl targets:
+- / — Main directory, search, category filters, and featured links.
+- /discover-websites — Intent-focused page to jump website to website.
+- /new-websites — New and upcoming website launches.
+- /trending — Ranked sites by community voting.
+- /collections — Curated collections of related websites.
+- /blog — Editorial notes about launches and curation.
+- /submit — Submission page for new launches.
+
+Priority keywords:
+- bored button
+- website to website
+- discover websites
+- find websites
+- launch new websites
+- new and upcoming websites

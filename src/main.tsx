@@ -12,6 +12,8 @@ import Trending from "./pages/Trending.tsx";
 import Submit from "./pages/Submit.tsx";
 import Admin from "./pages/Admin.tsx";
 import Auth from "./pages/Auth.tsx";
+import DiscoverWebsites from "./pages/DiscoverWebsites.tsx";
+import NewWebsites from "./pages/NewWebsites.tsx";
 
 const router = createBrowserRouter([
   {
@@ -45,6 +47,14 @@ const router = createBrowserRouter([
       {
         path: "submit",
         element: <Submit />,
+      },
+      {
+        path: "discover-websites",
+        element: <DiscoverWebsites />,
+      },
+      {
+        path: "new-websites",
+        element: <NewWebsites />,
       },
       {
         path: "admin",
