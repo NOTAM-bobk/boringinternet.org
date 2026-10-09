@@ -38,4 +38,13 @@ export const featureBadges: FeatureBadge[] = [
     alt: "Featured on LaunchAF",
     attributes: { "data-launchaf-badge": "true" },
   },
+  {
+    id: "launch-llama-tools",
+    name: "Launch Llama Tools",
+    href: "https://tools.launchllama.co/products/base31-org?utm_source=badge&utm_medium=referral",
+    image: "https://tools.launchllama.co/featured-badge.png?v=2",
+    width: 200,
+    height: 52,
+    alt: "Featured on Launch Llama Tools",
+  },
 ];
