@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
  * still works: votes are kept for the browser in localStorage and clearly
  * labelled as not shared.
  */
+import { recordVoteForAccount } from "./auth";
+
 const raw = (import.meta.env as Record<string, string | undefined>)
   .VITE_VOTES_API_URL;
 
@@ -91,6 +93,7 @@ export async function castVote(slug: string, direction: "up" | "down" = "up"): P
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { count?: number };
+    void recordVoteForAccount(slug, direction === "up");
     return typeof data.count === "number" ? data.count : null;
   } catch {
     return null;
