@@ -53,7 +53,7 @@ function SubmissionCard({
     ["Pricing", submission.pricing],
     ["Social or community links", submission.socialLinks],
     ["FAQ", submission.faq],
-  ].filter(([, value]) => value.length > 0) as Array<[string, string]>;
+  ].filter(([, value]) => typeof value === "string" && value.length > 0) as Array<[string, string]>;
 
   return (
     <article className="card p-5 flex flex-col gap-4">
