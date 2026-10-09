@@ -9,9 +9,14 @@ type TextFieldKey =
   | "name"
   | "tagline"
   | "description"
+  | "launchDate"
+  | "targetAudience"
+  | "problem"
+  | "features"
   | "useCases"
   | "alternatives"
   | "pricing"
+  | "socialLinks"
   | "faq";
 
 const EMPTY_DRAFT: SubmissionDraft = {
@@ -19,9 +24,14 @@ const EMPTY_DRAFT: SubmissionDraft = {
   url: "",
   tagline: "",
   description: "",
+  launchDate: "",
+  targetAudience: "",
+  problem: "",
+  features: "",
   useCases: "",
   alternatives: "",
   pricing: "",
+  socialLinks: "",
   faq: "",
   categories: [],
   openSource: false,
@@ -51,9 +61,14 @@ const FIELDS: Array<{
     hint: "what it does and who it is for",
     required: true,
   },
+  { key: "launchDate", label: "Launch date", hint: "when did this become publicly usable?" },
+  { key: "targetAudience", label: "Who is it for?", rows: 3, placeholder: "The people or teams this is built for" },
+  { key: "problem", label: "What problem does it solve?", rows: 4, placeholder: "The problem this product helps people overcome" },
+  { key: "features", label: "Key features", rows: 4, placeholder: "The most useful features, one per line" },
   { key: "useCases", label: "Use cases", rows: 3, placeholder: "One per line" },
   { key: "alternatives", label: "Alternatives", rows: 3, placeholder: "One per line" },
   { key: "pricing", label: "Pricing", placeholder: "Free · $5/mo · one-time $20" },
+  { key: "socialLinks", label: "Social or community links", rows: 3, placeholder: "One URL per line (optional)" },
   { key: "faq", label: "FAQ", rows: 4, placeholder: "Question? Answer. (one per line)" },
 ];
 
@@ -258,7 +273,7 @@ export default function Submit() {
                 ) : (
                   <input
                     id={field.key}
-                    type={field.key === "url" ? "url" : "text"}
+                    type={field.key === "url" ? "url" : field.key === "launchDate" ? "date" : "text"}
                     placeholder={field.placeholder}
                     value={draft[field.key]}
                     onChange={(event) => update(field.key, event.target.value)}
