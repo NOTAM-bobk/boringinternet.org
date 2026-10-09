@@ -25,6 +25,7 @@ export interface SubmissionDraft {
   faq: string;
   categories: string[];
   openSource: boolean;
+  supportsIframe: boolean;
 }
 
 export interface Submission extends SubmissionDraft {
@@ -35,6 +36,14 @@ export interface Submission extends SubmissionDraft {
 }
 
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string; fields?: string[] };
+
+export interface SiteAutofill {
+  url: string;
+  name: string;
+  tagline: string;
+  description: string;
+  supportsIframe: boolean;
+}
 
 async function post<T>(path: string, payload: unknown): Promise<Result<T>> {
   if (!submissionsConnected) {
@@ -61,6 +70,23 @@ async function post<T>(path: string, payload: unknown): Promise<Result<T>> {
     return { ok: true, value: data as T };
   } catch {
     return { ok: false, error: "Could not reach the submissions service." };
+  }
+}
+
+export async function autofillSite(url: string): Promise<Result<SiteAutofill>> {
+  if (!submissionsConnected) return { ok: false, error: "The submissions service is not connected." };
+  try {
+    const res = await fetch(`${votesEndpoint}/inspect?url=${encodeURIComponent(url)}`);
+    const data = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: typeof data?.error === "string" ? data.error : `The service returned ${res.status}.`,
+      };
+    }
+    return { ok: true, value: data as unknown as SiteAutofill };
+  } catch {
+    return { ok: false, error: "Could not inspect that URL." };
   }
 }
 

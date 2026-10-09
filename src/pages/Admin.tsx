@@ -67,6 +67,11 @@ function SubmissionCard({
                 open source
               </span>
             )}
+            {submission.supportsIframe && (
+              <span className="text-[10px] font-mono border px-2 py-0.5" style={{ borderColor: "var(--rule)", color: "var(--muted)" }}>
+                iframe ready
+              </span>
+            )}
           </div>
           <a
             href={submission.url}
