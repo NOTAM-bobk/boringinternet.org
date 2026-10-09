@@ -1,0 +1,393 @@
+(() => {
+  // cloudflare/votes-worker.js
+  var VOTE_PREFIX = "vote:";
+  var SUBMISSION_PREFIX = "submission:";
+  var USER_PREFIX = "user:";
+  var EMAIL_PREFIX = "email:";
+  var SESSION_PREFIX = "session:";
+  var SESSION_COOKIE = "bi_session";
+  var SESSION_DAYS = 30;
+  var SLUG_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
+  var MAX_BODY_BYTES = 24 * 1024;
+  var REVIEW_STATUSES = /* @__PURE__ */ new Set(["pending", "approved", "rejected"]);
+  function cors(env, request) {
+    const allowed = (env.ALLOWED_ORIGIN || "*").split(",").map((value) => value.trim());
+    const requested = request.headers.get("Origin");
+    const origin = requested && allowed.includes(requested) ? requested : allowed[0];
+    return {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Credentials": "true",
+      "Access-Control-Max-Age": "86400"
+    };
+  }
+  function json(body, headers, status = 200) {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { ...headers, "Content-Type": "application/json", "Cache-Control": "no-store" }
+    });
+  }
+  async function readBody(request) {
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+  function str(value, max) {
+    if (typeof value !== "string") return "";
+    return value.trim().slice(0, max);
+  }
+  function bytesToBase64(bytes) {
+    let binary = "";
+    for (const byte of bytes) binary += String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  async function hashPassword(password, salt = bytesToBase64(crypto.getRandomValues(new Uint8Array(16)))) {
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 12e4, hash: "SHA-256" }, key, 256);
+    return { salt, hash: bytesToBase64(new Uint8Array(bits)) };
+  }
+  async function digest(value) {
+    const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+    return bytesToBase64(new Uint8Array(bytes));
+  }
+  function userKey(id) {
+    return USER_PREFIX + id;
+  }
+  function emailKey(email) {
+    return EMAIL_PREFIX + email.toLowerCase().trim();
+  }
+  function sessionKey(token) {
+    return SESSION_PREFIX + token;
+  }
+  function parseCookies(request) {
+    return Object.fromEntries((request.headers.get("Cookie") || "").split(";").map((part) => part.trim().split("=")).filter(([key, value]) => key && value));
+  }
+  function cookieHeader(token, maxAge = SESSION_DAYS * 86400) {
+    return `${SESSION_COOKIE}=${token}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=None`;
+  }
+  function withCookie(response, cookie) {
+    const headers = new Headers(response.headers);
+    headers.append("Set-Cookie", cookie);
+    return new Response(response.body, { status: response.status, headers });
+  }
+  function publicUser(user) {
+    return { id: user.id, email: user.email, name: user.name, avatarSeed: user.avatarSeed, bio: user.bio, settings: user.settings, saved: user.saved || [], voted: user.voted || [] };
+  }
+  async function currentUser(request, env) {
+    const token = parseCookies(request)[SESSION_COOKIE];
+    if (!token) return null;
+    const session = await env.VOTES.get(sessionKey(token), "json");
+    if (!session || session.expiresAt < Date.now()) return null;
+    return env.VOTES.get(userKey(session.userId), "json");
+  }
+  async function createSession(userId, env) {
+    const token = bytesToBase64(crypto.getRandomValues(new Uint8Array(32)));
+    await env.VOTES.put(sessionKey(token), JSON.stringify({ userId, expiresAt: Date.now() + SESSION_DAYS * 864e5 }), { expirationTtl: SESSION_DAYS * 86400 });
+    return token;
+  }
+  function validEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+  function decodeHtml(value) {
+    return value.replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">");
+  }
+  function htmlField(html, pattern, max) {
+    const match = html.match(pattern);
+    return match ? decodeHtml(match[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()).slice(0, max) : "";
+  }
+  async function inspectSite(rawUrl) {
+    let parsed;
+    try {
+      parsed = new URL(rawUrl);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("unsupported protocol");
+    } catch {
+      return { error: "Enter a valid http:// or https:// URL." };
+    }
+    try {
+      const response = await fetch(parsed.toString(), {
+        headers: { Accept: "text/html,application/xhtml+xml", "User-Agent": "BoringInternet-Autofill/1.0" },
+        redirect: "follow"
+      });
+      if (!response.ok) return { error: `The site returned HTTP ${response.status}.` };
+      const html = (await response.text()).slice(0, 3e5);
+      const title = htmlField(html, /<title[^>]*>([\s\S]*?)<\/title>/i, 120);
+      const description = htmlField(
+        html,
+        /<meta[^>]+(?:name|property)=["'](?:description|og:description)["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
+        4e3
+      );
+      const reverseDescription = htmlField(
+        html,
+        /<meta[^>]+content=["']([\s\S]*?)["'][^>]+(?:name|property)=["'](?:description|og:description)["'][^>]*>/i,
+        4e3
+      );
+      const firstParagraph = htmlField(html, /<p[^>]*>([\s\S]*?)<\/p>/i, 4e3);
+      const h1 = htmlField(html, /<h1[^>]*>([\s\S]*?)<\/h1>/i, 160);
+      const fullDescription = description || reverseDescription || firstParagraph || h1 || title;
+      const tagline = (description || reverseDescription || h1 || title).split(/[.!?]\s/)[0].slice(0, 160);
+      const frameBlocked = /x-frame-options|frame-ancestors\s+[^;]*(?:'none'|'self')/i.test(
+        `${response.headers.get("x-frame-options") || ""} ${response.headers.get("content-security-policy") || ""}`
+      );
+      return { url: response.url || parsed.toString(), name: title || h1, tagline, description: fullDescription, supportsIframe: !frameBlocked };
+    } catch {
+      return { error: "Could not fetch that site. Check the URL and try again." };
+    }
+  }
+  function constantTimeEqual(a, b) {
+    if (typeof a !== "string" || typeof b !== "string") return false;
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  }
+  function adminConfigured(env) {
+    return typeof env.ADMIN_PASSWORD === "string" && env.ADMIN_PASSWORD.length > 0;
+  }
+  async function isAdmin(body, env) {
+    if (!adminConfigured(env)) return false;
+    return constantTimeEqual(str(body?.password, 200), env.ADMIN_PASSWORD);
+  }
+  function voteKey(slug) {
+    return VOTE_PREFIX + slug;
+  }
+  async function voteCount(env, slug) {
+    return Number(await env.VOTES.get(voteKey(slug)) ?? 0) || 0;
+  }
+  async function allVoteCounts(env) {
+    const counts = {};
+    let cursor;
+    do {
+      const page = await env.VOTES.list({ prefix: VOTE_PREFIX, cursor, limit: 1e3 });
+      for (const key of page.keys) {
+        counts[key.name.slice(VOTE_PREFIX.length)] = Number(key.metadata?.count ?? await voteCount(env, key.name.slice(VOTE_PREFIX.length))) || 0;
+      }
+      cursor = page.list_complete ? void 0 : page.cursor;
+    } while (cursor);
+    return counts;
+  }
+  var CATEGORY_LIMIT = 8;
+  function validateSubmission(body) {
+    const errors = [];
+    const name = str(body.name, 80);
+    const url = str(body.url, 300);
+    const tagline = str(body.tagline, 160);
+    const description = str(body.description, 4e3);
+    const launchDate = str(body.launchDate, 20);
+    const targetAudience = str(body.targetAudience, 2e3);
+    const problem = str(body.problem, 3e3);
+    const features = str(body.features, 3e3);
+    const useCases = str(body.useCases, 2e3);
+    const alternatives = str(body.alternatives, 2e3);
+    const pricing = str(body.pricing, 1e3);
+    const socialLinks = str(body.socialLinks, 2e3);
+    const faq = str(body.faq, 4e3);
+    const categories = Array.isArray(body.categories) ? [...new Set(body.categories.map((c) => str(c, 40)).filter(Boolean))].slice(0, CATEGORY_LIMIT) : [];
+    if (name.length < 2) errors.push("name");
+    if (tagline.length < 4) errors.push("tagline");
+    if (description.length < 20) errors.push("description");
+    if (categories.length === 0) errors.push("categories");
+    let parsedUrl = null;
+    try {
+      parsedUrl = new URL(url);
+      if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") errors.push("url");
+    } catch {
+      errors.push("url");
+    }
+    return {
+      errors,
+      value: {
+        name,
+        url,
+        tagline,
+        description,
+        launchDate,
+        targetAudience,
+        problem,
+        features,
+        useCases,
+        alternatives,
+        pricing,
+        socialLinks,
+        faq,
+        categories,
+        openSource: body.openSource === true,
+        supportsIframe: body.supportsIframe === true
+      }
+    };
+  }
+  async function listSubmissions(env) {
+    const submissions = [];
+    let cursor;
+    do {
+      const page = await env.VOTES.list({ prefix: SUBMISSION_PREFIX, cursor, limit: 1e3 });
+      for (const key of page.keys) {
+        const raw = await env.VOTES.get(key.name);
+        if (!raw) continue;
+        try {
+          submissions.push(JSON.parse(raw));
+        } catch {
+        }
+      }
+      cursor = page.list_complete ? void 0 : page.cursor;
+    } while (cursor);
+    return submissions.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+  }
+  var votes_worker_default = {
+    async fetch(request, env) {
+      const headers = cors(env, request);
+      if (request.method === "OPTIONS") {
+        return new Response(null, { status: 204, headers });
+      }
+      const { pathname } = new URL(request.url);
+      if (pathname === "/health" && request.method === "GET") {
+        return json(
+          {
+            ok: true,
+            adminConfigured: adminConfigured(env),
+            submissions: (await env.VOTES.list({ prefix: SUBMISSION_PREFIX, limit: 1e3 })).keys.length
+          },
+          headers
+        );
+      }
+      if (pathname === "/counts" && request.method === "GET") {
+        return json(await allVoteCounts(env), headers);
+      }
+      if (pathname === "/inspect" && request.method === "GET") {
+        const target = new URL(request.url).searchParams.get("url") || "";
+        const result = await inspectSite(target);
+        return result.error ? json(result, headers, 400) : json(result, headers);
+      }
+      if (pathname === "/auth/signup" && request.method === "POST") {
+        const body = await readBody(request);
+        const email = str(body?.email, 160).toLowerCase();
+        const password = typeof body?.password === "string" ? body.password : "";
+        const name = str(body?.name, 80);
+        if (!validEmail(email) || password.length < 8 || name.length < 2) return json({ error: "Use a valid email, a name, and a password with at least 8 characters." }, headers, 400);
+        if (await env.VOTES.get(await digest(emailKey(email)))) return json({ error: "An account with that email already exists." }, headers, 409);
+        const id = crypto.randomUUID();
+        const passwordData = await hashPassword(password);
+        const user = { id, email, name, avatarSeed: id.slice(0, 8), bio: "", password: passwordData, settings: { emailUpdates: false, reducedMotion: false }, saved: [], voted: [], createdAt: (/* @__PURE__ */ new Date()).toISOString() };
+        await env.VOTES.put(userKey(id), JSON.stringify(user));
+        await env.VOTES.put(await digest(emailKey(email)), id);
+        const token = await createSession(id, env);
+        return withCookie(json({ user: publicUser(user) }, headers, 201), cookieHeader(token));
+      }
+      if (pathname === "/auth/signin" && request.method === "POST") {
+        const body = await readBody(request);
+        const email = str(body?.email, 160).toLowerCase();
+        const password = typeof body?.password === "string" ? body.password : "";
+        const id = await env.VOTES.get(await digest(emailKey(email)));
+        const user = id ? await env.VOTES.get(userKey(id), "json") : null;
+        const candidate = user?.password ? await hashPassword(password, user.password.salt) : null;
+        if (!user || !candidate || candidate.hash !== user.password.hash) return json({ error: "Email or password is incorrect." }, headers, 401);
+        const token = await createSession(user.id, env);
+        return withCookie(json({ user: publicUser(user) }, headers), cookieHeader(token));
+      }
+      if (pathname === "/auth/me" && request.method === "GET") {
+        const user = await currentUser(request, env);
+        return user ? json({ user: publicUser(user) }, headers) : json({ error: "Not signed in." }, headers, 401);
+      }
+      if (pathname === "/auth/signout" && request.method === "POST") {
+        const token = parseCookies(request)[SESSION_COOKIE];
+        if (token) await env.VOTES.delete(sessionKey(token));
+        return withCookie(json({ ok: true }, headers), cookieHeader("", 0));
+      }
+      if (pathname === "/auth/profile" && request.method === "POST") {
+        const user = await requireUser(request, env);
+        if (!user) return json({ error: "Sign in to edit your profile." }, headers, 401);
+        const body = await readBody(request);
+        user.name = str(body?.name, 80) || user.name;
+        user.avatarSeed = str(body?.avatarSeed, 80) || user.avatarSeed;
+        user.bio = str(body?.bio, 240);
+        await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+        return json({ user: publicUser(user) }, headers);
+      }
+      if (pathname === "/auth/settings" && request.method === "POST") {
+        const user = await requireUser(request, env);
+        if (!user) return json({ error: "Sign in to edit settings." }, headers, 401);
+        const body = await readBody(request);
+        user.settings = { emailUpdates: body?.emailUpdates === true, reducedMotion: body?.reducedMotion === true };
+        await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+        return json({ user: publicUser(user) }, headers);
+      }
+      if (pathname === "/auth/saved" && request.method === "POST") {
+        const user = await requireUser(request, env);
+        if (!user) return json({ error: "Sign in to save websites." }, headers, 401);
+        const slug = str((await readBody(request))?.slug, 64).toLowerCase();
+        if (!SLUG_RE.test(slug)) return json({ error: "Invalid website." }, headers, 400);
+        user.saved = user.saved || [];
+        user.saved = user.saved.includes(slug) ? user.saved.filter((item) => item !== slug) : [...user.saved, slug].slice(-200);
+        await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+        return json({ user: publicUser(user) }, headers);
+      }
+      if ((pathname === "/vote" || pathname === "/unvote") && request.method === "POST") {
+        const body = await readBody(request);
+        const slug = str(body?.slug, 64).toLowerCase();
+        if (!SLUG_RE.test(slug)) return json({ error: "invalid slug" }, headers, 400);
+        const current = await voteCount(env, slug);
+        const next = pathname === "/vote" ? current + 1 : Math.max(0, current - 1);
+        await env.VOTES.put(voteKey(slug), String(next), {
+          metadata: { count: next, updatedAt: Date.now() }
+        });
+        const user = await currentUser(request, env);
+        if (user) {
+          user.voted = user.voted || [];
+          if (pathname === "/vote" && !user.voted.includes(slug)) user.voted = [...user.voted, slug].slice(-500);
+          if (pathname === "/unvote") user.voted = user.voted.filter((item) => item !== slug);
+          await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+        }
+        return json({ slug, count: next }, headers);
+      }
+      if (pathname === "/submit" && request.method === "POST") {
+        const body = await readBody(request);
+        if (!body) return json({ error: "invalid body" }, headers, 400);
+        const { errors, value } = validateSubmission(body);
+        if (errors.length > 0) {
+          return json({ error: "invalid fields", fields: errors }, headers, 400);
+        }
+        const id = crypto.randomUUID();
+        const submission = {
+          id,
+          status: "pending",
+          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          ...value
+        };
+        await env.VOTES.put(SUBMISSION_PREFIX + id, JSON.stringify(submission));
+        return json({ id, status: submission.status }, headers, 201);
+      }
+      if ((pathname === "/admin/submissions" || pathname === "/admin/review") && request.method === "POST") {
+        const body = await readBody(request);
+        if (!body) return json({ error: "invalid body" }, headers, 400);
+        if (!adminConfigured(env)) {
+          return json({ error: "admin is not configured on this worker" }, headers, 503);
+        }
+        if (!await isAdmin(body, env)) {
+          return json({ error: "wrong password" }, headers, 401);
+        }
+        if (pathname === "/admin/submissions") {
+          return json({ submissions: await listSubmissions(env) }, headers);
+        }
+        const id = str(body.id, 80);
+        const status = str(body.status, 20);
+        if (!SLUG_RE.test(id) || !REVIEW_STATUSES.has(status)) {
+          return json({ error: "invalid review" }, headers, 400);
+        }
+        const raw = await env.VOTES.get(SUBMISSION_PREFIX + id);
+        if (!raw) return json({ error: "not found" }, headers, 404);
+        const updated = { ...JSON.parse(raw), status, reviewedAt: (/* @__PURE__ */ new Date()).toISOString() };
+        await env.VOTES.put(SUBMISSION_PREFIX + id, JSON.stringify(updated));
+        return json({ id, status }, headers);
+      }
+      return json({ error: "not found" }, headers, 404);
+    }
+  };
+
+  // ../../../tmp/worker-wrapper.js
+  addEventListener("fetch", (event) => event.respondWith(votes_worker_default.fetch(event.request, globalThis)));
+})();
