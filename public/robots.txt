@@ -3,5 +3,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /auth
+Disallow: /auth/
 
 Sitemap: https://boringinternet.org/sitemap.xml

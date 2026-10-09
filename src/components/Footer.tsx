@@ -4,6 +4,8 @@ import { FeatureBadges } from "./FeatureBadges";
 /** Link columns, kept apart from the markup so the footer stays readable. */
 const DIRECTORY_LINKS: { to: string; label: string }[] = [
   { to: "/", label: "Home" },
+  { to: "/discover-websites", label: "Discover websites" },
+  { to: "/new-websites", label: "New & upcoming websites" },
   { to: "/blog", label: "Blog" },
   { to: "/collections", label: "Collections" },
   { to: "/trending", label: "Trending 🔥" },

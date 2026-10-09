@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
-import { categoryFilters, siteName } from "../lib/siteData";
+import { categoryFilters, siteName, siteUrl } from "../lib/siteData";
 import { submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
 
 type TextFieldKey =
@@ -55,6 +55,24 @@ const FIELDS: Array<{
   { key: "alternatives", label: "Alternatives", rows: 3, placeholder: "One per line" },
   { key: "pricing", label: "Pricing", placeholder: "Free · $5/mo · one-time $20" },
   { key: "faq", label: "FAQ", rows: 4, placeholder: "Question? Answer. (one per line)" },
+];
+
+const SUBMIT_FAQ = [
+  {
+    question: "How do I launch a new website in this directory?",
+    answer:
+      "Use this form to submit your launched website with a clear description and category so it can be reviewed by hand.",
+  },
+  {
+    question: "Can I submit upcoming websites?",
+    answer:
+      "Yes. You can submit new and upcoming websites as long as people can visit a working public page.",
+  },
+  {
+    question: "How can people find and discover my website here?",
+    answer:
+      "Accepted submissions appear in category browsing, search results, and can also show up in trending and collections.",
+  },
 ];
 
 export default function Submit() {
@@ -135,6 +153,32 @@ export default function Submit() {
         title="Submit your site"
         description={`Add your launched site to ${siteName}. Every submission is reviewed by hand.`}
         path="/submit"
+        keywords={[
+          "launch new website",
+          "submit website",
+          "discover websites",
+          "find websites",
+          "new and upcoming websites",
+        ]}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: SUBMIT_FAQ.map((item) => ({
+              "@type": "Question",
+              name: item.question,
+              acceptedAnswer: { "@type": "Answer", text: item.answer },
+            })),
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: `Submit your site to ${siteName}`,
+            url: `${siteUrl}/submit`,
+            description: `Submit launched and upcoming websites for review.`,
+            inLanguage: "en",
+          },
+        ]}
       />
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
@@ -147,6 +191,21 @@ export default function Submit() {
           <p className="text-base" style={{ color: "var(--muted)" }}>
             Everything here goes into the review queue. If it fits the list, it ships in the next
             update.
+          </p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Want to see where your launch can appear? Explore{" "}
+            <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
+              discovery pages
+            </Link>
+            ,{" "}
+            <Link to="/collections" className="accent-text font-bold underline underline-offset-4">
+              curated collections
+            </Link>
+            , and{" "}
+            <Link to="/trending" className="accent-text font-bold underline underline-offset-4">
+              trending websites
+            </Link>
+            .
           </p>
         </header>
 
@@ -283,6 +342,20 @@ export default function Submit() {
             </span>
           </div>
         </form>
+
+        <section className="space-y-3 border-t pt-6" style={{ borderColor: "var(--rule)" }}>
+          <h2 className="text-lg font-bold">Launch FAQ</h2>
+          <dl className="space-y-3">
+            {SUBMIT_FAQ.map((item) => (
+              <div key={item.question}>
+                <dt className="font-bold">{item.question}</dt>
+                <dd className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                  {item.answer}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       </div>
     </>
   );

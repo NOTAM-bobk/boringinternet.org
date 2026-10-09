@@ -190,6 +190,7 @@ export default function Admin() {
         title="Admin"
         description="Review submitted sites."
         path="/admin"
+        noindex
       />
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
