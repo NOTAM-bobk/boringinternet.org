@@ -95,13 +95,40 @@ function BackToTop() {
 
 export function AppShell() {
   const [navOpen, setNavOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const direction = useSlideDirection(location.pathname);
   const path = location.pathname.replace(/\/+$/, "") || "/";
 
+  /*
+    The mobile menu fills the screen below the header, so the drawer needs the
+    header's real height — it changes when the promo bar wraps or the brand row
+    shrinks on a narrow phone. Publish it as `--header-h` for the CSS.
+  */
+  useEffect(() => {
+    const element = headerRef.current;
+    if (!element) return;
+
+    const publish = () => {
+      document.documentElement.style.setProperty(
+        "--header-h",
+        `${Math.round(element.getBoundingClientRect().height)}px`,
+      );
+    };
+    publish();
+
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(publish) : null;
+    observer?.observe(element);
+    window.addEventListener("resize", publish);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", publish);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="site-header">
+      <header className="site-header" ref={headerRef}>
         {/* Slim promo bar: what we do for a launch, and the way to start one. */}
         <div className="promo-bar">
           <p className="promo-bar-copy">
@@ -139,7 +166,7 @@ export function AppShell() {
 
           <div className="justify-self-end flex items-center gap-2">
             <AccountMenu />
-            <HamburgerButton open={navOpen} onClick={() => setNavOpen(true)} />
+            <HamburgerButton open={navOpen} onClick={() => setNavOpen((open) => !open)} />
           </div>
         </div>
       </header>

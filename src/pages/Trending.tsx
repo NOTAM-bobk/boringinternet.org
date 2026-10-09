@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { siteName, siteUrl, trendingConfig, trendingSites, type Site } from "../lib/siteData";
+import { rankedSites, siteName, siteUrl, trendingConfig, type Site } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 import {
   castVote,
@@ -27,16 +27,33 @@ const MODE_NOTES: Record<Exclude<VoteMode, "shared">, string> = {
 };
 
 export default function Trending() {
-  const ranked = useMemo(() => trendingSites(TOP_N), []);
+  // Every listed site can climb, not just the ones that start in the top slots.
+  const pool = useMemo(() => rankedSites(), []);
 
   const [counts, setCounts] = useState<Record<string, number>>(() => {
     const base: Record<string, number> = {};
-    for (const site of ranked) base[site.slug] = site.trending ?? 0;
+    for (const site of pool) base[site.slug] = site.trending ?? 0;
     return { ...base, ...readLocalCounts() };
   });
   const [voted, setVoted] = useState<string[]>(() => readVotedSlugs());
   const [mode, setMode] = useState<VoteMode>(votesConnected ? "checking" : "local");
   const [pending, setPending] = useState<string[]>([]);
+
+  /*
+    The ranking is the votes: a site that collects more of them moves straight to
+    the top, and the ones it passes slide down. Sites on equal votes keep the
+    configured order, so the list is stable until somebody votes.
+  */
+  const ranked = useMemo(() => {
+    const configured = new Map(pool.map((site, index) => [site.slug, index]));
+    return [...pool]
+      .sort((a, b) => {
+        const votes = (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0);
+        if (votes !== 0) return votes;
+        return (configured.get(a.slug) ?? 0) - (configured.get(b.slug) ?? 0);
+      })
+      .slice(0, TOP_N);
+  }, [pool, counts]);
 
   useEffect(() => {
     let active = true;
