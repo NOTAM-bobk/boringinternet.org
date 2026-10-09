@@ -29,6 +29,8 @@ const TAB_ORDER = [
   "/blog",
   "/collections",
   "/submit",
+  "/terms",
+  "/privacy",
   "/admin",
   "/auth",
 ];
@@ -44,6 +46,8 @@ const FOOTER_ROUTES = new Set([
   "/collections",
   "/submit",
   "/advertise",
+  "/terms",
+  "/privacy",
 ]);
 
 function tabIndex(pathname: string): number {

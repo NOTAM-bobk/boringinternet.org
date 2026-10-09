@@ -2,7 +2,14 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink } from "react-router";
 import { SiteIcon } from "../components/SiteIcon";
 import { SiteSeo } from "../components/SeoHead";
-import { avatarUrl, useAuth, type AuthUser } from "../lib/auth";
+import {
+  avatarPresets,
+  avatarUrl,
+  randomAvatarSeed,
+  useAuth,
+  type AuthSettings,
+  type AuthUser,
+} from "../lib/auth";
 import { siteBySlug } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 
@@ -165,7 +172,7 @@ function ProfileForm({ user }: { user: AuthUser }) {
         />
         <div>
           <h2>Make it yours</h2>
-          <p>Your name and avatar appear in your account menu.</p>
+          <p>Your avatar and name appear in the account menu and on your saves.</p>
         </div>
       </div>
 
@@ -181,16 +188,42 @@ function ProfileForm({ user }: { user: AuthUser }) {
         />
       </label>
 
-      <label className="account-field">
-        <span className="account-field-label">Avatar seed</span>
-        <input
-          className="field"
-          value={form.avatarSeed}
-          maxLength={80}
-          onChange={(event) => setForm((current) => ({ ...current, avatarSeed: event.target.value }))}
-        />
-        <span>Change this word to generate a different illustration.</span>
-      </label>
+      <div className="account-field">
+        <span className="account-field-label">Avatar</span>
+        <div className="avatar-picker" role="group" aria-label="Choose an avatar">
+          {avatarPresets.map((seed) => {
+            const active = form.avatarSeed === seed;
+            return (
+              <button
+                key={seed}
+                type="button"
+                className={`avatar-choice${active ? " active" : ""}`}
+                aria-pressed={active}
+                title={seed.replace(/-/g, " ")}
+                onClick={() => setForm((current) => ({ ...current, avatarSeed: seed }))}
+              >
+                <img src={avatarUrl(seed)} alt="" loading="lazy" decoding="async" />
+                <span className="sr-only">{`Use the ${seed.replace(/-/g, " ")} avatar`}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="avatar-picker-actions">
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                avatarSeed: randomAvatarSeed(current.avatarSeed),
+              }))
+            }
+          >
+            <span aria-hidden="true">🎲</span> Shuffle
+          </button>
+          <span>Pick one above or shuffle for a new illustration — no code to type.</span>
+        </div>
+      </div>
 
       <label className="account-field">
         <span className="account-field-label">Short bio</span>
@@ -214,13 +247,111 @@ function ProfileForm({ user }: { user: AuthUser }) {
   );
 }
 
+/** A three-number summary of what the account has collected so far. */
+function AccountOverview({ user }: { user: AuthUser }) {
+  const stats = [
+    { label: "Saved websites", value: user.saved.length, to: "/saved" },
+    { label: "Votes cast", value: user.voted.length, to: "/trending" },
+    { label: "Email updates", value: user.settings.emailUpdates ? "On" : "Off", to: "/settings" },
+  ];
+
+  return (
+    <section className="account-panel account-overview">
+      <div className="account-panel-heading">
+        <span className="account-settings-icon" aria-hidden="true">◇</span>
+        <div>
+          <h2>At a glance</h2>
+          <p>What this account has picked up so far.</p>
+        </div>
+      </div>
+
+      <ul className="account-stat-grid">
+        {stats.map((stat) => (
+          <li key={stat.label}>
+            <Link to={stat.to} className="account-stat">
+              <span className="account-stat-value">{stat.value}</span>
+              <span className="account-stat-label">{stat.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <dl className="account-detail-list">
+        <div>
+          <dt>Email</dt>
+          <dd>{user.email}</dd>
+        </div>
+        <div>
+          <dt>Display name</dt>
+          <dd>{user.name || "Not set"}</dd>
+        </div>
+        <div>
+          <dt>Short bio</dt>
+          <dd>{user.bio?.trim() || "No bio yet — add one above."}</dd>
+        </div>
+        <div>
+          <dt>Account reference</dt>
+          <dd className="account-detail-mono">{user.id.slice(0, 8)}</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
+/** The four places worth a tap from your own page. */
+function AccountShortcuts() {
+  const links = [
+    { to: "/saved", label: "Your saved sites", note: "Everything you kept" },
+    { to: "/trending", label: "Trending list", note: "Where your votes land" },
+    { to: "/submit", label: "Submit a site", note: "Five votes first" },
+    { to: "/advertise", label: "Advertise", note: "Placements and extras" },
+  ];
+
+  return (
+    <section className="account-panel">
+      <div className="account-panel-heading">
+        <span className="account-settings-icon" aria-hidden="true">◎</span>
+        <div>
+          <h2>Shortcuts</h2>
+          <p>The parts of the directory that are yours.</p>
+        </div>
+      </div>
+      <ul className="account-shortcuts">
+        {links.map((link) => (
+          <li key={link.to}>
+            <Link to={link.to} className="account-shortcut">
+              <span>
+                <strong>{link.label}</strong>
+                <small>{link.note}</small>
+              </span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function Profile() {
   const { user, loading } = useAuth();
   if (loading) return <AccountLoading title="Your account" path="/profile" />;
 
   return (
-    <AccountFrame title="Your account" path="/profile" eyebrow="The details attached to your directory account.">
-      {user ? <ProfileForm user={user} /> : <SignInRequired />}
+    <AccountFrame
+      title="Your account"
+      path="/profile"
+      eyebrow="Your name, avatar and bio, plus a summary of what you have saved and voted for."
+    >
+      {user ? (
+        <div className="account-stack">
+          <ProfileForm user={user} />
+          <AccountOverview user={user} />
+          <AccountShortcuts />
+        </div>
+      ) : (
+        <SignInRequired />
+      )}
     </AccountFrame>
   );
 }
@@ -230,9 +361,28 @@ export function Saved() {
   if (loading) return <AccountLoading title="Saved" path="/saved" />;
 
   return (
-    <AccountFrame title="Saved" path="/saved" eyebrow="A shelf for sites you want to find again.">
+    <AccountFrame
+      title="Saved"
+      path="/saved"
+      eyebrow="A shelf for sites you want to find again, plus everything you have voted for."
+    >
       {user ? (
-        <div className="account-panel account-saved-panel">
+        <div className="account-stack">
+          <div className="account-panel account-saved-summary">
+            <div>
+              <strong>{user.saved.length}</strong>
+              <span>saved</span>
+            </div>
+            <div>
+              <strong>{user.voted.length}</strong>
+              <span>voted for</span>
+            </div>
+            <p>
+              Everything here is tied to {user.email}. Remove a site by opening it and tapping Save
+              again.
+            </p>
+          </div>
+          <div className="account-panel account-saved-panel">
           <SiteList
             title="Saved websites"
             slugs={user.saved}
@@ -243,6 +393,7 @@ export function Saved() {
             slugs={user.voted}
             empty="Your voted websites will appear here after you cast a vote while signed in."
           />
+          </div>
         </div>
       ) : (
         <SignInRequired />
@@ -251,60 +402,153 @@ export function Saved() {
   );
 }
 
+/** Every switch on the page, grouped so the panel reads in two short runs. */
+const SETTING_GROUPS: Array<{
+  id: string;
+  title: string;
+  note: string;
+  items: Array<{ key: keyof AuthSettings; label: string; hint: string }>;
+}> = [
+  {
+    id: "email",
+    title: "Email",
+    note: "What reaches your inbox, and how often.",
+    items: [
+      {
+        key: "emailUpdates",
+        label: "Email updates",
+        hint: "Occasional notes about new sites and directory changes.",
+      },
+      {
+        key: "weeklyDigest",
+        label: "Weekly digest",
+        hint: "One short round-up a week of everything that was added.",
+      },
+      {
+        key: "newSiteAlerts",
+        label: "New site alerts",
+        hint: "A heads-up when something lands in a category you follow.",
+      },
+    ],
+  },
+  {
+    id: "browsing",
+    title: "Browsing",
+    note: "How the pages behave while you read, and who sees your name.",
+    items: [
+      {
+        key: "reducedMotion",
+        label: "Reduced motion",
+        hint: "Hold the launch ticker and the badge carousel still.",
+      },
+      {
+        key: "publicProfile",
+        label: "Public profile",
+        hint: "Show your name and bio on the sites you vote for.",
+      },
+    ],
+  },
+];
+
 function SettingsForm({ user }: { user: AuthUser }) {
-  const { updateSettings } = useAuth();
+  const { updateSettings, signOut } = useAuth();
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const [settings, setSettings] = useState<AuthUser["settings"]>(user.settings);
+  const [settings, setSettings] = useState<AuthSettings>(user.settings);
 
   async function save() {
     setBusy(true);
     setMessage("");
     const result = await updateSettings(settings);
     setBusy(false);
-    setMessage(result.ok ? "Settings saved." : result.error);
+    if (!result.ok) {
+      setMessage(result.error);
+      return;
+    }
+    setMessage(
+      result.value.synced
+        ? "Settings saved."
+        : "Saved in this browser. The account service is older than these switches — redeploy it to sync them across devices.",
+    );
   }
 
+  const onCount = SETTING_GROUPS.flatMap((group) => group.items).filter(
+    (item) => settings[item.key],
+  ).length;
+
   return (
-    <div className="account-panel account-settings-panel">
-      <div className="account-panel-heading account-settings-heading">
-        <span className="account-settings-icon" aria-hidden="true">⚙</span>
+    <div className="account-stack">
+      {SETTING_GROUPS.map((group) => (
+        <section className="account-panel account-settings-panel" key={group.id}>
+          <div className="account-panel-heading account-settings-heading">
+            <span className="account-settings-icon" aria-hidden="true">
+              {group.id === "email" ? "✉" : "◈"}
+            </span>
+            <div>
+              <h2>{group.title}</h2>
+              <p>{group.note}</p>
+            </div>
+          </div>
+
+          <div className="account-settings-list">
+            {group.items.map((item) => (
+              <label className="setting-row" key={item.key}>
+                <span>
+                  <strong>{item.label}</strong>
+                  <small>{item.hint}</small>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={settings[item.key]}
+                  onChange={(event) =>
+                    setSettings((current) => ({ ...current, [item.key]: event.target.checked }))
+                  }
+                />
+              </label>
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <div className="account-panel account-settings-actions">
         <div>
-          <h2>Preferences</h2>
-          <p>Simple controls for how Boring Internet talks to you.</p>
+          <h2>Save your switches</h2>
+          <p>
+            {onCount === 0
+              ? "Nothing is switched on at the moment."
+              : `${onCount} of ${SETTING_GROUPS.flatMap((group) => group.items).length} switched on.`}
+          </p>
+        </div>
+        <div className="account-form-actions">
+          <button className="btn accent" type="button" onClick={() => void save()} disabled={busy}>
+            {busy ? "Saving…" : "Save settings"}
+          </button>
+          {message && (
+            <span className="account-feedback" role="status">
+              {message}
+            </span>
+          )}
         </div>
       </div>
 
-      <label className="setting-row">
-        <span>
-          <strong>Email updates</strong>
-          <small>Occasional notes about new sites and directory changes.</small>
-        </span>
-        <input
-          type="checkbox"
-          checked={settings.emailUpdates}
-          onChange={(event) => setSettings((current) => ({ ...current, emailUpdates: event.target.checked }))}
-        />
-      </label>
-
-      <label className="setting-row">
-        <span>
-          <strong>Reduced motion</strong>
-          <small>Prefer less animation while browsing.</small>
-        </span>
-        <input
-          type="checkbox"
-          checked={settings.reducedMotion}
-          onChange={(event) => setSettings((current) => ({ ...current, reducedMotion: event.target.checked }))}
-        />
-      </label>
-
-      <div className="account-form-actions">
-        <button className="btn accent" type="button" onClick={() => void save()} disabled={busy}>
-          {busy ? "Saving…" : "Save settings"}
-        </button>
-        {message && <span className="account-feedback" role="status">{message}</span>}
-      </div>
+      <section className="account-panel">
+        <div className="account-panel-heading">
+          <span className="account-settings-icon" aria-hidden="true">☻</span>
+          <div>
+            <h2>This account</h2>
+            <p>Signed in as {user.email}. Saved sites and votes follow this account between devices.</p>
+          </div>
+        </div>
+        <div className="account-settings-actions">
+          <div>
+            <strong>Sign out</strong>
+            <p>Ends the session in this browser. Your saved sites stay on the account.</p>
+          </div>
+          <button className="btn ghost" type="button" onClick={() => void signOut()}>
+            Sign out
+          </button>
+        </div>
+      </section>
     </div>
   );
 }
@@ -314,7 +558,11 @@ export function Settings() {
   if (loading) return <AccountLoading title="Settings" path="/settings" />;
 
   return (
-    <AccountFrame title="Settings" path="/settings" eyebrow="Choose how this directory behaves for you.">
+    <AccountFrame
+      title="Settings"
+      path="/settings"
+      eyebrow="Email, motion and privacy switches for how this directory behaves for you."
+    >
       {user ? <SettingsForm user={user} /> : <SignInRequired />}
     </AccountFrame>
   );

@@ -1,12 +1,89 @@
-import { Link } from "react-router";
+import { useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { newAdditions, siteName, siteUrl } from "../lib/siteData";
+import { newAdditions, siteName, siteUrl, sites } from "../lib/siteData";
 import { formatDate } from "../lib/posts";
 import { siteDomain } from "../lib/siteTile";
 
+/** The window each date filter covers, in days. `all` is the whole list. */
+type RangeId = "week" | "month" | "quarter" | "half" | "all";
+
+const RANGES: ReadonlyArray<{ id: RangeId; label: string; note: string; days: number | null }> = [
+  { id: "week", label: "This week", note: "the last seven days", days: 7 },
+  { id: "month", label: "This month", note: "the last thirty days", days: 30 },
+  { id: "quarter", label: "Last 3 months", note: "the last ninety days", days: 90 },
+  { id: "half", label: "Last 6 months", note: "the last six months", days: 180 },
+  { id: "all", label: "All time", note: "the whole directory", days: null },
+];
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Whole days between a listing's launch date and today, or null if undated. */
+function ageInDays(launched: string | undefined, now: number): number | null {
+  if (!launched) return null;
+  const time = Date.parse(launched);
+  if (Number.isNaN(time)) return null;
+  return Math.max(0, Math.floor((now - time) / DAY_MS));
+}
+
+/** "today", "12 days ago", "3 months ago" — a quicker read than a date. */
+function sinceLabel(launched: string | undefined, now: number): string {
+  const days = ageInDays(launched, now);
+  if (days === null) return "Date not listed";
+  if (days === 0) return "Launched today";
+  if (days === 1) return "Launched yesterday";
+  if (days < 14) return `Launched ${days} days ago`;
+  if (days < 60) return `Launched ${Math.round(days / 7)} weeks ago`;
+  if (days < 365) return `Launched ${Math.round(days / 30)} months ago`;
+  const years = Math.round(days / 365);
+  return `Launched ${years} ${years === 1 ? "year" : "years"} ago`;
+}
+
 export default function NewWebsites() {
-  const latest = newAdditions(24);
+  const [params, setParams] = useSearchParams();
+  const asked = params.get("since");
+  const range = RANGES.find((entry) => entry.id === asked) ?? RANGES[RANGES.length - 1]!;
+
+  // Read the clock once when the page mounts, so the filters and the cards agree.
+  const [now] = useState(() => Date.now());
+
+  /** Every listed site, newest first. Sites without a date sort last. */
+  const all = useMemo(() => newAdditions(sites.length), []);
+
+  const counts = useMemo(() => {
+    const tally = {} as Record<RangeId, number>;
+    for (const entry of RANGES) {
+      const window = entry.days;
+      tally[entry.id] =
+        window === null
+          ? all.length
+          : all.filter((site) => {
+              const age = ageInDays(site.launched, now);
+              return age !== null && age <= window;
+            }).length;
+    }
+    return tally;
+  }, [all, now]);
+
+  const listed = useMemo(() => {
+    const window = range.days;
+    if (window === null) return all;
+    return all.filter((site) => {
+      const age = ageInDays(site.launched, now);
+      return age !== null && age <= window;
+    });
+  }, [all, range, now]);
+
+  /** The SEO list stays the newest slice of the directory, whatever is filtered. */
+  const latest = useMemo(() => all.slice(0, 24), [all]);
+
+  function pick(id: RangeId) {
+    const next = new URLSearchParams(params);
+    if (id === "all") next.delete("since");
+    else next.set("since", id);
+    setParams(next, { replace: true, preventScrollReset: true });
+  }
 
   return (
     <>
@@ -69,30 +146,92 @@ export default function NewWebsites() {
           </p>
         </header>
 
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {latest.map((site) => (
-            <li key={site.id} className="card p-4 flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <SiteIcon site={site} size={30} />
-                <a
-                  href={site.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-bold hover:underline underline-offset-4"
-                  style={{ color: "var(--ink)" }}
+        <section className="new-filter" aria-labelledby="new-filter-heading">
+          <div className="new-filter-head">
+            <h2 id="new-filter-heading" className="text-lg font-bold">
+              Filter by launch date
+            </h2>
+            <p className="text-[12px] font-mono uppercase tracking-[0.1em]" style={{ color: "var(--muted)" }}>
+              {listed.length} of {all.length} sites
+            </p>
+          </div>
+          <div className="chip-row" role="group" aria-label="Filter listings by launch date">
+            {RANGES.map((entry) => {
+              const active = entry.id === range.id;
+              return (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className="chip"
+                  onClick={() => pick(entry.id)}
+                  aria-pressed={active}
+                  style={{
+                    backgroundColor: active ? "var(--accent)" : "#ffffff",
+                    color: active ? "var(--on-accent)" : "var(--ink)",
+                  }}
                 >
-                  {site.name}
-                </a>
-              </div>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
-                {site.description}
-              </p>
-              <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-                {site.launched ? formatDate(site.launched) : "Recently added"} · {siteDomain(site.url)}
-              </span>
-            </li>
-          ))}
-        </ul>
+                  {entry.label}
+                  <span className="new-filter-count" aria-hidden="true">
+                    {counts[entry.id]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[12px]" style={{ color: "var(--muted)" }}>
+            {listed.length === 0
+              ? `Nothing launched in ${range.note}.`
+              : `${listed.length === 1 ? "One site" : `${listed.length} sites`} from ${range.note}, newest first.`}
+          </p>
+        </section>
+
+        {listed.length > 0 ? (
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {listed.map((site) => (
+              <li key={site.id} className="card p-4 flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <SiteIcon site={site} size={30} />
+                  <a
+                    href={site.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold hover:underline underline-offset-4"
+                    style={{ color: "var(--ink)" }}
+                  >
+                    {site.name}
+                  </a>
+                </div>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                  {site.description}
+                </p>
+                <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+                  {site.launched ? sinceLabel(site.launched, now) : "Recently added"} ·{" "}
+                  {site.launched ? formatDate(site.launched) : "no date"} · {siteDomain(site.url)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="new-filter-empty">
+            <p>
+              <strong>Nothing launched in this window yet.</strong> Try a wider range, or{" "}
+              <button type="button" className="new-filter-link" onClick={() => pick("all")}>
+                show every site
+              </button>
+              .
+            </p>
+          </div>
+        )}
+
+        {listed.length > 0 && range.id !== "all" && (
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Looking for the ones that dropped off this window?{" "}
+            <button type="button" className="new-filter-link" onClick={() => pick("all")}>
+              Show all {all.length} sites
+            </button>
+            .
+          </p>
+        )}
       </div>
     </>
   );

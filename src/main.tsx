@@ -19,6 +19,7 @@ import ThisOrThat from "./pages/ThisOrThat.tsx";
 import SiteTinder from "./pages/SiteTinder.tsx";
 import { Profile, Saved, Settings } from "./pages/Account.tsx";
 import Advertise from "./pages/Advertise.tsx";
+import { Privacy, Terms } from "./pages/Legal.tsx";
 import EmbedBadge from "./pages/EmbedBadge.tsx";
 
 const router = createBrowserRouter([
@@ -57,6 +58,14 @@ const router = createBrowserRouter([
       {
         path: "advertise",
         element: <Advertise />,
+      },
+      {
+        path: "terms",
+        element: <Terms />,
+      },
+      {
+        path: "privacy",
+        element: <Privacy />,
       },
       {
         path: "discover-websites",
