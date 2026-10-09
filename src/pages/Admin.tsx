@@ -53,7 +53,7 @@ function SubmissionCard({
     ["Pricing", submission.pricing],
     ["Social or community links", submission.socialLinks],
     ["FAQ", submission.faq],
-  ].filter(([, value]) => value.length > 0) as Array<[string, string]>;
+  ].filter(([, value]) => typeof value === "string" && value.length > 0) as Array<[string, string]>;
 
   return (
     <article className="card p-5 flex flex-col gap-4">
@@ -65,6 +65,11 @@ function SubmissionCard({
             {submission.openSource && (
               <span className="text-[10px] font-mono border px-2 py-0.5" style={{ borderColor: "var(--rule)", color: "var(--muted)" }}>
                 open source
+              </span>
+            )}
+            {submission.supportsIframe && (
+              <span className="text-[10px] font-mono border px-2 py-0.5" style={{ borderColor: "var(--rule)", color: "var(--muted)" }}>
+                iframe ready
               </span>
             )}
           </div>

@@ -54,6 +54,60 @@ function str(value, max) {
   return value.trim().slice(0, max);
 }
 
+function decodeHtml(value) {
+  return value
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">");
+}
+
+function htmlField(html, pattern, max) {
+  const match = html.match(pattern);
+  return match ? decodeHtml(match[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()).slice(0, max) : "";
+}
+
+async function inspectSite(rawUrl) {
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("unsupported protocol");
+  } catch {
+    return { error: "Enter a valid http:// or https:// URL." };
+  }
+
+  try {
+    const response = await fetch(parsed.toString(), {
+      headers: { Accept: "text/html,application/xhtml+xml", "User-Agent": "BoringInternet-Autofill/1.0" },
+      redirect: "follow",
+    });
+    if (!response.ok) return { error: `The site returned HTTP ${response.status}.` };
+    const html = (await response.text()).slice(0, 300000);
+    const title = htmlField(html, /<title[^>]*>([\s\S]*?)<\/title>/i, 120);
+    const description = htmlField(
+      html,
+      /<meta[^>]+(?:name|property)=["'](?:description|og:description)["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
+      4000,
+    );
+    const reverseDescription = htmlField(
+      html,
+      /<meta[^>]+content=["']([\s\S]*?)["'][^>]+(?:name|property)=["'](?:description|og:description)["'][^>]*>/i,
+      4000,
+    );
+    const firstParagraph = htmlField(html, /<p[^>]*>([\s\S]*?)<\/p>/i, 4000);
+    const h1 = htmlField(html, /<h1[^>]*>([\s\S]*?)<\/h1>/i, 160);
+    const fullDescription = description || reverseDescription || firstParagraph || h1 || title;
+    const tagline = (description || reverseDescription || h1 || title).split(/[.!?]\s/)[0].slice(0, 160);
+    const frameBlocked = /x-frame-options|frame-ancestors\s+[^;]*(?:'none'|'self')/i.test(
+      `${response.headers.get("x-frame-options") || ""} ${response.headers.get("content-security-policy") || ""}`,
+    );
+    return { url: response.url || parsed.toString(), name: title || h1, tagline, description: fullDescription, supportsIframe: !frameBlocked };
+  } catch {
+    return { error: "Could not fetch that site. Check the URL and try again." };
+  }
+}
+
 function constantTimeEqual(a, b) {
   if (typeof a !== "string" || typeof b !== "string") return false;
   if (a.length !== b.length) return false;
@@ -149,6 +203,7 @@ function validateSubmission(body) {
       faq,
       categories,
       openSource: body.openSource === true,
+      supportsIframe: body.supportsIframe === true,
     },
   };
 }
@@ -197,6 +252,12 @@ export default {
 
     if (pathname === "/counts" && request.method === "GET") {
       return json(await allVoteCounts(env), headers);
+    }
+
+    if (pathname === "/inspect" && request.method === "GET") {
+      const target = new URL(request.url).searchParams.get("url") || "";
+      const result = await inspectSite(target);
+      return result.error ? json(result, headers, 400) : json(result, headers);
     }
 
     if ((pathname === "/vote" || pathname === "/unvote") && request.method === "POST") {

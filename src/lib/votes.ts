@@ -13,7 +13,7 @@ export const votesEndpoint = (raw ?? "").replace(/\/+$/, "");
 export const votesConnected = votesEndpoint.length > 0;
 
 const VOTED_KEY = "bi:voted";
-const COUNT_KEY = "bi:vote-counts";
+const COUNT_KEY = "bi:vote-counts:v2";
 
 function readJson<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;

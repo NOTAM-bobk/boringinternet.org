@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { categoryFilters, siteName, siteUrl } from "../lib/siteData";
-import { submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
+import { autofillSite, submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
 
 type TextFieldKey =
   | "url"
@@ -35,6 +35,7 @@ const EMPTY_DRAFT: SubmissionDraft = {
   faq: "",
   categories: [],
   openSource: false,
+  supportsIframe: false,
 };
 
 const FIELDS: Array<{
@@ -96,6 +97,8 @@ export default function Submit() {
   const [error, setError] = useState<string | null>(null);
   const [badFields, setBadFields] = useState<string[]>([]);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
+  const [autofillBusy, setAutofillBusy] = useState(false);
+  const [autofillMessage, setAutofillMessage] = useState<string | null>(null);
 
   const openCategories = categoryFilters.filter((category) => category.id !== "all");
 
@@ -110,6 +113,30 @@ export default function Submit() {
         ? current.categories.filter((c) => c !== id)
         : [...current.categories, id],
     }));
+  }
+
+  async function handleAutofill() {
+    if (!draft.url.trim()) {
+      setAutofillMessage("Enter a URL first.");
+      return;
+    }
+    setAutofillBusy(true);
+    setAutofillMessage(null);
+    const result = await autofillSite(draft.url.trim());
+    setAutofillBusy(false);
+    if (!result.ok) {
+      setAutofillMessage(result.error);
+      return;
+    }
+    setDraft((current) => ({
+      ...current,
+      url: result.value.url || current.url,
+      name: current.name || result.value.name,
+      tagline: current.tagline || result.value.tagline,
+      description: current.description || result.value.description,
+      supportsIframe: result.value.supportsIframe,
+    }));
+    setAutofillMessage("Filled what could be found. Review everything before submitting.");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -281,6 +308,17 @@ export default function Submit() {
                     style={{ borderColor }}
                   />
                 )}
+                {field.key === "url" && (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button type="button" className="btn ghost" onClick={() => void handleAutofill()} disabled={autofillBusy || !submissionsConnected}>
+                      {autofillBusy ? "Inspecting…" : "Autofill from URL"}
+                    </button>
+                    <span className="text-[12px]" style={{ color: "var(--muted)" }}>
+                      Reads page metadata; no AI is used.
+                    </span>
+                    {autofillMessage && <span className="text-[12px]" style={{ color: "var(--muted)" }}>{autofillMessage}</span>}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -329,6 +367,28 @@ export default function Submit() {
               aria-label="Open source"
               className="switch"
               onClick={() => update("openSource", !draft.openSource)}
+            >
+              <span className="switch-knob" />
+            </button>
+          </div>
+
+          <div
+            className="flex items-center justify-between gap-4 border p-4"
+            style={{ borderColor: "var(--rule)", backgroundColor: "var(--surface)" }}
+          >
+            <div>
+              <p className="text-[12px] font-bold tracking-[0.12em] uppercase">Supports iframe embedding</p>
+              <p className="text-[13px]" style={{ color: "var(--muted)" }}>
+                Turn this on if the site allows other pages to embed it in an iframe.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={draft.supportsIframe}
+              aria-label="Supports iframe embedding"
+              className="switch"
+              onClick={() => update("supportsIframe", !draft.supportsIframe)}
             >
               <span className="switch-knob" />
             </button>
