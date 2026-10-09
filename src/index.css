@@ -1149,17 +1149,22 @@ hr {
  */
 @media (min-width: 1024px) {
   .sidenav {
+    --sidenav-top-gap: 2rem;
+    --sidenav-bottom-gap: 3rem;
     display: block;
     position: sticky;
-    /* Sits just under the header, whatever height it is: the promo bar only
-       shows on the home screen, so the offset cannot be hard-coded. */
-    top: var(--header-h, 6.6rem);
+    /* The promo bar only shows on the home screen, so the header offset cannot
+       be hard-coded. The extra gutters keep the floating card clear of both
+       the header and the footer. */
+    top: calc(var(--header-h, 6.6rem) + var(--sidenav-top-gap));
     align-self: start;
     justify-self: start;
     margin-left: 1.1rem;
     width: 16.5rem;
-    height: calc(100vh - var(--header-h, 6.6rem) - 1.6rem);
-    height: min(calc(100dvh - var(--header-h, 6.6rem) - 1.6rem), 100%);
+    height: min(
+      calc(100dvh - var(--header-h, 6.6rem) - var(--sidenav-top-gap) - var(--sidenav-bottom-gap)),
+      calc(100% - var(--sidenav-bottom-gap))
+    );
     z-index: 30;
     perspective: 1400px;
   }
@@ -1920,10 +1925,49 @@ mark.hl {
 
 /* ---------- "this or that" ---------- */
 
+.compare-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: #fff8ef;
+  box-shadow: var(--shadow-thick);
+}
+
+.compare-toolbar-label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.compare-toolbar-status {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.compare-switch {
+  flex: none;
+  white-space: nowrap;
+}
+
 .compare-pair {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 1.25rem;
+  animation: compare-pair-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes compare-pair-in {
+  from { opacity: 0; transform: translateY(0.7rem); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .compare-side {
@@ -1936,39 +1980,18 @@ mark.hl {
   box-shadow: var(--shadow-thick);
 }
 
-.compare-side-winner {
-  outline: 3px solid var(--accent);
-  outline-offset: -3px;
-}
-
 .compare-head {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.7rem 0.85rem;
+  padding: 0.8rem 0.95rem;
   border-bottom: 1px solid var(--ink);
-}
-
-.compare-flag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  margin-left: auto;
-  width: 1.6rem;
-  height: 1.6rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-size: 0.8rem;
-  font-weight: 700;
 }
 
 /* the framed site itself; some sites refuse to load in a frame */
 .compare-frame {
   position: relative;
-  height: 20rem;
+  height: 24rem;
   border-bottom: 1px solid var(--ink);
   background: #fff;
 }
@@ -1985,24 +2008,11 @@ mark.hl {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  padding: 0.85rem;
+  padding: 0.95rem;
 }
 
 .compare-foot .btn {
   width: 100%;
-}
-
-.compare-foot .btn:disabled {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--surface);
-  cursor: default;
-}
-
-.compare-side-winner .btn:disabled {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
 }
 
 .compare-open {
@@ -2035,11 +2045,28 @@ mark.hl {
 @media (min-width: 768px) {
   .compare-pair {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: 1.5rem;
   }
 
   .compare-frame {
-    height: 26rem;
+    height: clamp(30rem, 45vw, 36rem);
+  }
+}
+
+@media (max-width: 540px) {
+  .compare-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .compare-switch {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare-pair {
+    animation: none;
   }
 }
 

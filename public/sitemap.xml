@@ -379,6 +379,30 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://boringinternet.org/collections/small-web-search</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://boringinternet.org/collections/learn-by-moving</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://boringinternet.org/collections/careful-design-kit</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://boringinternet.org/collections/make-room-to-focus</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://boringinternet.org/blog/what-counts-as-launched</loc>
     <lastmod>2026-10-04</lastmod>
     <changefreq>monthly</changefreq>

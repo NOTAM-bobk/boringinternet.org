@@ -26,23 +26,23 @@ function drawPair(exclude: string[] = []): [Site, Site] {
  */
 export default function ThisOrThat() {
   const [pair, setPair] = useState<[Site, Site]>(() => drawPair());
-  const [winner, setWinner] = useState<string | null>(null);
+  const [lastVote, setLastVote] = useState<Site | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>(() => readLocalCounts());
 
   const [left, right] = pair;
   const enoughSites = sites.length >= 2;
 
   function voteFor(site: Site) {
-    if (winner) return;
-    setWinner(site.slug);
-
     // Count it the way the trending list does: shared when the Worker is
-    // configured, kept in this browser otherwise.
+    // configured, kept in this browser otherwise. Advance immediately so each
+    // click feels like a quick, continuous round rather than a two-step flow.
     const base = counts[site.slug] ?? site.trending ?? 0;
     const optimistic = base + 1;
     setCounts((current) => ({ ...current, [site.slug]: optimistic }));
     markVoted(site.slug);
     writeLocalCount(site.slug, optimistic);
+    setLastVote(site);
+    setPair(drawPair([left.slug, right.slug]));
     void castVote(site.slug, "up").then((shared) => {
       if (shared == null) return;
       writeLocalCount(site.slug, shared);
@@ -52,14 +52,12 @@ export default function ThisOrThat() {
 
   function newPair() {
     setPair(drawPair([left.slug, right.slug]));
-    setWinner(null);
+    setLastVote(null);
   }
 
   function countFor(site: Site): number {
     return counts[site.slug] ?? site.trending ?? 0;
   }
-
-  const winnerSite = winner === left.slug ? left : winner === right.slug ? right : null;
 
   return (
     <>
@@ -70,8 +68,8 @@ export default function ThisOrThat() {
         keywords={["this or that", "vote on websites", "compare websites", "site battle"]}
       />
 
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-6">
-        <header className="flex flex-col gap-3 text-center">
+      <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-6">
+        <header className="mx-auto flex max-w-3xl flex-col gap-3 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">
             This <span className="accent-text">or</span> that
           </h1>
@@ -91,16 +89,30 @@ export default function ThisOrThat() {
           </p>
         ) : (
           <>
-            <div className="compare-pair">
+            <div className="compare-toolbar">
+              <div className="min-w-0">
+                <p className="compare-toolbar-label">Pick the better site</p>
+                <p className="compare-toolbar-status" aria-live="polite">
+                  {lastVote ? (
+                    <>
+                      Vote added for <strong>{lastVote.name}</strong>. Here is your next match-up.
+                    </>
+                  ) : (
+                    "Choose a winner, or switch to a completely new pair."
+                  )}
+                </p>
+              </div>
+              <button type="button" className="btn ghost compare-switch" onClick={newPair}>
+                <span aria-hidden="true">↻</span> Switch pair
+              </button>
+            </div>
+
+            <div key={`${left.slug}-${right.slug}`} className="compare-pair">
               {[left, right].map((site) => {
-                const isWinner = winner === site.slug;
                 return (
-                  <article
-                    key={site.slug}
-                    className={`compare-side${isWinner ? " compare-side-winner" : ""}`}
-                  >
+                  <article key={site.slug} className="compare-side">
                     <div className="compare-head">
-                      <SiteIcon site={site} size={32} label={false} />
+                      <SiteIcon site={site} size={36} label={false} />
                       <div className="min-w-0 flex flex-col">
                         <Link
                           to={`/sites/${site.slug}`}
@@ -113,11 +125,6 @@ export default function ThisOrThat() {
                           {siteDomain(site.url)} · {countFor(site)} votes
                         </span>
                       </div>
-                      {isWinner && (
-                        <span className="compare-flag" aria-hidden="true">
-                          ✓
-                        </span>
-                      )}
                     </div>
 
                     <div className="compare-frame">
@@ -134,9 +141,8 @@ export default function ThisOrThat() {
                         type="button"
                         className="btn accent"
                         onClick={() => voteFor(site)}
-                        disabled={winner !== null}
                       >
-                        {isWinner ? "You picked this" : "This one’s better"}
+                        Vote for this site
                       </button>
                       <a
                         href={site.url}
@@ -156,28 +162,6 @@ export default function ThisOrThat() {
               Some sites refuse to be framed, so a panel can come up empty — the link under each
               one always works.
             </p>
-
-            <div className="compare-actions">
-              {winnerSite ? (
-                <>
-                  <p className="compare-result">
-                    You picked <strong>{winnerSite.name}</strong>. That is one more vote for it.
-                  </p>
-                  <button type="button" className="btn accent" onClick={newPair}>
-                    Get new sites <span aria-hidden="true">→</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="compare-result" style={{ color: "var(--muted)" }}>
-                    Vote for one, or skip to a different pair.
-                  </p>
-                  <button type="button" className="btn ghost" onClick={newPair}>
-                    Skip these
-                  </button>
-                </>
-              )}
-            </div>
           </>
         )}
       </div>

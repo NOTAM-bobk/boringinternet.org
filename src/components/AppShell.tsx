@@ -193,9 +193,9 @@ export function AppShell() {
 
       {/*
         One grid row holds the side nav and the page, so the nav sticks while you
-        scroll the page but ends where the content does — above the footer.
+        scroll the page but ends with a generous lower gutter before the footer.
       */}
-      <div className="flex-1 w-full lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]">
+      <div className="flex-1 w-full lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:pb-12">
         <SideNav />
         <main className="min-w-0">
           <div key={location.pathname} className={`route-pane slide-${direction}`}>
