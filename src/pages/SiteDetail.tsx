@@ -15,6 +15,7 @@ import {
 import { formatDate } from "../lib/posts";
 import { siteDomain } from "../lib/siteTile";
 import { useAuth } from "../lib/auth";
+import { ReportProblem } from "../components/ReportProblem";
 
 /** Where a value first appears, so the listing reads in a sensible order. */
 const DETAIL_ORDER = [
@@ -158,6 +159,7 @@ export default function SiteDetail() {
             ) : (
               <Link to="/auth" className="btn ghost">Sign in to save</Link>
             )}
+            <ReportProblem siteName={site.name} siteUrl={site.url} slug={site.slug} />
           </div>
 
           <p className="text-[12px] font-mono break-all" style={{ color: "var(--muted)" }}>

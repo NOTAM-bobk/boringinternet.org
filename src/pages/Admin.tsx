@@ -2,8 +2,11 @@ import { useEffect, useState, type FormEvent } from "react";
 import { SiteSeo } from "../components/SeoHead";
 import {
   fetchSubmissions,
+  fetchSiteReports,
   reviewSubmission,
+  reviewSiteReport,
   submissionsConnected,
+  type SiteProblemReport,
   type Submission,
   type SubmissionStatus,
 } from "../lib/submissions";
@@ -135,25 +138,68 @@ function SubmissionCard({
   );
 }
 
+function ReportCard({
+  report,
+  onReview,
+  busy,
+}: {
+  report: SiteProblemReport;
+  onReview: (id: string, status: SubmissionStatus) => void;
+  busy: boolean;
+}) {
+  return (
+    <article className="card p-5 flex flex-col gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold">{report.siteName}</h2>
+            <StatusChip status={report.status} />
+          </div>
+          <a href={report.siteUrl} target="_blank" rel="noopener noreferrer" className="text-[13px] font-mono accent-text underline underline-offset-4 break-all">
+            {report.siteUrl}
+          </a>
+        </div>
+        <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+          {new Date(report.createdAt).toLocaleString("en-US")}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <span className="text-[10px] font-bold tracking-[0.14em] uppercase border px-2 py-0.5" style={{ borderColor: "var(--rule)", color: "var(--muted)" }}>
+          {report.type === "iframe" ? "iframe report" : report.type}
+        </span>
+        {report.email && <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>{report.email}</span>}
+      </div>
+      <p className="text-[15px] leading-relaxed whitespace-pre-line">{report.issue}</p>
+      <div className="flex flex-wrap items-center gap-3 border-t pt-4" style={{ borderColor: "var(--rule)" }}>
+        <button type="button" className="btn" disabled={busy || report.status === "approved"} onClick={() => onReview(report.id, "approved")}>Mark fixed</button>
+        <button type="button" className="btn ghost" disabled={busy || report.status === "rejected"} onClick={() => onReview(report.id, "rejected")}>Dismiss</button>
+        <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>{report.id}</span>
+      </div>
+    </article>
+  );
+}
+
 export default function Admin() {
   const [password, setPassword] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [reports, setReports] = useState<SiteProblemReport[]>([]);
   const [filter, setFilter] = useState<SubmissionStatus | "all">("pending");
 
   async function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError(null);
-    const result = await fetchSubmissions(password);
+    const [result, reportResult] = await Promise.all([fetchSubmissions(password), fetchSiteReports(password)]);
     setBusy(false);
     if (!result.ok) {
       setError(result.error === "wrong password" ? "Wrong password." : result.error);
       return;
     }
     setSubmissions(result.value.submissions);
+    if (reportResult.ok) setReports(reportResult.value.reports);
     setUnlocked(true);
   }
 
@@ -162,8 +208,10 @@ export default function Admin() {
     if (!unlocked) return;
     let active = true;
     const timer = setInterval(() => {
-      void fetchSubmissions(password).then((result) => {
-        if (active && result.ok) setSubmissions(result.value.submissions);
+      void Promise.all([fetchSubmissions(password), fetchSiteReports(password)]).then(([submissionResult, reportResult]) => {
+        if (!active) return;
+        if (submissionResult.ok) setSubmissions(submissionResult.value.submissions);
+        if (reportResult.ok) setReports(reportResult.value.reports);
       });
     }, 30000);
     return () => {
@@ -173,8 +221,9 @@ export default function Admin() {
   }, [unlocked, password]);
 
   async function refresh(currentPassword: string) {
-    const result = await fetchSubmissions(currentPassword);
+    const [result, reportResult] = await Promise.all([fetchSubmissions(currentPassword), fetchSiteReports(currentPassword)]);
     if (result.ok) setSubmissions(result.value.submissions);
+    if (reportResult.ok) setReports(reportResult.value.reports);
   }
 
   async function review(id: string, status: SubmissionStatus) {
@@ -188,6 +237,17 @@ export default function Admin() {
     setSubmissions((current) =>
       current.map((item) => (item.id === id ? { ...item, status } : item)),
     );
+  }
+
+  async function reviewReport(id: string, status: SubmissionStatus) {
+    setBusy(true);
+    const result = await reviewSiteReport(password, id, status);
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setReports((current) => current.map((item) => (item.id === id ? { ...item, status } : item)));
   }
 
   const visible =
@@ -278,6 +338,7 @@ export default function Admin() {
                     setUnlocked(false);
                     setPassword("");
                     setSubmissions([]);
+                    setReports([]);
                   }}
                 >
                   Lock
@@ -307,6 +368,25 @@ export default function Admin() {
                 ))}
               </div>
             )}
+
+            <section className="flex flex-col gap-5 border-t pt-8" style={{ borderColor: "var(--rule)" }}>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <span className="accent-text text-[11px] font-bold tracking-[0.2em] uppercase">Site feedback</span>
+                  <h2 className="text-2xl font-bold">Problem reports {reports.length > 0 ? `(${reports.filter((report) => report.status === "pending").length} pending)` : ""}</h2>
+                </div>
+                <p className="text-[12px]" style={{ color: "var(--muted)" }}>Reports from detail pages and This-or-That.</p>
+              </div>
+              {reports.length === 0 ? (
+                <p className="border p-6 text-center text-sm" style={{ borderColor: "var(--rule)", color: "var(--muted)" }}>No site-problem reports yet.</p>
+              ) : (
+                <div className="flex flex-col gap-5">
+                  {reports.map((report) => (
+                    <ReportCard key={report.id} report={report} busy={busy} onReview={(id, status) => void reviewReport(id, status)} />
+                  ))}
+                </div>
+              )}
+            </section>
           </>
         )}
       </div>
