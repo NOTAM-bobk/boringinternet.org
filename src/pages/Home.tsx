@@ -114,7 +114,7 @@ function SectionHead({
         )}
       </div>
       {pageCount > 1 && (
-        <div className="flex items-center gap-2">
+        <div className="sec-pager flex items-center gap-2">
           <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
             {page + 1}/{pageCount}
           </span>
@@ -142,13 +142,58 @@ function SectionHead({
   );
 }
 
+/** How many rows one phone screenful holds before you swipe on. */
+const MOBILE_PAGE = 5;
+
+function chunk<T>(list: T[], size: number): T[][] {
+  const groups: T[][] = [];
+  for (let i = 0; i < list.length; i += size) groups.push(list.slice(i, i + size));
+  return groups;
+}
+
 function PagedRows({ items, title, note }: { items: Site[]; title: string; note?: string }) {
   const [page, setPage] = useState(0);
-  const [showAllMobile, setShowAllMobile] = useState(false);
+  const [mobilePage, setMobilePage] = useState(0);
+  const railRef = useRef<HTMLDivElement>(null);
   const perPage = exploreConfig.rowsPerPage;
   const pageCount = Math.max(1, Math.ceil(items.length / perPage));
   const current = items.slice(page * perPage, page * perPage + perPage);
-  const mobileItems = showAllMobile ? items : items.slice(0, 5);
+
+  /*
+    Phones get five rows at a time and swipe sideways for the next five, so the
+    whole list is reachable without a "show all" button. Desktops keep the grid
+    and its pager.
+  */
+  const mobilePages = useMemo(() => chunk(items, MOBILE_PAGE), [items]);
+
+  /*
+    Keep the dots in step with whatever the swipe settled on. The pages are
+    compared by their on-screen centres rather than offsetLeft, which is measured
+    from the offset parent and so would not line up with rail.scrollLeft.
+  */
+  function trackSwipe() {
+    const rail = railRef.current;
+    if (!rail) return;
+    const railRect = rail.getBoundingClientRect();
+    const middle = railRect.left + railRect.width / 2;
+    let nearest = 0;
+    let distance = Infinity;
+    [...rail.children].forEach((child, index) => {
+      const box = (child as HTMLElement).getBoundingClientRect();
+      const gap = Math.abs(box.left + box.width / 2 - middle);
+      if (gap < distance) {
+        distance = gap;
+        nearest = index;
+      }
+    });
+    setMobilePage(nearest);
+  }
+
+  function showMobilePage(index: number) {
+    const target = railRef.current?.children[index] as HTMLElement | undefined;
+    target?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    setMobilePage(index);
+  }
 
   return (
     <section className="space-y-4">
@@ -165,20 +210,40 @@ function PagedRows({ items, title, note }: { items: Site[]; title: string; note?
           <SiteRow key={site.id} site={site} />
         ))}
       </ul>
-      <ul className="home-mobile-swipe" aria-label={`${title} mobile list`}>
-        {mobileItems.map((site) => (
-          <li key={site.id} className="home-mobile-swipe-item">
-            <SiteRow site={site} />
-          </li>
-        ))}
-        {!showAllMobile && items.length > 5 && (
-          <li className="home-mobile-more">
-            <button type="button" className="btn ghost" onClick={() => setShowAllMobile(true)}>
-              Show all {items.length} sites
-            </button>
-          </li>
+
+      <div className="home-mobile-swipe-wrap">
+        <div
+          className="home-mobile-swipe"
+          ref={railRef}
+          onScroll={trackSwipe}
+          aria-label={`${title} pages`}
+        >
+          {mobilePages.map((group, index) => (
+            <ul className="home-mobile-page" key={`${title}-page-${index + 1}`}>
+              {group.map((site) => (
+                <li key={site.id}>
+                  <SiteRow site={site} />
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+
+        {mobilePages.length > 1 && (
+          <div className="carousel-dots home-mobile-dots" aria-label={`Choose a page of ${title}`}>
+            {mobilePages.map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                className={`carousel-dot${index === mobilePage ? " carousel-dot-active" : ""}`}
+                aria-label={`Show ${title} page ${index + 1} of ${mobilePages.length}`}
+                aria-current={index === mobilePage ? "true" : undefined}
+                onClick={() => showMobilePage(index)}
+              />
+            ))}
+          </div>
         )}
-      </ul>
+      </div>
     </section>
   );
 }
