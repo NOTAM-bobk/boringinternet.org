@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Highlight } from "../components/Highlight";
 import { LaunchesThisWeek } from "../components/LaunchesThisWeek";
@@ -314,6 +314,7 @@ export default function Home() {
   const selectedCategory = params.get("category") ?? "all";
   const [savedCollections, toggleSaved] = useSavedCollections();
   const [showAllSites, setShowAllSites] = useState(false);
+  const lastRandom = useRef<string | null>(null);
 
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
   const picks = useMemo(() => featuredSiteRows(exploreConfig.featuredSitesLimit), []);
@@ -336,8 +337,32 @@ export default function Home() {
   const category = categoryById(selectedCategory);
   const browsingCategory = !searching && Boolean(category);
 
+  /** One random site from the whole directory — never the same one twice in a row. */
+  function openRandomSite() {
+    const pool = lastRandom.current
+      ? sites.filter((site) => site.id !== lastRandom.current)
+      : sites;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    if (!pick) return;
+    lastRandom.current = pick.id;
+    window.open(pick.url, "_blank", "noopener,noreferrer");
+  }
+
   const switcher = (
     <section className="flex flex-col gap-4">
+      {/* Above the search box: one click, one random site, in a new tab. */}
+      <div className="bored-row">
+        <button
+          type="button"
+          className="bored-btn"
+          onClick={openRandomSite}
+          title="Open a random site from the list in a new tab"
+        >
+          <span aria-hidden="true">🎲</span> I’m bored
+        </button>
+        <span className="bored-note">Opens one random site in a new tab.</span>
+      </div>
+
       <label htmlFor="site-search" className="sr-only">
         Search launched sites
       </label>

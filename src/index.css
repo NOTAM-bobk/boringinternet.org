@@ -1799,6 +1799,64 @@ mark.hl {
   font-size: 0.8rem;
 }
 
+/* ---------- "I'm bored" button ---------- */
+
+.bored-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.bored-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: 0 2px 0 0 var(--ink);
+  color: var(--ink);
+  font-family: var(--futura);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.bored-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lift);
+}
+
+.bored-btn:active {
+  transform: translateY(1px);
+}
+
+.bored-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+@media (max-width: 639px) {
+  .bored-note {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bored-btn {
+    transition: none;
+  }
+}
+
 /* ---------- search field + filter chips ---------- */
 
 .search-box {

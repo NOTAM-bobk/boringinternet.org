@@ -19,7 +19,7 @@ const SECTIONS = [
   { id: "explore", to: "/#explore", icon: "◎", label: "Explore" },
   { id: "articles", to: "/blog", icon: "◫", label: "Articles" },
   { id: "collections", to: "/collections", icon: "❐", label: "Collections" },
-  { id: "trending", to: "/trending", icon: "✦", label: "Trending" },
+  { id: "trending", to: "/trending", icon: "🔥", label: "Trending" },
 ] as const;
 
 function scrollToSection(id: string) {
