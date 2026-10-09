@@ -16,6 +16,7 @@ import DiscoverWebsites from "./pages/DiscoverWebsites.tsx";
 import NewWebsites from "./pages/NewWebsites.tsx";
 import SiteDetail from "./pages/SiteDetail.tsx";
 import ThisOrThat from "./pages/ThisOrThat.tsx";
+import { Profile, Saved, Settings } from "./pages/Account.tsx";
 
 const router = createBrowserRouter([
   {
@@ -73,6 +74,18 @@ const router = createBrowserRouter([
       {
         path: "auth",
         element: <Auth />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
+      },
+      {
+        path: "saved",
+        element: <Saved />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
       },
     ],
   },
