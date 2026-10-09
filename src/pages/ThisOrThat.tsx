@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import { sites, type Site } from "../lib/siteData";
@@ -24,11 +24,20 @@ function drawPair(exclude: string[] = []): [Site, Site] {
  * "This or that": two sites framed side by side, one vote for whichever is
  * better. The winner gets the same vote the trending list counts, and once a
  * vote is in the page offers a fresh pair.
+ *
+ * On a phone the page becomes a verdict bar — back button, "Which one is
+ * better?", Skip — over two stacked, full-width panels, each with its own
+ * preview controls and a wide "Vote for …" button. The wide layout keeps the
+ * toolbar and the framed pair as they were.
  */
 export default function ThisOrThat() {
   const [pair, setPair] = useState<[Site, Site]>(() => drawPair());
   const [lastVote, setLastVote] = useState<Site | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>(() => readLocalCounts());
+  // Remounting an iframe is the only way to reload a framed site, so each
+  // preview keeps a nonce that the header's refresh button bumps.
+  const [frameNonce, setFrameNonce] = useState<Record<string, number>>({});
+  const navigate = useNavigate();
 
   const [left, right] = pair;
   const enoughSites = sites.length >= 2;
@@ -56,9 +65,17 @@ export default function ThisOrThat() {
     setLastVote(null);
   }
 
+  function reloadFrame(slug: string) {
+    setFrameNonce((current) => ({ ...current, [slug]: (current[slug] ?? 0) + 1 }));
+  }
+
   function countFor(site: Site): number {
     return counts[site.slug] ?? site.trending ?? 0;
   }
+
+  const status = lastVote
+    ? `Vote added for ${lastVote.name}. Here is your next match-up.`
+    : "Choose a winner, or switch to a completely new pair.";
 
   return (
     <>
@@ -69,8 +86,23 @@ export default function ThisOrThat() {
         keywords={["this or that", "vote on websites", "compare websites", "site battle"]}
       />
 
-      <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-6">
-        <header className="mx-auto flex max-w-3xl flex-col gap-3 text-center">
+      {/* The phone's verdict bar. Hidden from the wide layout by CSS, and the
+          heading it carries is the page's h1 only where it shows. */}
+      <div className="tot-mobile-bar">
+        <button type="button" className="tot-back" onClick={() => navigate(-1)} aria-label="Go back">
+          <span aria-hidden="true">←</span>
+        </button>
+        <h1 className="tot-mobile-title">Which one is better?</h1>
+        <button type="button" className="tot-skip" onClick={newPair}>
+          Skip
+        </button>
+      </div>
+      <p className="tot-mobile-status" aria-live="polite">
+        {status}
+      </p>
+
+      <div className="tot-container mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-6">
+        <header className="tot-desktop-head mx-auto flex max-w-3xl flex-col gap-3 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">
             This <span className="accent-text">or</span> that
           </h1>
@@ -94,13 +126,7 @@ export default function ThisOrThat() {
               <div className="min-w-0">
                 <p className="compare-toolbar-label">Pick the better site</p>
                 <p className="compare-toolbar-status" aria-live="polite">
-                  {lastVote ? (
-                    <>
-                      Vote added for <strong>{lastVote.name}</strong>. Here is your next match-up.
-                    </>
-                  ) : (
-                    "Choose a winner, or switch to a completely new pair."
-                  )}
+                  {status}
                 </p>
               </div>
               <button type="button" className="btn ghost compare-switch" onClick={newPair}>
@@ -123,13 +149,37 @@ export default function ThisOrThat() {
                           {site.name}
                         </Link>
                         <span className="text-[11px] font-mono truncate" style={{ color: "var(--muted)" }}>
-                          {siteDomain(site.url)} · {countFor(site)} votes
+                          {siteDomain(site.url)}
+                          <span className="compare-votes"> · {countFor(site)} votes</span>
                         </span>
+                      </div>
+
+                      {/* Preview controls for the phone panel: reload the frame,
+                          or leave for the real site. */}
+                      <div className="compare-head-actions">
+                        <button
+                          type="button"
+                          className="compare-icon-btn"
+                          aria-label={`Reload the ${site.name} preview`}
+                          onClick={() => reloadFrame(site.slug)}
+                        >
+                          <span aria-hidden="true">↻</span>
+                        </button>
+                        <a
+                          href={site.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="compare-icon-btn"
+                          aria-label={`Open ${siteDomain(site.url)} in a new tab`}
+                        >
+                          <span aria-hidden="true">↗</span>
+                        </a>
                       </div>
                     </div>
 
                     <div className="compare-frame">
                       <iframe
+                        key={`${site.slug}:${frameNonce[site.slug] ?? 0}`}
                         src={site.url}
                         title={`${site.name} preview`}
                         loading="lazy"
@@ -143,7 +193,8 @@ export default function ThisOrThat() {
                         className="btn accent"
                         onClick={() => voteFor(site)}
                       >
-                        Vote for this site
+                        <SiteIcon site={site} size={20} label={false} />
+                        Vote for {site.name}
                       </button>
                       <a
                         href={site.url}
@@ -167,7 +218,7 @@ export default function ThisOrThat() {
               })}
             </div>
 
-            <p className="text-[12px] text-center" style={{ color: "var(--muted)" }}>
+            <p className="tot-footnote text-[12px] text-center" style={{ color: "var(--muted)" }}>
               Some sites refuse to be framed, so a panel can come up empty — the link under each
               one always works.
             </p>

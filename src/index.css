@@ -4246,3 +4246,189 @@ mark.hl {
     transition: none;
   }
 }
+
+/* ---------- "this or that": phone verdict layout ---------- */
+
+/*
+ * Below 768px the match-up becomes a verdict bar — back button, "Which one is
+ * better?", Skip — over two full-bleed panels split by ink rules: header with
+ * reload/open controls, the framed site, then a wide peach "Vote for …" button.
+ * The wide layout keeps the toolbar and the two-column pair unchanged, so all
+ * of this hides there; the sr-only status is the mobile twin of the toolbar's
+ * live region and is dropped from the a11y tree on wide screens.
+ */
+.tot-mobile-bar,
+.tot-mobile-status,
+.compare-head-actions {
+  display: none;
+}
+
+.tot-footnote {
+  margin-top: 1rem;
+}
+
+@media (max-width: 767px) {
+  .tot-mobile-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: #fff;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .tot-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--ink);
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .tot-back:hover {
+    background: var(--surface);
+  }
+
+  .tot-mobile-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .tot-skip {
+    flex: none;
+    padding: 0.35rem 0.15rem;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  .tot-mobile-status {
+    /* Re-shown as sr-only: the toolbar that normally carries the live status
+       is hidden here, so this twin keeps vote announcements reachable. */
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .tot-desktop-head,
+  .compare-toolbar {
+    display: none;
+  }
+
+  /* Panels run edge to edge, separated by single ink rules rather than cards. */
+  .tot-container {
+    padding-top: 0;
+    gap: 0;
+  }
+
+  .compare-pair {
+    gap: 0;
+    margin: 0 -1rem;
+  }
+
+  .compare-side {
+    border: 0;
+    border-bottom: 1px solid var(--ink);
+    border-radius: 0;
+    box-shadow: none;
+    background: #fff;
+  }
+
+  .compare-head {
+    gap: 0.7rem;
+    padding: 0.65rem 0.9rem;
+  }
+
+  .compare-head-actions {
+    display: flex;
+    gap: 0.45rem;
+    margin-left: auto;
+  }
+
+  .compare-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    color: var(--ink);
+    font-size: 1.05rem;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .compare-icon-btn:hover {
+    background: var(--ink);
+    color: #fff;
+  }
+
+  /* The panel's header link already shows the domain; the count can go. */
+  .compare-votes {
+    display: none;
+  }
+
+  .compare-frame {
+    height: 21rem;
+  }
+
+  .compare-foot {
+    padding: 0.85rem 0.9rem;
+  }
+
+  .compare-foot .btn.accent {
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.95rem 1rem;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    background: #fbe5c8;
+    color: var(--ink);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: normal;
+    text-transform: none;
+    box-shadow: none;
+  }
+
+  .compare-foot .btn.accent:hover {
+    background: var(--accent);
+    border-color: var(--ink);
+    color: var(--on-accent);
+  }
+
+  /* Leaving the site is the header's ↗ button up above. */
+  .compare-open {
+    display: none;
+  }
+
+  .tot-footnote {
+    padding: 0 1rem;
+  }
+}
