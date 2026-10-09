@@ -15,14 +15,14 @@ there is no CMS and nothing is fetched at build time.
 | `config/sites.json` | Every site: `name`, `slug`, `url`, `description`, `category`, `tags`, `trending` (starting score), `launched`, plus any extra detail fields |
 | `config/categories.json` | Categories used by the filters, the side navigation, and the counts |
 | `config/trending.json` | `topLimit` for the trending page (`0` ranks every listed site), plus a `boost` map and an `exclude` list |
-| `config/explore.json` | Home page: featured picks, the "very interesting" picks, row size, section limits, and the collections |
+| `config/explore.json` | Home page: featured picks, "Very Interesting," editor picks, row size, section limits, and collections |
 | `config/blog.json` | Posts with their full body (`blocks`: `p`, `h2`, `quote`, `ul`) |
-| `config/launches.json` | The "Launches this week" ticker at the top of the home page: a `title` and an `items` list |
+| `config/launches.json` | The "Launches this week" ticker heading; the sites themselves come from recent `launched` dates |
 
-**Add a launch** → append `{ "name", "url", "description" }` to `items` in
-`config/launches.json`. The home page shows one entry at a time and slides to
-the next every five seconds, so keep descriptions to a sentence. The section
-stays out of the page entirely while `items` is empty.
+**Show a launch** → set a site's `launched` date in `config/sites.json`. The
+home-page ticker automatically selects the newest sites launched in the last
+seven days, shows at most five, and rotates through them. `config/launches.json`
+only changes the section title.
 
 **Add a site** → append an object to `config/sites.json` (keep `slug` unique and
 stable — votes are stored under it), then add the slug to a collection in
@@ -39,6 +39,9 @@ the ones above is printed there as-is (for example `tagline`, `pricing`,
 **Pick something interesting** → the members of `interestingSlugs` in
 `config/explore.json` become the home page's "Very Interesting" section, in the
 order you list them. The section disappears while the list is empty.
+
+**Pick editor recommendations** → add site slugs to `editorsPickSlugs` in
+`config/explore.json`. They appear beneath "Very Interesting" in that order.
 
 **Open a collection** → every entry in the `collections` array of
 `config/explore.json` gets its own page at `/collections/<id>`, with the

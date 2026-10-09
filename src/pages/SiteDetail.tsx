@@ -1,6 +1,8 @@
 import { Link, useParams } from "react-router";
+import { ReportProblem } from "../components/ReportProblem";
 import { SiteIcon } from "../components/SiteIcon";
 import { SiteSeo } from "../components/SeoHead";
+import { useAuth } from "../lib/auth";
 import {
   categoryLabel,
   collections,
@@ -14,10 +16,8 @@ import {
 } from "../lib/siteData";
 import { formatDate } from "../lib/posts";
 import { siteDomain } from "../lib/siteTile";
-import { useAuth } from "../lib/auth";
-import { ReportProblem } from "../components/ReportProblem";
 
-/** Where a value first appears, so the listing reads in a sensible order. */
+/** Keep longer submitted details in a predictable, readable order. */
 const DETAIL_ORDER = [
   "tagline",
   "launchDate",
@@ -41,21 +41,12 @@ export default function SiteDetail() {
     return (
       <>
         <SiteSeo title="Site not found" path={`/sites/${slug}`} noindex />
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-16 flex flex-col items-center gap-4 text-center">
-          <span
-            className="text-[11px] font-bold tracking-[0.2em] uppercase border px-3 py-2"
-            style={{ borderColor: "var(--ink)" }}
-          >
-            404
-          </span>
-          <h1 className="text-3xl font-bold tracking-[-0.02em]">That site is not listed</h1>
-          <p className="max-w-md" style={{ color: "var(--muted)" }}>
-            “{slug}” is not one of the {sites.length} sites on {siteName}.
-          </p>
-          <Link to="/" className="nav-cta">
-            Browse the list
-          </Link>
-        </div>
+        <main className="site-not-found mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-16">
+          <span className="site-detail-kicker">404 · Not in the directory</span>
+          <h1>That site is not listed</h1>
+          <p>“{slug}” is not one of the {sites.length} sites on {siteName}.</p>
+          <Link to="/" className="btn accent">Browse the list</Link>
+        </main>
       </>
     );
   }
@@ -66,26 +57,17 @@ export default function SiteDetail() {
     .filter((entry) => entry.slug !== site.slug)
     .slice(0, 6);
   const domain = siteDomain(site.url);
-
-  const rows: Array<[string, string]> = [
-    ["Category", categoryLabel(site.category)],
-    ["Tags", site.tags.length > 0 ? site.tags.join(", ") : "—"],
-    ["Launched", site.launched ? formatDate(site.launched) : "—"],
-    ["Votes", String(site.trending ?? 0)],
-    ["Directory rank", rank > 0 ? `#${rank} of ${sites.length}` : "—"],
-    ["Domain", domain],
-    ["Slug", site.slug],
-  ];
-
-  const extras = Object.entries(site.extras ?? {}).sort(([a], [b]) => {
-    const rankA = DETAIL_ORDER.indexOf(a);
-    const rankB = DETAIL_ORDER.indexOf(b);
-    if (rankA === -1 && rankB === -1) return a.localeCompare(b);
-    if (rankA === -1) return 1;
-    if (rankB === -1) return -1;
-    return rankA - rankB;
+  const extras = Object.entries(site.extras ?? {}).sort(([left], [right]) => {
+    const leftOrder = DETAIL_ORDER.indexOf(left);
+    const rightOrder = DETAIL_ORDER.indexOf(right);
+    if (leftOrder === -1 && rightOrder === -1) return left.localeCompare(right);
+    if (leftOrder === -1) return 1;
+    if (rightOrder === -1) return -1;
+    return leftOrder - rightOrder;
   });
+  const visibleExtras = extras.filter(([key]) => key !== "tagline");
   const pageUrl = `${siteUrl}/sites/${site.slug}`;
+  const launched = site.launched ? formatDate(site.launched) : "Not listed";
 
   return (
     <>
@@ -120,34 +102,40 @@ export default function SiteDetail() {
         ]}
       />
 
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
-        <header className="flex flex-col gap-4 border-b pb-6" style={{ borderColor: "var(--rule)" }}>
-          <Link to="/" className="text-[11px] font-bold tracking-[0.2em] uppercase accent-text">
-            ← All {sites.length} sites
-          </Link>
+      <main className="site-detail-page mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
+        <Link to="/" className="site-detail-back">
+          <span aria-hidden="true">←</span> All {sites.length} sites
+        </Link>
 
-          <div className="flex items-center gap-4">
-            <SiteIcon site={site} size={56} label={false} />
-            <div className="min-w-0 flex flex-col gap-1">
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em]">{site.name}</h1>
-              <span className="text-[12px] font-mono" style={{ color: "var(--muted)" }}>
-                {domain}
-              </span>
+        <article className="site-detail-hero">
+          <div className="site-detail-hero-top">
+            <span className="site-detail-kicker">{categoryLabel(site.category)} · Small web directory</span>
+            <span className="site-detail-rank">#{rank || "—"} in the directory</span>
+          </div>
+
+          <div className="site-detail-identity">
+            <SiteIcon site={site} size={68} label={false} />
+            <div className="site-detail-title-block">
+              <h1>{site.name}</h1>
+              <a href={site.url} target="_blank" rel="noopener noreferrer" className="site-detail-domain">
+                {domain} <span aria-hidden="true">↗</span>
+              </a>
             </div>
           </div>
 
-          <p className="text-base leading-relaxed" style={{ color: "var(--muted)" }}>
-            {site.description}
+          <p className="site-detail-tagline">
+            {site.extras?.tagline || `A quiet corner of the web, filed under ${categoryLabel(site.category)}.`}
           </p>
 
-          <div className="flex flex-wrap gap-3">
-            <a
-              href={site.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn accent"
-            >
-              Open {domain} <span aria-hidden="true">→</span>
+          {site.tags.length > 0 && (
+            <ul className="site-detail-tags" aria-label="Site tags">
+              {site.tags.map((tag) => <li key={tag}>{tag}</li>)}
+            </ul>
+          )}
+
+          <div className="site-detail-actions">
+            <a href={site.url} target="_blank" rel="noopener noreferrer" className="btn accent">
+              Visit {domain} <span aria-hidden="true">→</span>
             </a>
             <Link to={`/?category=${site.category}#explore`} className="btn ghost">
               More {categoryLabel(site.category)}
@@ -161,89 +149,89 @@ export default function SiteDetail() {
             )}
             <ReportProblem siteName={site.name} siteUrl={site.url} slug={site.slug} />
           </div>
+        </article>
 
-          <p className="text-[12px] font-mono break-all" style={{ color: "var(--muted)" }}>
-            <a
-              href={site.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-4"
-            >
-              {site.url}
-            </a>
-          </p>
-        </header>
-
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold tracking-[-0.01em]">Details</h2>
-          <dl className="detail-list">
-            {rows.map(([key, value]) => (
-              <div className="detail-row" key={key}>
-                <dt className="detail-key">{key}</dt>
-                <dd className="detail-value">{value}</dd>
-              </div>
-            ))}
-            {extras.map(([key, value]) => (
-              <div className="detail-row" key={key}>
-                <dt className="detail-key">{humanizeKey(key)}</dt>
-                <dd className="detail-value">{value}</dd>
-              </div>
-            ))}
-          </dl>
-          {extras.length === 0 && (
-            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
-              This listing came with the fields above. Anything submitted with a site — tagline,
-              pricing, FAQ, and so on — is printed here the moment it is added to the listing.
-            </p>
-          )}
+        <section className="site-detail-facts" aria-label="Listing facts">
+          <div><span>Category</span><strong>{categoryLabel(site.category)}</strong></div>
+          <div><span>Launched</span><strong>{launched}</strong></div>
+          <div><span>Community votes</span><strong>{site.trending ?? 0}</strong></div>
+          <div><span>Directory rank</span><strong>{rank > 0 ? `#${rank} of ${sites.length}` : "—"}</strong></div>
         </section>
 
-        {lists.length > 0 && (
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold tracking-[-0.01em]">In these collections</h2>
-            <ul className="flex flex-col gap-2">
-              {lists.map((collection) => (
-                <li key={collection.id}>
-                  <Link
-                    to={`/collections/${collection.id}`}
-                    className="text-sm font-bold accent-text underline underline-offset-4"
-                  >
-                    {collection.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+        <div className="site-detail-content">
+          <section className="site-detail-section site-detail-about">
+            <span className="section-eyebrow">A little context</span>
+            <h2>About {site.name}</h2>
+            <p>{site.description}</p>
+            <a href={site.url} target="_blank" rel="noopener noreferrer" className="site-detail-canonical">
+              {site.url}
+            </a>
           </section>
-        )}
 
-        {neighbours.length > 0 && (
-          <section className="space-y-3 border-t pt-6" style={{ borderColor: "var(--rule)" }}>
-            <h2 className="text-xl font-bold tracking-[-0.01em]">
-              More in {categoryLabel(site.category)}
-            </h2>
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {neighbours.map((entry) => (
-                <li key={entry.id}>
-                  <Link
-                    to={`/sites/${entry.slug}`}
-                    className="card card-link p-3 flex items-center gap-3"
-                  >
-                    <SiteIcon site={entry} size={30} label={false} />
-                    <span className="min-w-0 flex flex-col">
-                      <span className="text-sm font-bold truncate" style={{ color: "var(--ink)" }}>
-                        {entry.name}
-                      </span>
-                      <span className="text-[11px] font-mono truncate" style={{ color: "var(--muted)" }}>
-                        {siteDomain(entry.url)}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          <section className="site-detail-section">
+            <div className="site-detail-section-heading">
+              <span className="section-eyebrow">The listing</span>
+              <h2>More to know</h2>
+            </div>
+            {visibleExtras.length > 0 ? (
+              <dl className="site-detail-extra-grid">
+                {visibleExtras.map(([key, value]) => (
+                  <div className="site-detail-extra" key={key}>
+                    <dt>{humanizeKey(key)}</dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className="site-detail-empty-note">
+                This listing has the essentials for now. We add details like pricing, features, and FAQs as they come in.
+              </p>
+            )}
           </section>
-        )}
-      </div>
+
+          {lists.length > 0 && (
+            <section className="site-detail-section">
+              <div className="site-detail-section-heading">
+                <span className="section-eyebrow">Hand-picked paths</span>
+                <h2>In these collections</h2>
+              </div>
+              <ul className="site-detail-collection-list">
+                {lists.map((collection) => (
+                  <li key={collection.id}>
+                    <Link to={`/collections/${collection.id}`}>
+                      <span>{collection.title}</span>
+                      <span aria-hidden="true">↗</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {neighbours.length > 0 && (
+            <section className="site-detail-section site-detail-related">
+              <div className="site-detail-section-heading">
+                <span className="section-eyebrow">Keep wandering</span>
+                <h2>More in {categoryLabel(site.category)}</h2>
+              </div>
+              <ul className="site-detail-related-grid">
+                {neighbours.map((entry) => (
+                  <li key={entry.id}>
+                    <Link to={`/sites/${entry.slug}`} className="site-detail-related-card">
+                      <SiteIcon site={entry} size={36} label={false} />
+                      <span>
+                        <strong>{entry.name}</strong>
+                        <small>{siteDomain(entry.url)}</small>
+                      </span>
+                      <span aria-hidden="true">↗</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </main>
     </>
   );
 }

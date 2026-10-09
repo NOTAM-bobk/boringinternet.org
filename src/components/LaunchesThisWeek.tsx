@@ -1,5 +1,6 @@
-import { useEffect, useState, type CSSProperties } from "react";
-import { launches, launchesTitle } from "../lib/launches";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { launchesThisWeek, launchesTitle } from "../lib/launches";
+import { formatDate } from "../lib/posts";
 import { prefersReducedMotion } from "../lib/motion";
 import { siteDomain } from "../lib/siteTile";
 import { SiteIcon } from "./SiteIcon";
@@ -7,34 +8,32 @@ import { SiteIcon } from "./SiteIcon";
 /** How long a launch stays up before the row slides to the next one. */
 const ROTATE_MS = 5000;
 
-/**
- * The "Launches this week" ticker: one launch at a time, sliding up to the
- * next every five seconds, pausing while a pointer or a keyboard is on it.
- * The list lives in `config/launches.json`; with no entries the whole section
- * stays out of the page.
- */
+/** The ticker is derived from listing dates, with a seven-day window and five-site cap. */
 export function LaunchesThisWeek() {
+  const launches = useMemo(() => launchesThisWeek(), []);
   const count = launches.length;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     if (count < 2 || paused || prefersReducedMotion()) return;
-    const timer = window.setInterval(() => setIndex((i) => (i + 1) % count), ROTATE_MS);
+    const timer = window.setInterval(() => setIndex((current) => (current + 1) % count), ROTATE_MS);
     return () => window.clearInterval(timer);
   }, [count, paused]);
 
   if (count === 0) return null;
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-4" aria-labelledby="launches-heading">
       <div
         className="sec-head flex items-end justify-between gap-4 border-b pb-3"
         style={{ borderColor: "var(--rule)" }}
       >
-        <h2 className="text-xl font-bold tracking-[-0.01em]">{launchesTitle}</h2>
+        <h2 id="launches-heading" className="text-xl font-bold tracking-[-0.01em]">
+          {launchesTitle}
+        </h2>
         <span className="hidden sm:inline text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-          {count === 1 ? "1 launch" : `${count} launches`}
+          {count === 1 ? "1 launch this week" : `${count} launches this week`}
         </span>
       </div>
 
@@ -46,8 +45,12 @@ export function LaunchesThisWeek() {
         onBlurCapture={() => setPaused(false)}
       >
         <ol className="launch-track" style={{ "--launch-index": index } as CSSProperties}>
-          {launches.map((launch, i) => (
-            <li key={launch.id} className="launch-row" aria-hidden={i === index ? undefined : true}>
+          {launches.map((launch, itemIndex) => (
+            <li
+              key={launch.id}
+              className="launch-row"
+              aria-hidden={itemIndex === index ? undefined : true}
+            >
               <SiteIcon site={launch} size={40} label={false} />
               <div className="launch-copy">
                 <a
@@ -55,13 +58,18 @@ export function LaunchesThisWeek() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="launch-name"
-                  tabIndex={i === index ? undefined : -1}
+                  tabIndex={itemIndex === index ? undefined : -1}
                 >
                   {launch.name}
                 </a>
-                {launch.description && <p className="launch-line">{launch.description}</p>}
+                <p className="launch-line">{launch.description}</p>
               </div>
-              <span className="launch-domain">{siteDomain(launch.url)}</span>
+              <div className="launch-meta">
+                <span className="launch-domain">{siteDomain(launch.url)}</span>
+                {launch.launched && (
+                  <span className="launch-date">Launched {formatDate(launch.launched)}</span>
+                )}
+              </div>
             </li>
           ))}
         </ol>
@@ -69,14 +77,14 @@ export function LaunchesThisWeek() {
 
       {count > 1 && (
         <div className="carousel-dots" aria-label="Choose a launch">
-          {launches.map((launch, i) => (
+          {launches.map((launch, itemIndex) => (
             <button
               key={launch.id}
               type="button"
-              className={`carousel-dot${i === index ? " carousel-dot-active" : ""}`}
+              className={`carousel-dot${itemIndex === index ? " carousel-dot-active" : ""}`}
               aria-label={`Show ${launch.name}`}
-              aria-current={i === index ? "true" : undefined}
-              onClick={() => setIndex(i)}
+              aria-current={itemIndex === index ? "true" : undefined}
+              onClick={() => setIndex(itemIndex)}
             />
           ))}
         </div>

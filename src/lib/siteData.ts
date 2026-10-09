@@ -53,6 +53,8 @@ export interface ExploreConfig {
   trendingPreviewCount: number;
   /** Slugs for the home page's "very interesting" section, in display order. */
   interestingSlugs: string[];
+  /** Hand-picked directory slugs featured after "Very Interesting". */
+  editorsPickSlugs: string[];
   collections: SiteCollection[];
 }
 
@@ -189,6 +191,7 @@ export const exploreConfig: ExploreConfig = {
   featuredSitesLimit: explore.featuredSitesLimit ?? 40,
   trendingPreviewCount: explore.trendingPreviewCount ?? 3,
   interestingSlugs: explore.interestingSlugs ?? [],
+  editorsPickSlugs: explore.editorsPickSlugs ?? [],
   collections,
 };
 
@@ -295,6 +298,11 @@ export function featuredSites(): Site[] {
 /** The hand-picked "very interesting" picks, in the order the config lists them. */
 export function interestingSites(): Site[] {
   return sitesBySlugs(exploreConfig.interestingSlugs);
+}
+
+/** The hand-picked "Editors' Picks", in the order the config lists them. */
+export function editorsPicks(): Site[] {
+  return sitesBySlugs(exploreConfig.editorsPickSlugs);
 }
 
 /** Ranked sites with the featured picks removed. */
