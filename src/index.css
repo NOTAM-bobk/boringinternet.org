@@ -678,6 +678,9 @@ hr {
     padding: 0;
     list-style: none;
     scroll-snap-align: start;
+    /* A flick stops on the very next page instead of sailing past two or
+       three, so one swipe moves one page and lands where you meant. */
+    scroll-snap-stop: always;
   }
 
   .home-mobile-page .site-row {
@@ -712,6 +715,7 @@ hr {
     flex: 0 0 min(86vw, 22rem);
     min-height: 13rem;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 }
 
@@ -2690,6 +2694,38 @@ mark.hl {
   box-shadow: var(--shadow-thick);
 }
 
+.service-card-featured {
+  border-width: 2px;
+  background: var(--accent-soft, #fff8e1);
+}
+
+.service-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.service-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.service-price > span {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.service-price small {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .advertise-submit {
   display: flex;
   align-items: center;
@@ -3607,6 +3643,7 @@ mark.hl {
     flex: 0 0 min(86vw, 22rem);
     min-height: 13rem;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 }
 

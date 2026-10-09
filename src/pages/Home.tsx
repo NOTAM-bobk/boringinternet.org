@@ -222,10 +222,9 @@ function PagedRows({ items, title, note }: { items: Site[]; title: string; note?
         >
           {mobilePages.map((group, index) => (
             <ul className="home-mobile-page" key={`${title}-page-${index + 1}`}>
+              {/* SiteRow is already an <li>, so it goes straight into the page. */}
               {group.map((site) => (
-                <li key={site.id}>
-                  <SiteRow site={site} />
-                </li>
+                <SiteRow key={site.id} site={site} />
               ))}
             </ul>
           ))}

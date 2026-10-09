@@ -23,6 +23,7 @@ const TAB_ORDER = [
   "/discover-websites",
   "/new-websites",
   "/this-or-that",
+  "/site-tinder",
   "/sites",
   "/trending",
   "/blog",

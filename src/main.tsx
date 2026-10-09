@@ -16,6 +16,7 @@ import DiscoverWebsites from "./pages/DiscoverWebsites.tsx";
 import NewWebsites from "./pages/NewWebsites.tsx";
 import SiteDetail from "./pages/SiteDetail.tsx";
 import ThisOrThat from "./pages/ThisOrThat.tsx";
+import SiteTinder from "./pages/SiteTinder.tsx";
 import { Profile, Saved, Settings } from "./pages/Account.tsx";
 import Advertise from "./pages/Advertise.tsx";
 import EmbedBadge from "./pages/EmbedBadge.tsx";
@@ -72,6 +73,10 @@ const router = createBrowserRouter([
       {
         path: "this-or-that",
         element: <ThisOrThat />,
+      },
+      {
+        path: "site-tinder",
+        element: <SiteTinder />,
       },
       {
         path: "admin",
