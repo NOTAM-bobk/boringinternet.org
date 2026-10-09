@@ -47,7 +47,8 @@ them all. Run `bun run sitemap` so the new pages are indexed.
 
 **Compare two sites** → `/this-or-that` frames two random listings side by side
 and takes one vote for whichever is better; the winner gets the same vote the
-trending list counts. No config: the pairs are drawn from `config/sites.json`.
+trending list counts and the next pair appears immediately. No config: the
+pairs are drawn from `config/sites.json`.
 
 **Write a post** → append an object to `config/blog.json` with `slug`, `title`,
 `description`, `date`, `tags`, `excerpt`, and `blocks`. It appears on `/blog`
