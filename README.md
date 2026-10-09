@@ -77,8 +77,13 @@ palette moves.
   from `src/components/SeoHead.tsx`, using `site.json` for defaults.
 - Blog posts add `BlogPosting` + `BreadcrumbList` JSON-LD and
   `article:published_time`; the home page adds `WebSite` + `SearchAction`.
-- `public/robots.txt` disallows `/admin` and points at `public/sitemap.xml`,
+- Home, trending, collections, submit, and intent pages (`/discover-websites`,
+  `/new-websites`) also publish `ItemList`/`CollectionPage`/`FAQPage` JSON-LD.
+- `public/robots.txt` disallows utility routes (`/admin`, `/auth`) and points
+  at `public/sitemap.xml`,
   which lists the static pages and every post.
+- `public/llms.txt` and `public/llms-full.txt` describe crawl priorities for AI
+  agents.
 - Canonical URLs always use the production domain from `config/site.json`, so
   preview URLs never get indexed.
 

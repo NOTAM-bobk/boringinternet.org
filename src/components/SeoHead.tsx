@@ -144,16 +144,89 @@ function websiteJsonLd(): JsonLd {
   };
 }
 
-export function HomepageSeo() {
+function itemListJsonLd({
+  name,
+  path,
+  items,
+}: {
+  name: string;
+  path: string;
+  items: Array<{ name: string; url: string; description?: string }>;
+}): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    url: `${siteUrl}${path}`,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "WebSite",
+        name: item.name,
+        url: item.url,
+        description: item.description,
+      },
+    })),
+  };
+}
+
+export function HomepageSeo({
+  featuredSites = [],
+  newSites = [],
+  trendingSites = [],
+}: {
+  featuredSites?: Array<{ name: string; url: string; description?: string }>;
+  newSites?: Array<{ name: string; url: string; description?: string }>;
+  trendingSites?: Array<{ name: string; url: string; description?: string }>;
+}) {
   const total = sites.length;
   const description = `${siteTagline} Browse all ${total} sites by category, see what is trending, and submit your own.`;
+  const keywords = [
+    "bored button",
+    "website to website",
+    "discover websites",
+    "find websites",
+    "new and upcoming websites",
+  ];
+  const jsonLd: JsonLd[] = [websiteJsonLd()];
+
+  if (featuredSites.length > 0) {
+    jsonLd.push(
+      itemListJsonLd({
+        name: "Featured launched websites",
+        path: "/",
+        items: featuredSites,
+      }),
+    );
+  }
+  if (newSites.length > 0) {
+    jsonLd.push(
+      itemListJsonLd({
+        name: "New and upcoming websites",
+        path: "/",
+        items: newSites,
+      }),
+    );
+  }
+  if (trendingSites.length > 0) {
+    jsonLd.push(
+      itemListJsonLd({
+        name: "Trending discovered websites",
+        path: "/trending",
+        items: trendingSites,
+      }),
+    );
+  }
 
   return (
     <SeoHead
       title={siteName}
       description={description}
       path="/"
-      jsonLd={[websiteJsonLd()]}
+      keywords={keywords}
+      jsonLd={jsonLd}
     />
   );
 }

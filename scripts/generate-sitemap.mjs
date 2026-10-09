@@ -20,6 +20,8 @@ const base = String(site.url ?? "https://example.com").replace(/\/+$/, "");
 /** Pages that always exist. */
 const staticPages = [
   { path: "/", priority: "1.0", changefreq: "daily" },
+  { path: "/discover-websites", priority: "0.9", changefreq: "daily" },
+  { path: "/new-websites", priority: "0.9", changefreq: "daily" },
   { path: "/trending", priority: "0.9", changefreq: "daily" },
   { path: "/blog", priority: "0.7", changefreq: "weekly" },
   { path: "/collections", priority: "0.8", changefreq: "weekly" },
@@ -62,6 +64,8 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /auth
+Disallow: /auth/
 
 Sitemap: ${base}/sitemap.xml
 `;

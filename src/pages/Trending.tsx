@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
-import { trendingConfig, trendingSites, type Site } from "../lib/siteData";
+import { siteName, siteUrl, trendingConfig, trendingSites, type Site } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 import {
   castVote,
@@ -77,7 +78,32 @@ export default function Trending() {
         title={trendingConfig.title}
         description={`${trendingConfig.tagline} The top ${TOP_N} launched sites, ranked by stored votes and a small editorial boost.`}
         path="/trending"
-        keywords={["trending sites", "site ranking", "vote for sites"]}
+        keywords={[
+          "discover websites",
+          "find websites",
+          "new and upcoming websites",
+          "website ranking",
+          "bored button alternatives",
+        ]}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: `${siteName} trending websites`,
+            url: `${siteUrl}/trending`,
+            numberOfItems: ranked.length,
+            itemListElement: ranked.map((site, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              item: {
+                "@type": "WebSite",
+                name: site.name,
+                url: site.url,
+                description: site.description,
+              },
+            })),
+          },
+        ]}
       />
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-8">
         <header className="flex flex-col gap-3 text-center">
@@ -87,6 +113,17 @@ export default function Trending() {
           <p className="text-base" style={{ color: "var(--muted)" }}>
             {trendingConfig.tagline} The top {ranked.length} launched sites, stacked in order — one
             vote each.
+          </p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Looking to discover websites fast? Start here, then jump to{" "}
+            <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
+              curated discovery paths
+            </Link>{" "}
+            or{" "}
+            <Link to="/new-websites" className="accent-text font-bold underline underline-offset-4">
+              newly launched websites
+            </Link>
+            .
           </p>
         </header>
 
@@ -160,6 +197,10 @@ export default function Trending() {
           <a href="/#explore" className="accent-text font-bold underline underline-offset-4">
             Browse all sites
           </a>
+          {" · "}
+          <Link to="/collections" className="accent-text font-bold underline underline-offset-4">
+            Open curated collections
+          </Link>
         </p>
       </div>
     </>

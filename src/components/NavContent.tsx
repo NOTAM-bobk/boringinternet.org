@@ -17,6 +17,8 @@ const SEARCH_PREVIEW = 6;
 /** The four top-level places in the site. */
 const SECTIONS = [
   { id: "explore", to: "/#explore", icon: "◎", label: "Explore" },
+  { id: "discover", to: "/discover-websites", icon: "◈", label: "Discover" },
+  { id: "new", to: "/new-websites", icon: "✧", label: "New" },
   { id: "articles", to: "/blog", icon: "◫", label: "Articles" },
   { id: "collections", to: "/collections", icon: "❐", label: "Collections" },
   { id: "trending", to: "/trending", icon: "✦", label: "Trending" },
@@ -123,6 +125,8 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const activeSection = useMemo(() => {
     const path = location.pathname.replace(/\/+$/, "") || "/";
     if (path === "/blog" || path.startsWith("/blog/")) return "articles";
+    if (path === "/discover-websites") return "discover";
+    if (path === "/new-websites") return "new";
     if (path === "/trending") return "trending";
     if (path === "/collections" || path.startsWith("/collections/")) return "collections";
     if (path === "/submit") return "submit";

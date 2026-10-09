@@ -18,10 +18,28 @@ function NavItem({ to, children }: { to: string; children: ReactNode }) {
 }
 
 /** Left-to-right order of the top-level tabs, so we can slide in the right direction. */
-const TAB_ORDER = ["/", "/trending", "/blog", "/collections", "/submit", "/admin", "/auth"];
+const TAB_ORDER = [
+  "/",
+  "/discover-websites",
+  "/new-websites",
+  "/trending",
+  "/blog",
+  "/collections",
+  "/submit",
+  "/admin",
+  "/auth",
+];
 
 /** Only the main screens keep the full footer; utility pages end with the page. */
-const FOOTER_ROUTES = new Set(["/", "/trending", "/blog"]);
+const FOOTER_ROUTES = new Set([
+  "/",
+  "/discover-websites",
+  "/new-websites",
+  "/trending",
+  "/blog",
+  "/collections",
+  "/submit",
+]);
 
 function tabIndex(pathname: string): number {
   const path = pathname.replace(/\/+$/, "") || "/";
@@ -106,6 +124,8 @@ export function AppShell() {
             <a href="/#explore" className="nav-link">
               Explore
             </a>
+            <NavItem to="/discover-websites">Discover</NavItem>
+            <NavItem to="/new-websites">New</NavItem>
             <NavItem to="/trending">
               <span className="whitespace-nowrap">
                 Trending <span aria-hidden="true">🔥</span>
