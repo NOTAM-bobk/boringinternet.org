@@ -1546,6 +1546,58 @@ hr {
   box-shadow: var(--shadow-lift);
 }
 
+.account-signout {
+  width: 100%;
+  border: 0;
+  text-align: center;
+  font: inherit;
+  cursor: pointer;
+}
+
+.account-page { width: 100%; }
+
+.account-layout {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.account-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  position: sticky;
+  top: 7rem;
+}
+
+.account-eyebrow {
+  color: var(--accent);
+  font: 700 0.68rem var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.account-nav { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.7rem; }
+.account-nav a { padding: 0.65rem 0.75rem; border: 1px solid transparent; font-weight: 700; }
+.account-nav a:hover, .account-nav a.active { border-color: var(--ink); background: var(--surface); box-shadow: 0 2px 0 var(--ink); }
+.account-content { min-width: 0; }
+
+.account-field { display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+.account-field > span { color: var(--muted); font-size: 0.72rem; font-weight: 400; letter-spacing: 0; text-transform: none; }
+.account-profile-avatar { border: 1px solid var(--ink); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-thick); }
+.account-site-list { display: grid; gap: 0.8rem; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; border: 1px solid var(--rule); border-radius: var(--radius-sm); }
+.setting-row span { display: flex; flex-direction: column; gap: 0.2rem; }
+.setting-row small { color: var(--muted); font-size: 0.78rem; font-weight: 400; }
+
+@media (max-width: 700px) {
+  .account-layout { grid-template-columns: 1fr; gap: 1.25rem; }
+  .account-sidebar { position: static; }
+  .account-nav { flex-direction: row; overflow-x: auto; }
+  .account-nav a { white-space: nowrap; }
+}
+
 /* ---------- search match highlight ---------- */
 
 mark.hl {

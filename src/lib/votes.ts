@@ -63,7 +63,7 @@ export function writeLocalCount(slug: string, count: number) {
 export async function fetchSharedCounts(): Promise<Record<string, number> | null> {
   if (!votesConnected) return null;
   try {
-    const res = await fetch(`${votesEndpoint}/counts`, { headers: { Accept: "application/json" } });
+    const res = await fetch(`${votesEndpoint}/counts`, { credentials: "include", headers: { Accept: "application/json" } });
     if (!res.ok) return null;
     const data = (await res.json()) as Record<string, unknown>;
     const counts: Record<string, number> = {};
@@ -83,6 +83,7 @@ export async function castVote(slug: string, direction: "up" | "down" = "up"): P
   try {
     const res = await fetch(`${votesEndpoint}/${direction === "up" ? "vote" : "unvote"}`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ slug }),
     });

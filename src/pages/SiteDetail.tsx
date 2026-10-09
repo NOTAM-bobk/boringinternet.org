@@ -14,6 +14,7 @@ import {
 } from "../lib/siteData";
 import { formatDate } from "../lib/posts";
 import { siteDomain } from "../lib/siteTile";
+import { useAuth } from "../lib/auth";
 
 /** Where a value first appears, so the listing reads in a sensible order. */
 const DETAIL_ORDER = [
@@ -32,6 +33,7 @@ const DETAIL_ORDER = [
 
 export default function SiteDetail() {
   const { slug = "" } = useParams();
+  const { user, toggleSaved } = useAuth();
   const site = siteBySlug(slug);
 
   if (!site) {
@@ -149,6 +151,13 @@ export default function SiteDetail() {
             <Link to={`/?category=${site.category}#explore`} className="btn ghost">
               More {categoryLabel(site.category)}
             </Link>
+            {user ? (
+              <button type="button" className="btn ghost" onClick={() => void toggleSaved(site.slug)}>
+                {user.saved.includes(site.slug) ? "Saved ✓" : "Save site"}
+              </button>
+            ) : (
+              <Link to="/auth" className="btn ghost">Sign in to save</Link>
+            )}
           </div>
 
           <p className="text-[12px] font-mono break-all" style={{ color: "var(--muted)" }}>

@@ -18,15 +18,24 @@
 
 const VOTE_PREFIX = "vote:";
 const SUBMISSION_PREFIX = "submission:";
+const USER_PREFIX = "user:";
+const EMAIL_PREFIX = "email:";
+const SESSION_PREFIX = "session:";
+const SESSION_COOKIE = "bi_session";
+const SESSION_DAYS = 30;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const MAX_BODY_BYTES = 24 * 1024;
 const REVIEW_STATUSES = new Set(["pending", "approved", "rejected"]);
 
-function cors(env) {
+function cors(env, request) {
+  const allowed = (env.ALLOWED_ORIGIN || "*").split(",").map((value) => value.trim());
+  const requested = request.headers.get("Origin");
+  const origin = requested && allowed.includes(requested) ? requested : allowed[0];
   return {
-    "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN || "*",
+    "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Credentials": "true",
     "Access-Control-Max-Age": "86400",
   };
 }
@@ -53,6 +62,61 @@ function str(value, max) {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, max);
 }
+
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function hashPassword(password, salt = bytesToBase64(crypto.getRandomValues(new Uint8Array(16)))) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 120000, hash: "SHA-256" }, key, 256);
+  return { salt, hash: bytesToBase64(new Uint8Array(bits)) };
+}
+
+async function digest(value) {
+  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return bytesToBase64(new Uint8Array(bytes));
+}
+
+function userKey(id) { return USER_PREFIX + id; }
+function emailKey(email) { return EMAIL_PREFIX + email.toLowerCase().trim(); }
+function sessionKey(token) { return SESSION_PREFIX + token; }
+
+function parseCookies(request) {
+  return Object.fromEntries((request.headers.get("Cookie") || "").split(";").map((part) => part.trim().split("=")).filter(([key, value]) => key && value));
+}
+
+function cookieHeader(token, maxAge = SESSION_DAYS * 86400) {
+  return `${SESSION_COOKIE}=${token}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=None`;
+}
+
+function withCookie(response, cookie) {
+  const headers = new Headers(response.headers);
+  headers.append("Set-Cookie", cookie);
+  return new Response(response.body, { status: response.status, headers });
+}
+
+function publicUser(user) {
+  return { id: user.id, email: user.email, name: user.name, avatarSeed: user.avatarSeed, bio: user.bio, settings: user.settings, saved: user.saved || [], voted: user.voted || [] };
+}
+
+async function currentUser(request, env) {
+  const token = parseCookies(request)[SESSION_COOKIE];
+  if (!token) return null;
+  const session = await env.VOTES.get(sessionKey(token), "json");
+  if (!session || session.expiresAt < Date.now()) return null;
+  return env.VOTES.get(userKey(session.userId), "json");
+}
+
+async function createSession(userId, env) {
+  const token = bytesToBase64(crypto.getRandomValues(new Uint8Array(32)));
+  await env.VOTES.put(sessionKey(token), JSON.stringify({ userId, expiresAt: Date.now() + SESSION_DAYS * 86400000 }), { expirationTtl: SESSION_DAYS * 86400 });
+  return token;
+}
+
+function validEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
 
 function decodeHtml(value) {
   return value
@@ -232,7 +296,7 @@ async function listSubmissions(env) {
 
 export default {
   async fetch(request, env) {
-    const headers = cors(env);
+    const headers = cors(env, request);
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers });
     }
@@ -260,6 +324,76 @@ export default {
       return result.error ? json(result, headers, 400) : json(result, headers);
     }
 
+    if (pathname === "/auth/signup" && request.method === "POST") {
+      const body = await readBody(request);
+      const email = str(body?.email, 160).toLowerCase();
+      const password = typeof body?.password === "string" ? body.password : "";
+      const name = str(body?.name, 80);
+      if (!validEmail(email) || password.length < 8 || name.length < 2) return json({ error: "Use a valid email, a name, and a password with at least 8 characters." }, headers, 400);
+      if (await env.VOTES.get(await digest(emailKey(email)))) return json({ error: "An account with that email already exists." }, headers, 409);
+      const id = crypto.randomUUID();
+      const passwordData = await hashPassword(password);
+      const user = { id, email, name, avatarSeed: id.slice(0, 8), bio: "", password: passwordData, settings: { emailUpdates: false, reducedMotion: false }, saved: [], voted: [], createdAt: new Date().toISOString() };
+      await env.VOTES.put(userKey(id), JSON.stringify(user));
+      await env.VOTES.put(await digest(emailKey(email)), id);
+      const token = await createSession(id, env);
+      return withCookie(json({ user: publicUser(user) }, headers, 201), cookieHeader(token));
+    }
+
+    if (pathname === "/auth/signin" && request.method === "POST") {
+      const body = await readBody(request);
+      const email = str(body?.email, 160).toLowerCase();
+      const password = typeof body?.password === "string" ? body.password : "";
+      const id = await env.VOTES.get(await digest(emailKey(email)));
+      const user = id ? await env.VOTES.get(userKey(id), "json") : null;
+      const candidate = user?.password ? await hashPassword(password, user.password.salt) : null;
+      if (!user || !candidate || candidate.hash !== user.password.hash) return json({ error: "Email or password is incorrect." }, headers, 401);
+      const token = await createSession(user.id, env);
+      return withCookie(json({ user: publicUser(user) }, headers), cookieHeader(token));
+    }
+
+    if (pathname === "/auth/me" && request.method === "GET") {
+      const user = await currentUser(request, env);
+      return user ? json({ user: publicUser(user) }, headers) : json({ error: "Not signed in." }, headers, 401);
+    }
+
+    if (pathname === "/auth/signout" && request.method === "POST") {
+      const token = parseCookies(request)[SESSION_COOKIE];
+      if (token) await env.VOTES.delete(sessionKey(token));
+      return withCookie(json({ ok: true }, headers), cookieHeader("", 0));
+    }
+
+    if (pathname === "/auth/profile" && request.method === "POST") {
+      const user = await requireUser(request, env);
+      if (!user) return json({ error: "Sign in to edit your profile." }, headers, 401);
+      const body = await readBody(request);
+      user.name = str(body?.name, 80) || user.name;
+      user.avatarSeed = str(body?.avatarSeed, 80) || user.avatarSeed;
+      user.bio = str(body?.bio, 240);
+      await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+      return json({ user: publicUser(user) }, headers);
+    }
+
+    if (pathname === "/auth/settings" && request.method === "POST") {
+      const user = await requireUser(request, env);
+      if (!user) return json({ error: "Sign in to edit settings." }, headers, 401);
+      const body = await readBody(request);
+      user.settings = { emailUpdates: body?.emailUpdates === true, reducedMotion: body?.reducedMotion === true };
+      await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+      return json({ user: publicUser(user) }, headers);
+    }
+
+    if (pathname === "/auth/saved" && request.method === "POST") {
+      const user = await requireUser(request, env);
+      if (!user) return json({ error: "Sign in to save websites." }, headers, 401);
+      const slug = str((await readBody(request))?.slug, 64).toLowerCase();
+      if (!SLUG_RE.test(slug)) return json({ error: "Invalid website." }, headers, 400);
+      user.saved = user.saved || [];
+      user.saved = user.saved.includes(slug) ? user.saved.filter((item) => item !== slug) : [...user.saved, slug].slice(-200);
+      await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+      return json({ user: publicUser(user) }, headers);
+    }
+
     if ((pathname === "/vote" || pathname === "/unvote") && request.method === "POST") {
       const body = await readBody(request);
       const slug = str(body?.slug, 64).toLowerCase();
@@ -270,6 +404,13 @@ export default {
       await env.VOTES.put(voteKey(slug), String(next), {
         metadata: { count: next, updatedAt: Date.now() },
       });
+      const user = await currentUser(request, env);
+      if (user) {
+        user.voted = user.voted || [];
+        if (pathname === "/vote" && !user.voted.includes(slug)) user.voted = [...user.voted, slug].slice(-500);
+        if (pathname === "/unvote") user.voted = user.voted.filter((item) => item !== slug);
+        await env.VOTES.put(userKey(user.id), JSON.stringify(user));
+      }
       return json({ slug, count: next }, headers);
     }
 
