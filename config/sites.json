@@ -191,6 +191,16 @@
       "launched": "2026-07-07"
     },
     {
+      "id": "bear-blog",
+      "name": "Bear Blog",
+      "slug": "bear-blog",
+      "url": "https://bearblog.dev",
+      "description": "A tiny blogging platform with no trackers, no scripts, and a dashboard that fits on one screen.",
+      "category": "tools",
+      "tags": ["blog", "smallweb", "minimal"],
+      "launched": "2026-10-09"
+    },
+    {
       "id": "excalidraw",
       "name": "Excalidraw",
       "slug": "excalidraw",
