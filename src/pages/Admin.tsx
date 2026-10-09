@@ -44,9 +44,14 @@ function SubmissionCard({
   const rows: Array<[string, string]> = [
     ["Tagline", submission.tagline],
     ["Description", submission.description],
+    ["Launch date", submission.launchDate],
+    ["Who it is for", submission.targetAudience],
+    ["Problem solved", submission.problem],
+    ["Key features", submission.features],
     ["Use cases", submission.useCases],
     ["Alternatives", submission.alternatives],
     ["Pricing", submission.pricing],
+    ["Social or community links", submission.socialLinks],
     ["FAQ", submission.faq],
   ].filter(([, value]) => value.length > 0) as Array<[string, string]>;
 

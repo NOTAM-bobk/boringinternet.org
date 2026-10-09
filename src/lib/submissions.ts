@@ -14,9 +14,14 @@ export interface SubmissionDraft {
   url: string;
   tagline: string;
   description: string;
+  launchDate: string;
+  targetAudience: string;
+  problem: string;
+  features: string;
   useCases: string;
   alternatives: string;
   pricing: string;
+  socialLinks: string;
   faq: string;
   categories: string[];
   openSource: boolean;

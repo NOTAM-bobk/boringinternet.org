@@ -105,9 +105,14 @@ function validateSubmission(body) {
   const url = str(body.url, 300);
   const tagline = str(body.tagline, 160);
   const description = str(body.description, 4000);
+  const launchDate = str(body.launchDate, 20);
+  const targetAudience = str(body.targetAudience, 2000);
+  const problem = str(body.problem, 3000);
+  const features = str(body.features, 3000);
   const useCases = str(body.useCases, 2000);
   const alternatives = str(body.alternatives, 2000);
   const pricing = str(body.pricing, 1000);
+  const socialLinks = str(body.socialLinks, 2000);
   const faq = str(body.faq, 4000);
   const categories = Array.isArray(body.categories)
     ? [...new Set(body.categories.map((c) => str(c, 40)).filter(Boolean))].slice(0, CATEGORY_LIMIT)
@@ -133,9 +138,14 @@ function validateSubmission(body) {
       url,
       tagline,
       description,
+      launchDate,
+      targetAudience,
+      problem,
+      features,
       useCases,
       alternatives,
       pricing,
+      socialLinks,
       faq,
       categories,
       openSource: body.openSource === true,
