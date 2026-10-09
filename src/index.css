@@ -4880,3 +4880,118 @@ mark.hl {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ---------- hero intro: two short lines that rise into place ---------- */
+
+.find-intro {
+  display: flex;
+  max-width: 46rem;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.find-eyebrow {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  /*
+   * The highlight is a background stripe that sweeps in behind the words, the
+   * same shape as the `.highlight-accent` marks used elsewhere on the page.
+   */
+  background-image: linear-gradient(var(--accent-soft), var(--accent-soft));
+  background-repeat: no-repeat;
+  background-position: 0 92%;
+  background-size: 100% 0.45em;
+  animation: find-sweep 0.9s 0.15s ease-out both;
+}
+
+/* A small live dot: quiet, slow, and gone entirely under reduced motion. */
+.find-pulse {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: find-pulse 2.6s 1s ease-in-out infinite;
+}
+
+.find-lede {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  animation: find-rise 0.5s 0.05s ease-out both;
+}
+
+.find-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  animation: find-rise 0.5s 0.18s ease-out both;
+}
+
+.find-link {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: text-decoration-thickness 0.15s ease;
+}
+
+.find-link:hover {
+  text-decoration-thickness: 3px;
+}
+
+.find-links-sep {
+  color: var(--rule);
+}
+
+@keyframes find-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes find-sweep {
+  from {
+    background-size: 0 0.45em;
+  }
+  to {
+    background-size: 100% 0.45em;
+  }
+}
+
+@keyframes find-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 96, 31, 0);
+    transform: scale(1);
+  }
+  45% {
+    box-shadow: 0 0 0 5px rgba(217, 96, 31, 0.18);
+    transform: scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .find-eyebrow,
+  .find-lede,
+  .find-links,
+  .find-pulse {
+    animation: none;
+  }
+}
