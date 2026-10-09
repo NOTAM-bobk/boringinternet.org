@@ -47,6 +47,7 @@ export function FeatureBadges() {
             href={badge.href}
             target="_blank"
             rel="noopener noreferrer"
+            {...badge.attributes}
             className={`badge-slide${i === index ? " badge-slide-active" : ""}`}
             aria-hidden={i === index ? undefined : true}
             tabIndex={i === index ? undefined : -1}

@@ -756,6 +756,75 @@ hr {
   box-shadow: 0 12px 26px -20px rgba(26, 18, 11, 0.6);
 }
 
+/* The strip at the very top of the header: the pitch and the way to act on it. */
+.promo-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--surface);
+  text-align: center;
+}
+
+.promo-bar-copy {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.promo-bar-note {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #f0d9bf;
+}
+
+.promo-bar-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--surface);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.promo-bar-cta:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Phones keep the bar short: one line, no explanatory tail. */
+@media (max-width: 639px) {
+  .promo-bar {
+    gap: 0.3rem 0.55rem;
+    padding: 0.45rem 0.75rem;
+  }
+
+  .promo-bar-copy {
+    font-size: 0.74rem;
+  }
+
+  .promo-bar-note {
+    display: none;
+  }
+
+  .promo-bar-cta {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.09em;
+  }
+}
+
 .brand-mark {
   display: inline-block;
   padding: 0.55rem 0.75rem;
@@ -953,13 +1022,13 @@ hr {
   .sidenav {
     display: block;
     position: sticky;
-    top: 5.25rem;
+    top: 6.6rem;
     align-self: start;
     justify-self: start;
     margin-left: 1.1rem;
     width: 16.5rem;
-    height: calc(100vh - 7rem);
-    height: min(calc(100dvh - 7rem), 100%);
+    height: calc(100vh - 8.2rem);
+    height: min(calc(100dvh - 8.2rem), 100%);
     z-index: 30;
     perspective: 1400px;
   }
@@ -1603,33 +1672,9 @@ mark.hl {
   }
 }
 
-/* ---------- home hero ---------- */
+/* ---------- closing CTA eyebrow (shared little label) ---------- */
 
-.hero {
-  position: relative;
-  display: grid;
-  gap: 1.5rem;
-  padding: 1.15rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(
-      620px 320px at 88% -25%,
-      rgba(217, 96, 31, 0.18) 0%,
-      rgba(217, 96, 31, 0) 70%
-    ),
-    linear-gradient(150deg, #fff7ee 0%, #fdeee0 52%, #f7e0c6 100%);
-  box-shadow: var(--shadow-lift);
-  overflow: hidden;
-}
-
-.hero-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-.hero-eyebrow {
+.cta-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1640,7 +1685,7 @@ mark.hl {
   color: var(--muted);
 }
 
-.hero-blip {
+.cta-blip {
   flex: none;
   width: 0.5rem;
   height: 0.5rem;
@@ -1649,133 +1694,9 @@ mark.hl {
   background: var(--accent);
 }
 
-.hero-title {
-  font-size: clamp(2rem, 7vw, 3.4rem);
-  line-height: 1.04;
-  text-wrap: balance;
-}
-
-.hero-em {
-  color: var(--accent);
-  box-shadow: inset 0 -0.26em 0 var(--accent-soft);
-}
-
-.hero-lede {
-  max-width: 34rem;
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--muted);
-}
-
-.hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.hero-actions .btn,
 .cta-actions .btn {
   padding: 0.72rem 1.15rem;
   font-size: 0.8rem;
-}
-
-.hero-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin: 0;
-}
-
-.hero-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  box-shadow: 0 2px 0 0 var(--ink);
-}
-
-.hero-stat dt {
-  order: 2;
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.hero-stat dd {
-  order: 1;
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.hero-art {
-  display: none;
-}
-
-.hero-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.hero-bar {
-  display: block;
-  width: 100%;
-  height: 0.95rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-pill);
-  background: var(--ink);
-}
-
-.hero-bar-accent {
-  background: var(--accent);
-}
-
-.hero-bar-short {
-  width: 62%;
-}
-
-.hero-art-note {
-  margin-top: 0.75rem;
-  font-size: 0.76rem;
-  line-height: 1.5;
-  color: var(--muted);
-}
-
-.hero-art-kicker {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-@media (min-width: 1024px) {
-  .hero {
-    grid-template-columns: minmax(0, 1fr) 15rem;
-    align-items: center;
-    gap: 2rem;
-    padding: 2rem;
-  }
-
-  .hero-art {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 1.1rem;
-    border: 1px solid var(--ink);
-    border-radius: var(--radius);
-    background: #fff;
-    box-shadow: var(--shadow-thick);
-  }
 }
 
 /* ---------- search field + filter chips ---------- */
@@ -1801,7 +1722,8 @@ mark.hl {
 .search-glyph {
   position: absolute;
   left: 1rem;
-  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
   color: var(--muted);
   pointer-events: none;
 }
@@ -1968,17 +1890,22 @@ mark.hl {
 /* ---------- phone pass ---------- */
 
 @media (max-width: 560px) {
-  .hero {
-    padding: 1.1rem;
+  /* Section heads have a title, a note, and a pager on one row: give the title
+     a size that fits a phone and let the controls drop to their own line. */
+  .sec-head {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
   }
 
-  .hero-actions,
+  .sec-head h2 {
+    font-size: 1.15rem;
+  }
+
   .cta-actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .hero-actions .btn,
   .cta-actions .btn {
     width: 100%;
   }

@@ -22,7 +22,7 @@ export function Footer() {
       style={{ backgroundColor: "#ffffff", borderColor: "var(--ink)" }}
     >
       <div className="w-full px-5 sm:px-8 lg:px-12 py-10 sm:py-12 flex flex-col gap-10 text-sm">
-        <div className="grid gap-9 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
+        <div className="grid grid-cols-1 gap-9 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] md:gap-12">
           <div className="flex flex-col gap-3">
             <span
               className="text-[11px] font-bold tracking-[0.2em] uppercase"

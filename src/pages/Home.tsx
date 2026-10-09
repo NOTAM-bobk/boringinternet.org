@@ -4,7 +4,6 @@ import { Highlight } from "../components/Highlight";
 import { HomepageSeo } from "../components/SeoHead";
 import { SiteIcon } from "../components/SiteIcon";
 import {
-  categories,
   categoryById,
   categoryFilters,
   categoryLabel,
@@ -15,8 +14,8 @@ import {
   featuredSites,
   newAdditions,
   searchSites,
-  siteDescription,
   siteName,
+  siteTagline,
   sites,
   sitesByCategory,
   trendingSites,
@@ -198,7 +197,10 @@ function SectionHead({
       <div className="flex items-baseline gap-3">
         <h2 className="text-xl font-bold tracking-[-0.01em]">{title}</h2>
         {note && (
-          <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
+          <span
+            className="hidden sm:inline text-[11px] font-mono"
+            style={{ color: "var(--muted)" }}
+          >
             {note}
           </span>
         )}
@@ -248,7 +250,7 @@ function PagedRows({ items, title, note }: { items: Site[]; title: string; note?
         onPrev={() => setPage((p) => Math.max(0, p - 1))}
         onNext={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
       />
-      <ul className="grid gap-x-10 gap-y-1 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2">
         {current.map((site) => (
           <SiteRow key={site.id} site={site} />
         ))}
@@ -407,58 +409,6 @@ function useSavedCollections(): [string[], (id: string) => void] {
 
 /* ---------------- page ---------------- */
 
-/** The top of the page: what this is, how big the list is, and where to start. */
-function Hero() {
-  const stats = [
-    { value: sites.length, label: "sites listed" },
-    { value: categories.length, label: "categories" },
-    { value: collections.length, label: "collections" },
-  ];
-
-  return (
-    <section className="hero">
-      <div className="hero-copy">
-        <span className="hero-eyebrow">
-          <span className="hero-blip" aria-hidden="true" />
-          {siteName} — the list
-        </span>
-        <h1 className="hero-title">
-          A <span className="hero-em">quiet</span> corner of the web, kept small on purpose.
-        </h1>
-        <p className="hero-lede">{siteDescription}</p>
-        <div className="hero-actions">
-          <a href="#all-sites" className="btn accent">
-            Browse the list
-          </a>
-          <Link to="/submit" className="btn ghost">
-            Submit your site
-          </Link>
-        </div>
-        <dl className="hero-stats">
-          {stats.map((stat) => (
-            <div key={stat.label} className="hero-stat">
-              <dt>{stat.label}</dt>
-              <dd>{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
-      <div className="hero-art">
-        <div className="hero-bars" aria-hidden="true">
-          <span className="hero-bar" />
-          <span className="hero-bar hero-bar-accent" />
-          <span className="hero-bar hero-bar-short" />
-        </div>
-        <p className="hero-art-note">
-          <span className="hero-art-kicker">edited by hand</span>
-          No growth tactics, no infinite scroll, no accounts required.
-        </p>
-      </div>
-    </section>
-  );
-}
-
 export default function Home() {
   // ?q= and ?category= keep the side navigation and this page in sync.
   const [params, setParams] = useSearchParams();
@@ -496,7 +446,10 @@ export default function Home() {
       </label>
       <div className="search-box">
         <span className="search-glyph" aria-hidden="true">
-          ⌕
+          <svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M12.8 12.8 L17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
         </span>
         <input
           id="site-search"
@@ -565,7 +518,7 @@ export default function Home() {
         <HomepageSeo />
         <div
           id="explore"
-          className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col gap-8 scroll-mt-24"
+          className="mx-auto max-w-6xl px-4 sm:px-6 py-10 flex flex-col gap-8 scroll-mt-28"
         >
           {switcher}
 
@@ -593,7 +546,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((site) => (
                 <SiteCard key={site.id} site={site} />
               ))}
@@ -626,16 +579,16 @@ export default function Home() {
   return (
     <>
       <HomepageSeo />
+      {/* The page keeps a heading for search engines and screen readers. */}
+      <h1 className="sr-only">{`${siteName} — ${siteTagline}`}</h1>
       <div
         id="explore"
-        className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-10 flex flex-col gap-8 sm:gap-12 scroll-mt-24"
+        className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-10 flex flex-col gap-8 sm:gap-12 scroll-mt-28"
       >
-        <Hero />
-
         {switcher}
 
         {/* Featured band */}
-        <section className="grid gap-5 sm:grid-cols-2">
+        <section className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           {featured.map((site, index) => (
             <FeatureCard key={site.id} site={site} priority={index === 0} />
           ))}
@@ -646,7 +599,7 @@ export default function Home() {
 
         {/* Collections */}
         {collections.length > 0 && (
-          <section id="collections" className="space-y-4 scroll-mt-24">
+          <section id="collections" className="space-y-4 scroll-mt-28">
           <div
             className="sec-head flex items-end justify-between gap-4 border-b pb-3"
             style={{ borderColor: "var(--rule)" }}
@@ -659,7 +612,7 @@ export default function Home() {
                 All {collections.length} collections →
               </Link>
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {collections.map((collection) => (
                 <CollectionCard
                   key={collection.id}
@@ -683,7 +636,7 @@ export default function Home() {
               All notes →
             </Link>
           </div>
-          <div className="grid gap-5 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             {FEATURED_POSTS.map((post) => (
               <Link
                 key={post.slug}
@@ -716,7 +669,7 @@ export default function Home() {
                 See all {trendingAll} →
               </Link>
             </div>
-            <ol className="grid gap-5 sm:grid-cols-3">
+            <ol className="grid grid-cols-1 gap-5 sm:grid-cols-3">
               {trending.map((site, index) => (
                 <li key={site.id} className="card p-5 flex flex-col gap-3">
                   <div className="flex items-center justify-between gap-3">
@@ -742,7 +695,7 @@ export default function Home() {
         )}
 
         {/* Full directory */}
-        <section id="all-sites" className="space-y-4 scroll-mt-24">
+        <section id="all-sites" className="space-y-4 scroll-mt-28">
           <div
             className="sec-head flex items-end justify-between gap-4 border-b pb-3"
             style={{ borderColor: "var(--rule)" }}
@@ -757,7 +710,7 @@ export default function Home() {
 
           {filtered.length > 0 ? (
             <>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {(showAllSites ? filtered : filtered.slice(0, SITE_PAGE)).map((site) => (
                   <SiteCard key={site.id} site={site} query={query} />
                 ))}
@@ -788,8 +741,8 @@ export default function Home() {
         {/* Closing call to action */}
         <section className="cta-band">
           <div className="cta-copy">
-            <span className="hero-eyebrow">
-              <span className="hero-blip" aria-hidden="true" />
+            <span className="cta-eyebrow">
+              <span className="cta-blip" aria-hidden="true" />
               Add yourself
             </span>
             <h2 className="text-2xl font-bold tracking-[-0.02em]">Built something quiet?</h2>

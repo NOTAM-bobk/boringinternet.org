@@ -81,6 +81,19 @@ export function AppShell() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="site-header">
+        {/* Slim promo bar: what we do for a launch, and the way to start one. */}
+        <div className="promo-bar">
+          <p className="promo-bar-copy">
+            Enhance your site’s SEO{" "}
+            <span className="promo-bar-note">
+              — get in front of people looking for quiet, fast sites
+            </span>
+          </p>
+          <Link to="/submit" className="promo-bar-cta">
+            Launch your site <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 grid grid-cols-[1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center gap-3">
           <Link to="/" className="justify-self-start">
             <span className="brand-mark">{siteName}</span>

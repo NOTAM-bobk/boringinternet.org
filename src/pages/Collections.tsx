@@ -33,7 +33,7 @@ export default function Collections() {
           </p>
         </header>
 
-        <ul className="grid gap-5 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           {grouped.map(({ collection, members }) => (
             <li key={collection.id}>
               <Link

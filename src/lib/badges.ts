@@ -14,6 +14,8 @@ export interface FeatureBadge {
   width: number;
   height: number;
   alt: string;
+  /** Extra attributes the badge provider asks for (e.g. a verification flag). */
+  attributes?: Record<string, string>;
 }
 
 export const featureBadges: FeatureBadge[] = [
@@ -25,5 +27,15 @@ export const featureBadges: FeatureBadge[] = [
     width: 244,
     height: 56,
     alt: "Featured on Nick Launches",
+  },
+  {
+    id: "launchaf",
+    name: "LaunchAF",
+    href: "https://launchaf.com/",
+    image: "https://launchaf.com/api/badge/light?v=launchaf-blue-2026-2",
+    width: 200,
+    height: 56,
+    alt: "Featured on LaunchAF",
+    attributes: { "data-launchaf-badge": "true" },
   },
 ];
