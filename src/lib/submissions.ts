@@ -35,6 +35,24 @@ export interface Submission extends SubmissionDraft {
   reviewedAt?: string;
 }
 
+export type SiteProblemReportType = "problem" | "iframe" | "other";
+
+export interface SiteProblemReportDraft {
+  slug: string;
+  siteName: string;
+  siteUrl: string;
+  type: SiteProblemReportType;
+  issue: string;
+  email: string;
+}
+
+export interface SiteProblemReport extends SiteProblemReportDraft {
+  id: string;
+  status: SubmissionStatus;
+  createdAt: string;
+  reviewedAt?: string;
+}
+
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string; fields?: string[] };
 
 export interface SiteAutofill {
@@ -96,6 +114,12 @@ export async function submitSite(
   return post<{ id: string; status: SubmissionStatus }>("/submit", draft);
 }
 
+export async function submitSiteReport(
+  report: SiteProblemReportDraft,
+): Promise<Result<{ id: string; status: SubmissionStatus }>> {
+  return post<{ id: string; status: SubmissionStatus }>("/report", report);
+}
+
 export async function fetchSubmissions(
   password: string,
 ): Promise<Result<{ submissions: Submission[] }>> {
@@ -108,4 +132,18 @@ export async function reviewSubmission(
   status: SubmissionStatus,
 ): Promise<Result<{ id: string; status: SubmissionStatus }>> {
   return post<{ id: string; status: SubmissionStatus }>("/admin/review", { password, id, status });
+}
+
+export async function fetchSiteReports(
+  password: string,
+): Promise<Result<{ reports: SiteProblemReport[] }>> {
+  return post<{ reports: SiteProblemReport[] }>("/admin/reports", { password });
+}
+
+export async function reviewSiteReport(
+  password: string,
+  id: string,
+  status: SubmissionStatus,
+): Promise<Result<{ id: string; status: SubmissionStatus }>> {
+  return post<{ id: string; status: SubmissionStatus }>("/admin/report-review", { password, id, status });
 }

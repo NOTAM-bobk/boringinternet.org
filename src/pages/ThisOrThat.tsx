@@ -5,6 +5,7 @@ import { SiteIcon } from "../components/SiteIcon";
 import { sites, type Site } from "../lib/siteData";
 import { siteDomain } from "../lib/siteTile";
 import { castVote, markVoted, readLocalCounts, writeLocalCount } from "../lib/votes";
+import { ReportProblem } from "../components/ReportProblem";
 
 function pickOne<T>(list: T[]): T {
   return list[Math.floor(Math.random() * list.length)]!;
@@ -152,6 +153,14 @@ export default function ThisOrThat() {
                       >
                         Open {siteDomain(site.url)} in a new tab <span aria-hidden="true">↗</span>
                       </a>
+                      <ReportProblem
+                        siteName={site.name}
+                        siteUrl={site.url}
+                        slug={site.slug}
+                        initialType="iframe"
+                        triggerLabel="Report site doesn’t allow iframe"
+                        compact
+                      />
                     </div>
                   </article>
                 );

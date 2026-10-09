@@ -18,6 +18,7 @@
 
 const VOTE_PREFIX = "vote:";
 const SUBMISSION_PREFIX = "submission:";
+const REPORT_PREFIX = "report:";
 const USER_PREFIX = "user:";
 const EMAIL_PREFIX = "email:";
 const SESSION_PREFIX = "session:";
@@ -432,6 +433,51 @@ export default {
       };
       await env.VOTES.put(SUBMISSION_PREFIX + id, JSON.stringify(submission));
       return json({ id, status: submission.status }, headers, 201);
+    }
+
+    if (pathname === "/report" && request.method === "POST") {
+      const body = await readBody(request);
+      const slug = str(body?.slug, 64).toLowerCase();
+      const siteName = str(body?.siteName, 120);
+      const siteUrl = str(body?.siteUrl, 300);
+      const issue = str(body?.issue, 2000);
+      const type = ["problem", "iframe", "other"].includes(body?.type) ? body.type : "problem";
+      const email = str(body?.email, 160);
+      if (!SLUG_RE.test(slug) || siteName.length < 2 || !/^https?:\/\//i.test(siteUrl) || issue.length < 8) {
+        return json({ error: "Tell us which site has a problem and describe the issue in at least 8 characters." }, headers, 400);
+      }
+      const id = crypto.randomUUID();
+      const report = { id, slug, siteName, siteUrl, type, issue, email, status: "pending", createdAt: new Date().toISOString() };
+      await env.VOTES.put(REPORT_PREFIX + id, JSON.stringify(report));
+      return json({ id, status: report.status }, headers, 201);
+    }
+
+    if ((pathname === "/admin/reports" || pathname === "/admin/report-review") && request.method === "POST") {
+      const body = await readBody(request);
+      if (!body) return json({ error: "invalid body" }, headers, 400);
+      if (!adminConfigured(env)) return json({ error: "admin is not configured on this worker" }, headers, 503);
+      if (!(await isAdmin(body, env))) return json({ error: "wrong password" }, headers, 401);
+      if (pathname === "/admin/reports") {
+        const reports = [];
+        let cursor;
+        do {
+          const page = await env.VOTES.list({ prefix: REPORT_PREFIX, cursor, limit: 1000 });
+          for (const key of page.keys) {
+            const raw = await env.VOTES.get(key.name, "json");
+            if (raw) reports.push(raw);
+          }
+          cursor = page.list_complete ? undefined : page.cursor;
+        } while (cursor);
+        reports.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+        return json({ reports }, headers);
+      }
+      const id = str(body.id, 80);
+      const status = str(body.status, 20);
+      if (!REVIEW_STATUSES.has(status)) return json({ error: "invalid review" }, headers, 400);
+      const raw = await env.VOTES.get(REPORT_PREFIX + id);
+      if (!raw) return json({ error: "not found" }, headers, 404);
+      await env.VOTES.put(REPORT_PREFIX + id, JSON.stringify({ ...JSON.parse(raw), status, reviewedAt: new Date().toISOString() }));
+      return json({ id, status }, headers);
     }
 
     if ((pathname === "/admin/submissions" || pathname === "/admin/review") && request.method === "POST") {
