@@ -10,6 +10,7 @@ const DIRECTORY_LINKS: { to: string; label: string }[] = [
   { to: "/collections", label: "Collections" },
   { to: "/trending", label: "Trending 🔥" },
   { to: "/submit", label: "Submit your site" },
+  { to: "/advertise", label: "Advertise with Boring Internet" },
 ];
 
 const CONNECT_LINKS: { href: string; label: string }[] = [

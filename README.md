@@ -50,6 +50,11 @@ and takes one vote for whichever is better; the winner gets the same vote the
 trending list counts and the next pair appears immediately. No config: the
 pairs are drawn from `config/sites.json`.
 
+**Advertise** → `/advertise` describes draft promoted-placement and verification
+prices. Checkout is not connected; the listed amounts are proposals and cannot
+be purchased yet. After submitting a site, the confirmation screen generates an
+iframe badge snippet that points to the standalone `/embed` route.
+
 **Write a post** → append an object to `config/blog.json` with `slug`, `title`,
 `description`, `date`, `tags`, `excerpt`, and `blocks`. It appears on `/blog`
 and gets its own readable page at `/blog/<slug>`.

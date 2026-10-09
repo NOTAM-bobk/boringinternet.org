@@ -97,6 +97,9 @@ export default function Submit() {
   const [error, setError] = useState<string | null>(null);
   const [badFields, setBadFields] = useState<string[]>([]);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
+  const [submittedSite, setSubmittedSite] = useState<{ name: string; url: string } | null>(null);
+  const [embedCopied, setEmbedCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
   const [autofillBusy, setAutofillBusy] = useState(false);
   const [autofillMessage, setAutofillMessage] = useState<string | null>(null);
 
@@ -154,10 +157,20 @@ export default function Submit() {
       return;
     }
     setSubmittedId(result.value.id);
+    setSubmittedSite({ name: draft.name.trim(), url: draft.url.trim() });
+    setEmbedCopied(false);
+    setCopyError(false);
     setDraft(EMPTY_DRAFT);
   }
 
   if (submittedId) {
+    const embedUrl = new URL("/embed", siteUrl);
+    embedUrl.searchParams.set("name", submittedSite?.name ?? "A website");
+    embedUrl.searchParams.set("url", submittedSite?.url ?? "");
+    embedUrl.searchParams.set("status", "listed");
+    const embedSrc = embedUrl.toString().replaceAll("&", "&amp;");
+    const embedCode = `<iframe src="${embedSrc}" title="As seen on Boring Internet" width="280" height="76" loading="lazy" style="border:0;max-width:100%" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+
     return (
       <>
         <SiteSeo
@@ -176,6 +189,61 @@ export default function Submit() {
           <p className="text-[12px] font-mono" style={{ color: "var(--muted)" }}>
             reference {submittedId}
           </p>
+          <section className="submit-embed" aria-labelledby="submit-embed-title">
+            <div className="flex flex-col gap-2 text-left">
+              <span className="accent-text text-[11px] font-bold tracking-[0.18em] uppercase">
+                Share your listing
+              </span>
+              <h2 id="submit-embed-title" className="text-xl font-bold">
+                Add an “As seen on Boring Internet” badge
+              </h2>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+                Copy this iframe snippet and paste it into your site’s HTML. The badge links back
+                to Boring Internet and shows your site name and domain.
+              </p>
+            </div>
+            <textarea
+              className="embed-code"
+              aria-label="Boring Internet badge iframe code"
+              readOnly
+              rows={3}
+              value={embedCode}
+              onFocus={(event) => event.currentTarget.select()}
+            />
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                className="btn accent"
+                onClick={() => {
+                  if (!navigator.clipboard?.writeText) {
+                    setCopyError(true);
+                    return;
+                  }
+                  void navigator.clipboard.writeText(embedCode).then(
+                    () => {
+                      setEmbedCopied(true);
+                      setCopyError(false);
+                    },
+                    () => {
+                      setEmbedCopied(false);
+                      setCopyError(true);
+                    },
+                  );
+                }}
+              >
+                {embedCopied ? "Copied iframe code" : "Copy iframe code"}
+              </button>
+              {copyError && (
+                <span className="text-sm" role="status" style={{ color: "var(--muted)" }}>
+                  Clipboard unavailable — select the code above and copy it manually.
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-left" style={{ color: "var(--muted)" }}>
+              Your submission is still under review. Please use the “As seen on” badge once your
+              listing is approved.
+            </p>
+          </section>
           <div className="flex flex-wrap justify-center gap-3 mt-2">
             <button type="button" className="btn" onClick={() => setSubmittedId(null)}>
               Submit another

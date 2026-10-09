@@ -42,6 +42,7 @@ const FOOTER_ROUTES = new Set([
   "/blog",
   "/collections",
   "/submit",
+  "/advertise",
 ]);
 
 function tabIndex(pathname: string): number {

@@ -28,6 +28,7 @@ const staticPages = [
   { path: "/blog", priority: "0.7", changefreq: "weekly" },
   { path: "/collections", priority: "0.8", changefreq: "weekly" },
   { path: "/submit", priority: "0.6", changefreq: "monthly" },
+  { path: "/advertise", priority: "0.5", changefreq: "monthly" },
 ];
 
 /** Every listed site has its own page. */

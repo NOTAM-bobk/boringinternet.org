@@ -17,6 +17,8 @@ import NewWebsites from "./pages/NewWebsites.tsx";
 import SiteDetail from "./pages/SiteDetail.tsx";
 import ThisOrThat from "./pages/ThisOrThat.tsx";
 import { Profile, Saved, Settings } from "./pages/Account.tsx";
+import Advertise from "./pages/Advertise.tsx";
+import EmbedBadge from "./pages/EmbedBadge.tsx";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +52,10 @@ const router = createBrowserRouter([
       {
         path: "submit",
         element: <Submit />,
+      },
+      {
+        path: "advertise",
+        element: <Advertise />,
       },
       {
         path: "discover-websites",
@@ -88,6 +94,10 @@ const router = createBrowserRouter([
         element: <Settings />,
       },
     ],
+  },
+  {
+    path: "/embed",
+    element: <EmbedBadge />,
   },
 ]);
 
