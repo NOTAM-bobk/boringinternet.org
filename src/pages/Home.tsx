@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
+import { AvatarRow } from "../components/AvatarRow";
 import { Highlight } from "../components/Highlight";
 import { LaunchesThisWeek } from "../components/LaunchesThisWeek";
 import { HomepageSeo } from "../components/SeoHead";
@@ -368,6 +369,9 @@ export default function Home() {
 
   const switcher = (
     <section className="flex flex-col gap-4">
+      {/* The page's own headline, then the ways to browse, then the crowd. */}
+      <h2 className="find-title">Find launches</h2>
+
       {/* Above the search box: one click, one random site, in a new tab. */}
       <div className="bored-row">
         <button
@@ -383,6 +387,8 @@ export default function Home() {
         </Link>
         <span className="bored-note">One random site, or two to vote on.</span>
       </div>
+
+      <AvatarRow />
 
       <label htmlFor="site-search" className="sr-only">
         Search launched sites

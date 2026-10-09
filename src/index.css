@@ -1030,13 +1030,15 @@ hr {
   .sidenav {
     display: block;
     position: sticky;
-    top: 6.6rem;
+    /* Sits just under the header, whatever height it is: the promo bar only
+       shows on the home screen, so the offset cannot be hard-coded. */
+    top: var(--header-h, 6.6rem);
     align-self: start;
     justify-self: start;
     margin-left: 1.1rem;
     width: 16.5rem;
-    height: calc(100vh - 8.2rem);
-    height: min(calc(100dvh - 8.2rem), 100%);
+    height: calc(100vh - var(--header-h, 6.6rem) - 1.6rem);
+    height: min(calc(100dvh - var(--header-h, 6.6rem) - 1.6rem), 100%);
     z-index: 30;
     perspective: 1400px;
   }
@@ -2057,6 +2059,74 @@ mark.hl {
 @media (prefers-reduced-motion: reduce) {
   .bored-btn {
     transition: none;
+  }
+}
+
+/* ---------- "find launches" headline + avatar strip ---------- */
+
+.find-title {
+  font-size: clamp(1.9rem, 5.5vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--accent);
+}
+
+/*
+ * A crowd of different DiceBear styles in circles, overlapping like the
+ * reference line-up and sitting in a gentle wave. The size is a variable so the
+ * row keeps fitting the narrowest phone: eight circles at 44px overlap down to
+ * about 272px, inside the 288px a 320px screen leaves after padding.
+ */
+.avatar-row {
+  --avatar-size: 44px;
+  display: flex;
+  align-items: center;
+  padding-block: 6px;
+}
+
+.avatar {
+  display: block;
+  flex: none;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  margin-left: calc(var(--avatar-size) * -0.26);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: 0 2px 0 0 var(--ink);
+  overflow: hidden;
+}
+
+.avatar:first-child {
+  margin-left: 0;
+}
+
+.avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.avatar:nth-child(3n + 1) {
+  transform: translateY(-5px);
+}
+
+.avatar:nth-child(3n + 3) {
+  transform: translateY(4px);
+}
+
+@media (min-width: 640px) {
+  .avatar-row {
+    --avatar-size: 58px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar {
+    box-shadow: none;
   }
 }
 
