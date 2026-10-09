@@ -34,7 +34,7 @@
     try {
       const parsed = JSON.parse(raw);
       return parsed && typeof parsed === "object" ? parsed : null;
-    } catch {
+    } catch (e) {
       return null;
     }
   }
@@ -106,7 +106,7 @@
     try {
       parsed = new URL(rawUrl);
       if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("unsupported protocol");
-    } catch {
+    } catch (e) {
       return { error: "Enter a valid http:// or https:// URL." };
     }
     try {
@@ -135,7 +135,7 @@
         `${response.headers.get("x-frame-options") || ""} ${response.headers.get("content-security-policy") || ""}`
       );
       return { url: response.url || parsed.toString(), name: title || h1, tagline, description: fullDescription, supportsIframe: !frameBlocked };
-    } catch {
+    } catch (e) {
       return { error: "Could not fetch that site. Check the URL and try again." };
     }
   }
@@ -151,21 +151,23 @@
   }
   async function isAdmin(body, env) {
     if (!adminConfigured(env)) return false;
-    return constantTimeEqual(str(body?.password, 200), env.ADMIN_PASSWORD);
+    return constantTimeEqual(str(body == null ? void 0 : body.password, 200), env.ADMIN_PASSWORD);
   }
   function voteKey(slug) {
     return VOTE_PREFIX + slug;
   }
   async function voteCount(env, slug) {
-    return Number(await env.VOTES.get(voteKey(slug)) ?? 0) || 0;
+    var _a;
+    return Number((_a = await env.VOTES.get(voteKey(slug))) != null ? _a : 0) || 0;
   }
   async function allVoteCounts(env) {
+    var _a, _b;
     const counts = {};
     let cursor;
     do {
       const page = await env.VOTES.list({ prefix: VOTE_PREFIX, cursor, limit: 1e3 });
       for (const key of page.keys) {
-        counts[key.name.slice(VOTE_PREFIX.length)] = Number(key.metadata?.count ?? await voteCount(env, key.name.slice(VOTE_PREFIX.length))) || 0;
+        counts[key.name.slice(VOTE_PREFIX.length)] = Number((_b = (_a = key.metadata) == null ? void 0 : _a.count) != null ? _b : await voteCount(env, key.name.slice(VOTE_PREFIX.length))) || 0;
       }
       cursor = page.list_complete ? void 0 : page.cursor;
     } while (cursor);
@@ -196,7 +198,7 @@
     try {
       parsedUrl = new URL(url);
       if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") errors.push("url");
-    } catch {
+    } catch (e) {
       errors.push("url");
     }
     return {
@@ -231,15 +233,19 @@
         if (!raw) continue;
         try {
           submissions.push(JSON.parse(raw));
-        } catch {
+        } catch (e) {
         }
       }
       cursor = page.list_complete ? void 0 : page.cursor;
     } while (cursor);
-    return submissions.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")));
+    return submissions.sort((a, b) => {
+      var _a, _b;
+      return String((_a = b.createdAt) != null ? _a : "").localeCompare(String((_b = a.createdAt) != null ? _b : ""));
+    });
   }
   var votes_worker_default = {
     async fetch(request, env) {
+      var _a;
       const headers = cors(env, request);
       if (request.method === "OPTIONS") {
         return new Response(null, { status: 204, headers });
@@ -265,9 +271,9 @@
       }
       if (pathname === "/auth/signup" && request.method === "POST") {
         const body = await readBody(request);
-        const email = str(body?.email, 160).toLowerCase();
-        const password = typeof body?.password === "string" ? body.password : "";
-        const name = str(body?.name, 80);
+        const email = str(body == null ? void 0 : body.email, 160).toLowerCase();
+        const password = typeof (body == null ? void 0 : body.password) === "string" ? body.password : "";
+        const name = str(body == null ? void 0 : body.name, 80);
         if (!validEmail(email) || password.length < 8 || name.length < 2) return json({ error: "Use a valid email, a name, and a password with at least 8 characters." }, headers, 400);
         if (await env.VOTES.get(await digest(emailKey(email)))) return json({ error: "An account with that email already exists." }, headers, 409);
         const id = crypto.randomUUID();
@@ -280,11 +286,11 @@
       }
       if (pathname === "/auth/signin" && request.method === "POST") {
         const body = await readBody(request);
-        const email = str(body?.email, 160).toLowerCase();
-        const password = typeof body?.password === "string" ? body.password : "";
+        const email = str(body == null ? void 0 : body.email, 160).toLowerCase();
+        const password = typeof (body == null ? void 0 : body.password) === "string" ? body.password : "";
         const id = await env.VOTES.get(await digest(emailKey(email)));
         const user = id ? await env.VOTES.get(userKey(id), "json") : null;
-        const candidate = user?.password ? await hashPassword(password, user.password.salt) : null;
+        const candidate = (user == null ? void 0 : user.password) ? await hashPassword(password, user.password.salt) : null;
         if (!user || !candidate || candidate.hash !== user.password.hash) return json({ error: "Email or password is incorrect." }, headers, 401);
         const token = await createSession(user.id, env);
         return withCookie(json({ user: publicUser(user) }, headers), cookieHeader(token));
@@ -302,9 +308,9 @@
         const user = await requireUser(request, env);
         if (!user) return json({ error: "Sign in to edit your profile." }, headers, 401);
         const body = await readBody(request);
-        user.name = str(body?.name, 80) || user.name;
-        user.avatarSeed = str(body?.avatarSeed, 80) || user.avatarSeed;
-        user.bio = str(body?.bio, 240);
+        user.name = str(body == null ? void 0 : body.name, 80) || user.name;
+        user.avatarSeed = str(body == null ? void 0 : body.avatarSeed, 80) || user.avatarSeed;
+        user.bio = str(body == null ? void 0 : body.bio, 240);
         await env.VOTES.put(userKey(user.id), JSON.stringify(user));
         return json({ user: publicUser(user) }, headers);
       }
@@ -312,14 +318,14 @@
         const user = await requireUser(request, env);
         if (!user) return json({ error: "Sign in to edit settings." }, headers, 401);
         const body = await readBody(request);
-        user.settings = { emailUpdates: body?.emailUpdates === true, reducedMotion: body?.reducedMotion === true };
+        user.settings = { emailUpdates: (body == null ? void 0 : body.emailUpdates) === true, reducedMotion: (body == null ? void 0 : body.reducedMotion) === true };
         await env.VOTES.put(userKey(user.id), JSON.stringify(user));
         return json({ user: publicUser(user) }, headers);
       }
       if (pathname === "/auth/saved" && request.method === "POST") {
         const user = await requireUser(request, env);
         if (!user) return json({ error: "Sign in to save websites." }, headers, 401);
-        const slug = str((await readBody(request))?.slug, 64).toLowerCase();
+        const slug = str((_a = await readBody(request)) == null ? void 0 : _a.slug, 64).toLowerCase();
         if (!SLUG_RE.test(slug)) return json({ error: "Invalid website." }, headers, 400);
         user.saved = user.saved || [];
         user.saved = user.saved.includes(slug) ? user.saved.filter((item) => item !== slug) : [...user.saved, slug].slice(-200);
@@ -328,7 +334,7 @@
       }
       if ((pathname === "/vote" || pathname === "/unvote") && request.method === "POST") {
         const body = await readBody(request);
-        const slug = str(body?.slug, 64).toLowerCase();
+        const slug = str(body == null ? void 0 : body.slug, 64).toLowerCase();
         if (!SLUG_RE.test(slug)) return json({ error: "invalid slug" }, headers, 400);
         const current = await voteCount(env, slug);
         const next = pathname === "/vote" ? current + 1 : Math.max(0, current - 1);
