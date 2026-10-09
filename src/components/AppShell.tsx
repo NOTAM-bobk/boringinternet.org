@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { Link, NavLink, Outlet, useLocation, useNavigationType } from "react-router";
 import { AccountMenu } from "./AccountMenu";
 import { Footer } from "./Footer";
 import { MobileNav, HamburgerButton } from "./MobileNav";
@@ -97,6 +97,7 @@ export function AppShell() {
   const [navOpen, setNavOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
+  const navigationType = useNavigationType();
   const direction = useSlideDirection(location.pathname);
   const path = location.pathname.replace(/\/+$/, "") || "/";
 
@@ -125,6 +126,18 @@ export function AppShell() {
       window.removeEventListener("resize", publish);
     };
   }, []);
+
+  /*
+    A screen you navigate to starts at the top. Without this, following a link
+    from halfway down the directory dropped you halfway down the next page, so a
+    site's own page opened part-way through its details. In-page jumps keep
+    their hash (the nav scrolls those to the section), and going back leaves the
+    browser's own scroll restoration alone.
+  */
+  useEffect(() => {
+    if (location.hash || navigationType === "POP") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location.pathname, location.hash, navigationType]);
 
   return (
     <div className="min-h-screen flex flex-col">

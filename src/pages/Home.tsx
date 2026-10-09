@@ -13,6 +13,7 @@ import {
   collections,
   exploreConfig,
   featuredSiteRows,
+  interestingSites,
   newAdditions,
   searchSites,
   siteName,
@@ -217,7 +218,7 @@ function CollectionCard({
         </button>
       </div>
 
-      <h3 className="mt-6 text-lg font-bold leading-snug">
+      <h3 className="text-lg font-bold leading-snug">
         <Link
           to={`/collections/${collection.id}`}
           className="hover:underline underline-offset-4"
@@ -340,6 +341,7 @@ export default function Home() {
   const lastRandom = useRef<string | null>(null);
 
   const additions = useMemo(() => newAdditions(exploreConfig.newAdditionsLimit), []);
+  const interesting = useMemo(() => interestingSites(), []);
   const picks = useMemo(() => featuredSiteRows(exploreConfig.featuredSitesLimit), []);
   const seoNewSites = useMemo(
     () => additions.slice(0, 10).map((site) => ({ name: site.name, url: site.url, description: site.description })),
@@ -386,7 +388,7 @@ export default function Home() {
   const switcher = (
     <section className="flex flex-col gap-4">
       {/* The page's own headline, then the ways to browse, then the crowd. */}
-      <h2 className="find-title">Find launches</h2>
+      <h2 className="find-title">Cure boredom, find launches</h2>
 
       {/* Above the search box: one click, one random site, in a new tab. */}
       <div className="bored-row">
@@ -584,6 +586,10 @@ export default function Home() {
 
         <PagedRows items={additions} title="New and Upcoming Websites" note="latest launches" />
         <PagedRows items={picks} title="Featured Sites" note="top ranked" />
+
+        {interesting.length > 0 && (
+          <PagedRows items={interesting} title="Very Interesting" note="worth a detour" />
+        )}
 
         {/* Collections */}
         {collections.length > 0 && (

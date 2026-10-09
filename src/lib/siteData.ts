@@ -36,6 +36,7 @@ export interface SiteCollection {
 }
 
 export interface TrendingConfig {
+  /** How many sites the trending page shows. `0` ranks every listed site. */
   topLimit: number;
   title: string;
   tagline: string;
@@ -50,6 +51,8 @@ export interface ExploreConfig {
   newAdditionsLimit: number;
   featuredSitesLimit: number;
   trendingPreviewCount: number;
+  /** Slugs for the home page's "very interesting" section, in display order. */
+  interestingSlugs: string[];
   collections: SiteCollection[];
 }
 
@@ -168,7 +171,10 @@ export const categories = normalizeCategories(categoriesJson);
 export const collections = normalizeCollections(explore.collections);
 
 export const trendingConfig: TrendingConfig = {
-  topLimit: trending.topLimit ?? sites.length,
+  topLimit:
+    typeof trending.topLimit === "number" && trending.topLimit > 0
+      ? trending.topLimit
+      : sites.length,
   title: trending.title ?? "Trending",
   tagline: trending.tagline ?? "Most active this week.",
   boost: trending.boost ?? {},
@@ -182,6 +188,7 @@ export const exploreConfig: ExploreConfig = {
   newAdditionsLimit: explore.newAdditionsLimit ?? 40,
   featuredSitesLimit: explore.featuredSitesLimit ?? 40,
   trendingPreviewCount: explore.trendingPreviewCount ?? 3,
+  interestingSlugs: explore.interestingSlugs ?? [],
   collections,
 };
 
@@ -283,6 +290,11 @@ export function featuredSites(): Site[] {
   }
   const filler = rankedSites().filter((site) => !picked.includes(site));
   return [...picked, ...filler].slice(0, exploreConfig.featuredCount);
+}
+
+/** The hand-picked "very interesting" picks, in the order the config lists them. */
+export function interestingSites(): Site[] {
+  return sitesBySlugs(exploreConfig.interestingSlugs);
 }
 
 /** Ranked sites with the featured picks removed. */

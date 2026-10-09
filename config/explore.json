@@ -5,6 +5,14 @@
   "newAdditionsLimit": 40,
   "featuredSitesLimit": 40,
   "trendingPreviewCount": 3,
+  "interestingSlugs": [
+    "ciechanowski",
+    "pudding",
+    "desmos",
+    "wiby",
+    "are-na",
+    "music-for-programming"
+  ],
   "collections": [
     {
       "id": "quiet-desk",

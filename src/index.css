@@ -223,12 +223,16 @@ a {
   box-shadow: -6px 0 0 var(--accent);
 }
 
-/* rank numbers in the trending list; the top three get a medal-ish badge */
+/*
+ * Rank numbers in the trending list. The rest are small, quiet mono figures;
+ * the top three drop the badge entirely and become oversized numerals, one
+ * colour each, with a solid offset shadow for the brutalist lift.
+ */
 .rank {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  min-width: 1.5rem;
+  min-width: 2.9rem;
   font-family: var(--mono);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
@@ -236,35 +240,33 @@ a {
 }
 
 .rank-top {
-  justify-content: center;
-  width: 3.05rem;
-  height: 3.05rem;
+  justify-content: flex-end;
+  width: 2.9rem;
   min-width: 0;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-sm);
-  background: linear-gradient(165deg, #ef7f38 0%, var(--accent) 58%, #b74b14 100%);
-  box-shadow: 0 3px 0 0 var(--ink), 0 14px 24px -12px rgba(26, 18, 11, 0.55);
-  color: var(--on-accent);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   font-family: var(--futura);
-  font-size: 1.55rem;
-  font-weight: 800;
-  letter-spacing: -0.05em;
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: -0.07em;
   line-height: 1;
-  text-shadow: 0 1px 0 rgba(26, 18, 11, 0.45);
-  transform: rotate(-4deg);
 }
 
 .rank-1 {
-  transform: rotate(-4deg) scale(1.1);
-  box-shadow: 0 3px 0 0 var(--ink), 0 18px 30px -12px rgba(217, 96, 31, 0.75);
+  color: #d9601f;
+  text-shadow: 2px 3px 0 rgba(217, 96, 31, 0.28);
 }
 
 .rank-2 {
-  transform: rotate(3deg);
+  color: #2f6f9f;
+  text-shadow: 2px 3px 0 rgba(47, 111, 159, 0.28);
 }
 
 .rank-3 {
-  transform: rotate(-2deg) scale(0.96);
+  color: #2e7d4f;
+  text-shadow: 2px 3px 0 rgba(46, 125, 79, 0.28);
 }
 
 .site-tile {
@@ -316,10 +318,13 @@ a {
     padding: 0.7rem 0.8rem;
   }
 
+  .rank {
+    min-width: 2.2rem;
+  }
+
   .rank-top {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.25rem;
+    width: 2.2rem;
+    font-size: 2rem;
   }
 
   .vote-btn {
@@ -565,6 +570,21 @@ hr {
   padding: 1.15rem;
   border: 1px solid var(--ink);
   background: var(--surface);
+}
+
+/*
+ * The collection name needs real air below the icon cluster, and it has to be
+ * set here: the reset above (`h1, h2, h3, h4 { margin: 0 }`, `p { margin: 0 }`)
+ * sits outside any cascade layer, so it outranks every Tailwind margin utility
+ * — the `mt-6` this heading used to carry silently did nothing.
+ */
+.collection-card h3 {
+  margin-top: 2.5rem;
+}
+
+/* Same reset, same reason: keep the blurb off its title. */
+.collection-card h3 + p {
+  margin-top: 0.35rem;
 }
 
 .tile-cluster {
