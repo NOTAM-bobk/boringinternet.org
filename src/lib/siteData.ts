@@ -20,6 +20,8 @@ export interface Site {
   tags: string[];
   trending?: number;
   launched?: string;
+  /** A listing a person has checked and marked as verified. */
+  verified?: boolean;
   /**
    * Any field beyond the ones above, kept as readable text. Listings carry the
    * details that came in with a submission (tagline, pricing, FAQ, …), and the
@@ -71,6 +73,7 @@ const SITE_FIELDS = new Set([
   "tags",
   "trending",
   "launched",
+  "verified",
 ]);
 
 /** Any JSON value as one line of readable text, or "" when there is nothing to show. */
@@ -117,6 +120,7 @@ function normalizeSites(value: unknown): Site[] {
     tags: Array.isArray(site.tags) ? site.tags : [],
     trending: typeof site.trending === "number" ? site.trending : undefined,
     launched: site.launched,
+    verified: site.verified === true,
     extras: extraDetails(site),
   }));
 }
@@ -195,10 +199,27 @@ export const exploreConfig: ExploreConfig = {
   collections,
 };
 
-/** "All" first, then the categories from config/categories.json. */
+/** Every category in the config, including the ones no listing uses yet. */
+export const categoryChoices: SiteCategory[] = categories;
+
+/** Categories at least one listing is filed under, in config order. */
+const usedCategoryIds = new Set(sites.map((site) => site.category));
+
+/** Ids a listing uses that the config has no entry for, so they still show up. */
+const unlistedCategories: SiteCategory[] = [...usedCategoryIds]
+  .filter((id) => id !== "all" && !categories.some((category) => category.id === id))
+  .sort()
+  .map((id) => ({ id, label: humanizeKey(id) }));
+
+/**
+ * What the filter row and the side menu offer: "All", then the categories that
+ * have at least one listing. A niche category added to the config stays out of
+ * the way until a site uses it, so nothing leads to an empty page.
+ */
 export const categoryFilters: SiteCategory[] = [
   { id: "all", label: "All" },
-  ...categories,
+  ...categories.filter((category) => usedCategoryIds.has(category.id)),
+  ...unlistedCategories,
 ];
 
 export function categoryById(id: string): SiteCategory | undefined {

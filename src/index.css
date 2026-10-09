@@ -193,142 +193,197 @@ a {
   box-shadow: inset 0 -0.3em 0 var(--accent-soft);
 }
 
-/* stacked trending list */
-.stack {
+/* ---------- ranking rows: trending + "needs some votes" ---------- */
+
+.vote-rows {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.stack-row {
+.vote-row {
   display: grid;
-  grid-template-columns: auto 2.75rem minmax(0, 1fr) auto;
+  grid-template-columns: 2rem 3.5rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.85rem;
-  padding: 0.8rem 1rem;
+  padding: 0.9rem 1rem;
   border: 1px solid var(--ink);
+  border-radius: var(--radius);
   background: var(--surface);
-  margin-top: -1px;
-  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--shadow-thick);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.stack-row:first-child {
-  margin-top: 0;
+.vote-row:hover {
+  transform: translateX(4px) translateY(-2px);
+  box-shadow: var(--shadow-lift);
 }
 
-.stack-row:hover {
-  position: relative;
-  z-index: 1;
-  background: #fffdf8;
-  transform: translateX(3px);
-  box-shadow: -6px 0 0 var(--accent);
+.vote-row > .site-icon,
+.vote-row > .site-tile {
+  justify-self: center;
 }
 
-/*
- * Rank numbers in the trending list. The rest are small, quiet mono figures;
- * the top three drop the badge entirely and become oversized numerals, one
- * colour each, with a solid offset shadow for the brutalist lift.
- */
-.rank {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-width: 2.9rem;
-  font-family: var(--mono);
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-}
-
-.rank-top {
-  justify-content: flex-end;
-  width: 2.9rem;
-  min-width: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  font-family: var(--futura);
-  font-size: 2.6rem;
-  font-weight: 900;
-  letter-spacing: -0.07em;
-  line-height: 1;
-}
-
-.rank-1 {
-  color: #d9601f;
-  text-shadow: 2px 3px 0 rgba(217, 96, 31, 0.28);
-}
-
-.rank-2 {
-  color: #2f6f9f;
-  text-shadow: 2px 3px 0 rgba(47, 111, 159, 0.28);
-}
-
-.rank-3 {
-  color: #2e7d4f;
-  text-shadow: 2px 3px 0 rgba(46, 125, 79, 0.28);
-}
-
-.site-tile {
+.vote-row-rank {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid var(--ink);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  flex: none;
+  color: var(--muted);
+  font: 0.75rem var(--mono);
+  text-align: center;
 }
 
-.vote-btn {
-  display: inline-flex;
+.vote-row-medal {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.vote-row-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.vote-row-head {
+  display: flex;
+  min-width: 0;
   align-items: center;
   gap: 0.4rem;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 0.5rem 0.7rem;
-  border: 1px solid var(--ink);
+}
+
+.vote-row-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vote-row-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.vote-check {
+  flex: none;
+  color: var(--accent);
+}
+
+.vote-row-description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.vote-row-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vote-row-tags li {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.vote-row-diamond {
+  color: var(--rule);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.vote-circle {
+  display: flex;
+  flex: none;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.05rem;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
   background: #fff;
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
-.vote-btn:hover:not(:disabled) {
+.vote-circle-arrow {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.vote-circle-count {
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.vote-circle:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--accent-soft);
+}
+
+/* The site currently on top wears the filled button. */
+.vote-row-leader .vote-circle {
   background: var(--accent);
   color: var(--on-accent);
-  transform: translateY(-1px);
 }
 
-.vote-btn:disabled {
+/* Once your vote is in, the button fills in and shows the tick. */
+.vote-circle.voted,
+.vote-circle:disabled {
+  border-color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
   cursor: default;
-  background: var(--accent);
-  color: var(--on-accent);
 }
 
-/* the trending rows keep their numbers on a phone, just smaller */
+/* ranking rows keep the same shape on a phone, just tighter */
 @media (max-width: 560px) {
-  .stack-row {
+  .vote-row {
+    grid-template-columns: 1.7rem 3.5rem minmax(0, 1fr) auto;
     gap: 0.6rem;
-    padding: 0.7rem 0.8rem;
+    padding: 0.75rem 0.8rem;
   }
 
-  .rank {
-    min-width: 2.2rem;
+  .vote-row-medal {
+    font-size: 1.3rem;
   }
 
-  .rank-top {
-    width: 2.2rem;
-    font-size: 2rem;
+  .vote-row-name {
+    font-size: 1rem;
   }
 
-  .vote-btn {
-    padding: 0.45rem 0.55rem;
+  .vote-circle {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  .vote-rows {
+    gap: 10px;
   }
 }
 
@@ -825,7 +880,6 @@ hr {
 .chip,
 .pager,
 .save-btn,
-.vote-btn,
 .switch,
 .site-icon,
 .site-tile,
@@ -839,7 +893,6 @@ hr {
 .field,
 .pager,
 .save-btn,
-.vote-btn,
 .site-icon,
 .site-tile,
 .nav-btn,
@@ -855,29 +908,8 @@ hr {
 .btn:hover,
 .pager:hover:not(:disabled),
 .save-btn:hover,
-.vote-btn:hover:not(:disabled),
 .nav-btn:hover,
 .nav-cta:hover {
-  box-shadow: var(--shadow-lift);
-}
-
-/* the trending stack becomes a list of rounded, lifted cards */
-.stack {
-  gap: 12px;
-}
-
-.stack-row {
-  margin-top: 0;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-thick);
-}
-
-.stack-row:first-child {
-  margin-top: 0;
-}
-
-.stack-row:hover {
-  transform: translateX(4px) translateY(-2px);
   box-shadow: var(--shadow-lift);
 }
 
@@ -3705,94 +3737,6 @@ mark.hl {
   text-underline-offset: 4px;
 }
 
-.needs-votes-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.needs-votes-card {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.55rem;
-  padding: 1rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-}
-
-.needs-votes-card-top {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.needs-votes-rank {
-  color: var(--muted);
-  font: 0.67rem var(--mono);
-}
-
-.needs-votes-site-name {
-  color: var(--ink);
-  font-weight: 750;
-}
-
-.needs-votes-site-name:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.needs-votes-domain {
-  color: var(--accent);
-  font: 0.64rem var(--mono);
-}
-
-.needs-votes-description {
-  flex: 1;
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.5;
-}
-
-.needs-votes-button {
-  display: inline-flex;
-  min-height: 2.5rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  width: 100%;
-  margin-top: 0.25rem;
-  padding: 0.55rem 0.75rem;
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  box-shadow: 0 2px 0 var(--ink);
-  color: var(--ink);
-  font-size: 0.78rem;
-  font-weight: 750;
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-
-.needs-votes-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.needs-votes-button:disabled {
-  background: var(--accent);
-  color: var(--on-accent);
-  cursor: default;
-}
-
 .needs-votes-note {
   color: var(--muted);
   font-size: 0.72rem;
@@ -4227,30 +4171,6 @@ mark.hl {
     align-items: flex-start;
   }
 
-  .needs-votes-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .needs-votes-card {
-    display: grid;
-    grid-template-columns: 2.6rem minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 0.75rem;
-  }
-
-  .needs-votes-card-top {
-    grid-row: span 3;
-    flex-direction: column-reverse;
-  }
-
-  .needs-votes-description {
-    grid-column: 2 / 4;
-  }
-
-  .needs-votes-button {
-    grid-column: 2 / 4;
-  }
-
   .site-detail-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -4279,7 +4199,8 @@ mark.hl {
   .account-nav-link,
   .account-nav-link > span,
   .account-site-card,
-  .needs-votes-button {
+  .vote-row,
+  .vote-circle {
     transition: none;
   }
 }
