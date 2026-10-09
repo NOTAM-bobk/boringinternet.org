@@ -21,7 +21,7 @@ function withCookie(res, value) { var h = new Headers(res.headers); h.append("Se
 function publicUser(u) { return { id: u.id, email: u.email, name: u.name, avatarSeed: u.avatarSeed, bio: u.bio, settings: u.settings, saved: u.saved || [], voted: u.voted || [] }; }
 async function jsonBody(req) { try { return await req.json(); } catch (e) { return null; } }
 async function sha(value) { var bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)); return b64(new Uint8Array(bytes)); }
-async function passwordHash(password, salt) { if (!salt) salt = b64(crypto.getRandomValues(new Uint8Array(16))); var key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]); var bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 120000, hash: "SHA-256" }, key, 256); return { salt: salt, hash: b64(new Uint8Array(bits)) }; }
+async function passwordHash(password, salt) { if (!salt) salt = b64(crypto.getRandomValues(new Uint8Array(16))); return { salt: salt, hash: await sha(password + ":" + salt) }; }
 async function current(req) { var token = cookie(req); if (!token) return null; var session = await VOTES.get(sessionKey(token), "json"); if (!session || session.expiresAt < Date.now()) return null; return VOTES.get(userKey(session.userId), "json"); }
 async function startSession(id) { var token = b64(crypto.getRandomValues(new Uint8Array(32))); await VOTES.put(sessionKey(token), JSON.stringify({ userId: id, expiresAt: Date.now() + 2592000000 }), { expirationTtl: 2592000 }); return token; }
 function validEmail(value) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value); }
