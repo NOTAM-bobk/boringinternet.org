@@ -387,8 +387,31 @@ export default function Home() {
 
   const switcher = (
     <section className="flex flex-col gap-4">
-      {/* The page's own headline, then the ways to browse, then the crowd. */}
+      {/* The page's own headline, then what the place is, then the ways to
+          browse, then the crowd. */}
       <h2 className="find-title">Cure boredom, find launches</h2>
+
+      {/* Right under the headline: what you do here. */}
+      <section className="space-y-3">
+        <p className="text-[11px] font-bold tracking-[0.2em] uppercase accent-text">
+          Discover and find websites
+        </p>
+        <p className="max-w-4xl text-base leading-relaxed" style={{ color: "var(--muted)" }}>
+          Use this directory as a calm bored button to jump website to website, discover new
+          launches, and find upcoming websites worth bookmarking.
+        </p>
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Want focused lists?{" "}
+          <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
+            Discover websites by use case
+          </Link>{" "}
+          or{" "}
+          <Link to="/new-websites" className="accent-text font-bold underline underline-offset-4">
+            browse new and upcoming websites
+          </Link>
+          .
+        </p>
+      </section>
 
       {/* Above the search box: one click, one random site, in a new tab. */}
       <div className="bored-row">
@@ -561,26 +584,6 @@ export default function Home() {
         className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-10 flex flex-col gap-8 sm:gap-12 scroll-mt-28"
       >
         {switcher}
-        <section className="space-y-3">
-          <p className="text-[11px] font-bold tracking-[0.2em] uppercase accent-text">
-            Discover and find websites
-          </p>
-          <p className="max-w-4xl text-base leading-relaxed" style={{ color: "var(--muted)" }}>
-            Use this directory as a calm bored button to jump website to website, discover new
-            launches, and find upcoming websites worth bookmarking.
-          </p>
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            Want focused lists?{" "}
-            <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
-              Discover websites by use case
-            </Link>{" "}
-            or{" "}
-            <Link to="/new-websites" className="accent-text font-bold underline underline-offset-4">
-              browse new and upcoming websites
-            </Link>
-            .
-          </p>
-        </section>
 
         <LaunchesThisWeek />
 
