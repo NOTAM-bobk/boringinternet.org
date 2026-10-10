@@ -23,7 +23,7 @@ export default function EmbedBadge() {
   return (
     <main className="embed-root">
       <a
-        href="https://boringinternet.org/"
+        href="https://www.benlaunches.icu/"
         target="_top"
         rel="noopener noreferrer"
         className="embed-badge"
