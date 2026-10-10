@@ -23,11 +23,14 @@ const TAB_ORDER = [
   "/discover-websites",
   "/new-websites",
   "/this-or-that",
+  "/site-tinder",
   "/sites",
   "/trending",
   "/blog",
   "/collections",
   "/submit",
+  "/terms",
+  "/privacy",
   "/admin",
   "/auth",
 ];
@@ -43,6 +46,8 @@ const FOOTER_ROUTES = new Set([
   "/collections",
   "/submit",
   "/advertise",
+  "/terms",
+  "/privacy",
 ]);
 
 function tabIndex(pathname: string): number {

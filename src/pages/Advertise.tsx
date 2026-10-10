@@ -27,25 +27,44 @@ const OPTIONS = [
   },
 ];
 
-/** Extras we can do around a launch, listed under the main placements. */
+/**
+ * Extras we can do around a launch, listed under the main placements. These are
+ * one-off prices rather than weekly placements, so each card shows its own.
+ */
 const SERVICES = [
   {
+    name: "Become a verified site",
+    price: "$45",
+    unit: " one time",
+    description:
+      "A person reviews your site by hand, then your listing keeps the verified mark and moves to the front of future feature and category queues.",
+    featured: true,
+  },
+  {
     name: "SEO audit",
+    price: "$95",
+    unit: " one time",
     description:
       "A plain-English review of your technical SEO, page speed and on-page basics, returned as a prioritised list of fixes.",
   },
   {
     name: "Pre-launch checklist",
+    price: "$45",
+    unit: " one time",
     description:
       "Everything to run through before launch day: metadata, redirects, analytics, performance and the easy-to-miss details.",
   },
   {
     name: "Top 100 featured-on cards",
+    price: "$15",
+    unit: " one time",
     description:
       "A ready-made pack of 100 “featured on” badge cards to drop into your product page or footer.",
   },
   {
     name: "Get listed on 20 other directories",
+    price: "$149",
+    unit: " one time",
     description:
       "We submit your site to 20 hand-picked directories and launch platforms, so you start with a spread of quality listings.",
   },
@@ -137,14 +156,22 @@ export default function Advertise() {
               Other services
             </h2>
             <p className="text-sm" style={{ color: "var(--muted)" }}>
-              Extra help around a launch, alongside a placement or on its own.
+              One-off help around a launch — bought on its own or alongside a placement. Priced in USD.
             </p>
           </div>
 
           <div className="service-grid">
             {SERVICES.map((service) => (
-              <article key={service.name} className="service-card">
-                <h3 className="text-lg font-bold">{service.name}</h3>
+              <article
+                key={service.name}
+                className={`service-card${service.featured ? " service-card-featured" : ""}`}
+              >
+                <div className="service-card-top">
+                  <h3 className="text-lg font-bold">{service.name}</h3>
+                  <p className="service-price">
+                    <span>{service.price}</span> <small>{service.unit}</small>
+                  </p>
+                </div>
                 <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
                   {service.description}
                 </p>

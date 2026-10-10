@@ -222,10 +222,9 @@ function PagedRows({ items, title, note }: { items: Site[]; title: string; note?
         >
           {mobilePages.map((group, index) => (
             <ul className="home-mobile-page" key={`${title}-page-${index + 1}`}>
+              {/* SiteRow is already an <li>, so it goes straight into the page. */}
               {group.map((site) => (
-                <li key={site.id}>
-                  <SiteRow site={site} />
-                </li>
+                <SiteRow key={site.id} site={site} />
               ))}
             </ul>
           ))}
@@ -464,25 +463,26 @@ export default function Home() {
           browse, then the crowd. */}
       <h2 className="find-title">Cure boredom, find launches</h2>
 
-      {/* Right under the headline: what you do here. */}
-      <section className="space-y-3">
-        <p className="text-[11px] font-bold tracking-[0.2em] uppercase accent-text">
-          Discover and find websites
+      {/* Right under the headline: what this is in two short lines, then the two
+          ways to browse. The pieces rise in with a small stagger. */}
+      <section className="find-intro">
+        <p className="find-eyebrow">
+          <span className="find-pulse" aria-hidden="true" />
+          Hand-checked quiet sites
         </p>
-        <p className="max-w-4xl text-base leading-relaxed" style={{ color: "var(--muted)" }}>
-          Use this directory as a calm bored button to jump website to website, discover new
-          launches, and find upcoming websites worth bookmarking.
+        <p className="find-lede">
+          One tap opens a real website — no feed, no autoplay, nothing tracking you.
         </p>
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Want focused lists?{" "}
-          <Link to="/discover-websites" className="accent-text font-bold underline underline-offset-4">
-            Discover websites by use case
-          </Link>{" "}
-          or{" "}
-          <Link to="/new-websites" className="accent-text font-bold underline underline-offset-4">
-            browse new and upcoming websites
+        <p className="find-links">
+          <Link to="/discover-websites" className="find-link">
+            Browse by use case
           </Link>
-          .
+          <span className="find-links-sep" aria-hidden="true">
+            ·
+          </span>
+          <Link to="/new-websites" className="find-link">
+            See what just launched
+          </Link>
         </p>
       </section>
 

@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
-import { SiteIcon } from "../components/SiteIcon";
+import { SiteVoteRow } from "../components/SiteVoteRow";
 import { rankedSites, siteName, siteUrl, trendingConfig, type Site } from "../lib/siteData";
-import { siteDomain } from "../lib/siteTile";
 import {
   castVote,
   fetchSharedCounts,
@@ -157,56 +156,20 @@ export default function Trending() {
           </p>
         )}
 
-        <ol className="stack">
-          {ranked.map((site, index) => {
-            const hasVoted = voted.includes(site.slug);
-            const count = counts[site.slug] ?? site.trending ?? 0;
-            return (
-              <li key={site.id} className="stack-row">
-                <span
-                  className={`rank${index < 3 ? ` rank-top rank-${index + 1}` : ""}`}
-                >
-                  {index + 1}
-                </span>
-
-                <SiteIcon site={site} size={44} label={false} />
-
-                <div className="min-w-0 flex flex-col gap-0.5">
-                  <a
-                    href={site.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-bold truncate hover:underline underline-offset-4"
-                    style={{ color: "var(--ink)" }}
-                  >
-                    {site.name}
-                  </a>
-                  <p className="text-[13px] truncate" style={{ color: "var(--muted)" }}>
-                    {site.description}
-                  </p>
-                  <span className="text-[11px] font-mono" style={{ color: "var(--muted)" }}>
-                    {siteDomain(site.url)}
-                  </span>
-                </div>
-
-                <button
-                  type="button"
-                  className="vote-btn"
-                  onClick={() => void vote(site)}
-                  disabled={hasVoted}
-                  aria-label={
-                    hasVoted
-                      ? `${site.name} voted, ${count} votes`
-                      : `Vote for ${site.name}, ${count} votes`
-                  }
-                  title={hasVoted ? "You already voted for this site" : "Vote for this site"}
-                >
-                  <span aria-hidden="true">{hasVoted ? "✓" : "▲"}</span>
-                  {count}
-                </button>
-              </li>
-            );
-          })}
+        <ol className="vote-rows">
+          {ranked.map((site, index) => (
+            <SiteVoteRow
+              key={site.id}
+              site={site}
+              rank={index + 1}
+              medal
+              leader={index === 0}
+              count={counts[site.slug] ?? site.trending ?? 0}
+              voted={voted.includes(site.slug)}
+              pending={pending.includes(site.slug)}
+              onVote={() => void vote(site)}
+            />
+          ))}
         </ol>
 
         <p className="text-sm text-center" style={{ color: "var(--muted)" }}>

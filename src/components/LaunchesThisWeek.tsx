@@ -6,7 +6,7 @@ import { siteDomain } from "../lib/siteTile";
 import { SiteIcon } from "./SiteIcon";
 
 /** How long a launch stays up before the row slides to the next one. */
-const ROTATE_MS = 5000;
+const ROTATE_MS = 4000;
 
 /** The ticker is derived from listing dates, with a seven-day window and five-site cap. */
 export function LaunchesThisWeek() {

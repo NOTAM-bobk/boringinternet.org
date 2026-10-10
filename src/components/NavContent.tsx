@@ -68,6 +68,8 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const pendingSection = useRef<string | null>(null);
+  /** Keeps the Bored button from opening the same site twice in a row. */
+  const lastRandom = useRef<string | null>(null);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
@@ -173,6 +175,18 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
     navigate(href);
   }
 
+  /** The Bored button, same as the one on the home page: one random site. */
+  function openRandomSite() {
+    const pool = lastRandom.current
+      ? sites.filter((site) => site.id !== lastRandom.current)
+      : sites;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    if (!pick) return;
+    lastRandom.current = pick.id;
+    onNavigate?.();
+    window.open(pick.url, "_blank", "noopener,noreferrer");
+  }
+
   function runSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = query.trim();
@@ -271,6 +285,35 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       <div className="sidenav-divider" />
+
+      <div className="sidenav-group">
+        <SectionToggle
+          label="Games"
+          open={Boolean(openGroups.games)}
+          onToggle={() => toggleGroup("games")}
+        />
+        {openGroups.games && (
+          <div className="sidenav-sub">
+            <button type="button" className="sidenav-subitem" onClick={openRandomSite}>
+              Bored button
+            </button>
+            <button
+              type="button"
+              className="sidenav-subitem"
+              onClick={() => go("/this-or-that")}
+            >
+              This or That
+            </button>
+            <button
+              type="button"
+              className={`sidenav-subitem${location.pathname === "/site-tinder" ? " active-sub" : ""}`}
+              onClick={() => go("/site-tinder")}
+            >
+              Site Tinder
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="sidenav-group">
         <SectionToggle

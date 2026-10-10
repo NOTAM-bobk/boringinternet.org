@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { SiteSeo } from "../components/SeoHead";
 import { VoteGate, VOTES_REQUIRED } from "../components/VoteGate";
-import { categoryFilters, siteName, siteUrl } from "../lib/siteData";
+import { categoryChoices, siteName, siteUrl } from "../lib/siteData";
 import { readVotedSlugs } from "../lib/votes";
 import { autofillSite, submissionsConnected, submitSite, type SubmissionDraft } from "../lib/submissions";
 
@@ -110,7 +110,8 @@ export default function Submit() {
   const votesReady = votesCast >= VOTES_REQUIRED;
   const votesLeft = Math.max(0, VOTES_REQUIRED - votesCast);
 
-  const openCategories = categoryFilters.filter((category) => category.id !== "all");
+  /* Every configured category, including the niche ones no listing uses yet. */
+  const openCategories = categoryChoices;
 
   function update<K extends keyof SubmissionDraft>(key: K, value: SubmissionDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));

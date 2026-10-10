@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import { Link, useParams } from "react-router";
 import { ReportProblem } from "../components/ReportProblem";
+import { ShareSite } from "../components/ShareSite";
 import { SiteIcon } from "../components/SiteIcon";
 import { SiteSeo } from "../components/SeoHead";
 import { useAuth } from "../lib/auth";
@@ -226,6 +227,15 @@ export default function SiteDetail() {
               </ul>
             </section>
           )}
+
+          {/* The last thing on the page: hand this listing to someone else. */}
+          <section className="site-detail-section site-detail-share">
+            <h2>Share this site</h2>
+            <p>
+              Send {site.name} to someone who would like it, or keep the link for later.
+            </p>
+            <ShareSite site={site} pageUrl={pageUrl} />
+          </section>
         </div>
       </div>
 

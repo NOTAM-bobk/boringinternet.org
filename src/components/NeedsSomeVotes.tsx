@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { SiteIcon } from "./SiteIcon";
+import { SiteVoteRow } from "./SiteVoteRow";
 import { rankedSites, type Site } from "../lib/siteData";
 import {
   castVote,
@@ -11,18 +11,36 @@ import {
   votesConnected,
   writeLocalCount,
 } from "../lib/votes";
-import { siteDomain } from "../lib/siteTile";
 
 const SITE_POOL = rankedSites();
 const STARTING_COUNTS = Object.fromEntries(
   SITE_POOL.map((site) => [site.slug, site.trending ?? 0]),
 );
 
+/** The scores as they stand on arrival: configured, then this browser's votes. */
+function startingCounts(): Record<string, number> {
+  return { ...STARTING_COUNTS, ...readLocalCounts() };
+}
+
+/**
+ * The three listings at the very bottom of the live ranking, weakest first, each
+ * with the position it holds so a row can show it like the trending list does.
+ */
+function weakestThree(counts: Record<string, number>) {
+  const order = [...SITE_POOL].sort((a, b) => (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0));
+  return order
+    .slice(-3)
+    .reverse()
+    .map((site) => ({ site, rank: order.indexOf(site) + 1 }));
+}
+
 export function NeedsSomeVotes() {
-  const [counts, setCounts] = useState<Record<string, number>>(() => ({
-    ...STARTING_COUNTS,
-    ...readLocalCounts(),
-  }));
+  const [counts, setCounts] = useState<Record<string, number>>(startingCounts);
+  /*
+    Picked once, when the strip mounts. Choosing the weakest three again on every
+    vote would swap the site you just voted for out of the strip mid-session.
+  */
+  const [sitesNeedingVotes] = useState(() => weakestThree(startingCounts()));
   const [voted, setVoted] = useState<string[]>(() => readVotedSlugs());
   const [pending, setPending] = useState<string[]>([]);
   const [shared, setShared] = useState(false);
@@ -38,17 +56,6 @@ export function NeedsSomeVotes() {
       active = false;
     };
   }, []);
-
-  const sitesNeedingVotes = useMemo(() => {
-    const originalPosition = new Map(SITE_POOL.map((site, index) => [site.slug, index]));
-    return [...SITE_POOL]
-      .sort((a, b) => {
-        const difference = (counts[a.slug] ?? 0) - (counts[b.slug] ?? 0);
-        if (difference !== 0) return difference;
-        return (originalPosition.get(b.slug) ?? 0) - (originalPosition.get(a.slug) ?? 0);
-      })
-      .slice(0, 3);
-  }, [counts]);
 
   async function vote(site: Site) {
     if (voted.includes(site.slug) || pending.includes(site.slug)) return;
@@ -82,35 +89,18 @@ export function NeedsSomeVotes() {
         <Link to="/trending" className="needs-votes-all">Full rankings →</Link>
       </header>
 
-      <ol className="needs-votes-grid">
-        {sitesNeedingVotes.map((site, index) => {
-          const hasVoted = voted.includes(site.slug);
-          const isPending = pending.includes(site.slug);
-          const count = counts[site.slug] ?? site.trending ?? 0;
-          return (
-            <li key={site.id} className="needs-votes-card">
-              <div className="needs-votes-card-top">
-                <span className="needs-votes-rank">#{SITE_POOL.length - index}</span>
-                <SiteIcon site={site} size={40} label={false} />
-              </div>
-              <Link to={`/sites/${site.slug}`} className="needs-votes-site-name">
-                {site.name}
-              </Link>
-              <span className="needs-votes-domain">{siteDomain(site.url)}</span>
-              <p className="needs-votes-description">{site.description}</p>
-              <button
-                type="button"
-                className="needs-votes-button"
-                onClick={() => void vote(site)}
-                disabled={hasVoted || isPending}
-                aria-label={hasVoted ? `You voted for ${site.name}, ${count} votes` : `Vote for ${site.name}, ${count} votes`}
-              >
-                <span aria-hidden="true">{hasVoted ? "✓" : "▲"}</span>
-                {isPending ? "Counting…" : hasVoted ? `Voted · ${count}` : `Vote for it · ${count}`}
-              </button>
-            </li>
-          );
-        })}
+      <ol className="vote-rows">
+        {sitesNeedingVotes.map(({ site, rank }) => (
+          <SiteVoteRow
+            key={site.id}
+            site={site}
+            rank={rank}
+            count={counts[site.slug] ?? site.trending ?? 0}
+            voted={voted.includes(site.slug)}
+            pending={pending.includes(site.slug)}
+            onVote={() => void vote(site)}
+          />
+        ))}
       </ol>
       <p className="needs-votes-note" role="status">
         {shared
