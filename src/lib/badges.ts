@@ -39,6 +39,15 @@ export const featureBadges: FeatureBadge[] = [
     attributes: { "data-launchaf-badge": "true" },
   },
   {
+    id: "startup-trusted",
+    name: "StartupTrusted",
+    href: "https://startuptrusted.com?ref=new.base31.org",
+    image: "https://startuptrusted.com/api/badge?type=featured&style=dark",
+    width: 240,
+    height: 54,
+    alt: "Boring Internet on StartupTrusted",
+  },
+  {
     id: "launch-llama-tools",
     name: "Launch Llama Tools",
     href: "https://tools.launchllama.co/products/base31-org?utm_source=badge&utm_medium=referral",
