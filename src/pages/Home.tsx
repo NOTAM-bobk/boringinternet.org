@@ -517,7 +517,7 @@ export default function Home() {
         <input
           id="site-search"
           type="search"
-          placeholder={`Search ${sites.length} sites, tags, categories…`}
+          placeholder="Search sites, tags, categories…"
           value={query}
           onChange={(e) => {
             updateParams({ q: e.target.value, category: undefined });

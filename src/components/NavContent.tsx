@@ -19,7 +19,6 @@ const SECTIONS: ReadonlyArray<{ id: string; to: string; label: string; icon?: st
   { id: "explore", to: "/#explore", label: "Explore" },
   { id: "discover", to: "/discover-websites", label: "Discover" },
   { id: "new", to: "/new-websites", label: "New" },
-  { id: "articles", to: "/blog", label: "Articles" },
   { id: "collections", to: "/collections", label: "Collections" },
   { id: "trending", to: "/trending", icon: "🔥", label: "Trending" },
 ];
@@ -216,7 +215,7 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               setSearchOpen(true);
             }}
             onFocus={() => setSearchOpen(true)}
-            placeholder={`Search ${sites.length} sites`}
+            placeholder="Search sites"
           />
           <span className="keycap" aria-hidden="true">
             ⌘K
@@ -276,9 +275,6 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 </span>
               )}
               <span>{section.label}</span>
-              {section.id === "articles" && (
-                <span className="sidenav-badge">{posts.length}</span>
-              )}
             </button>
           );
         })}
@@ -328,6 +324,17 @@ export function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             </button>
             <button type="button" className="sidenav-subitem" onClick={() => go("/trending")}>
               Top {sites.length} ranking
+            </button>
+            <button
+              type="button"
+              className={`sidenav-subitem${
+                location.pathname === "/blog" || location.pathname.startsWith("/blog/")
+                  ? " active-sub"
+                  : ""
+              }`}
+              onClick={() => go("/blog")}
+            >
+              Articles <span className="sidenav-badge">{posts.length}</span>
             </button>
             <button type="button" className="sidenav-subitem" onClick={() => go("/submit")}>
               Submit your site
