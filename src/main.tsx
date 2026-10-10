@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router";
+import { Analytics } from "@vercel/analytics/react";
 import "./index.css";
 import { AppShell } from "./components/AppShell.tsx";
 import Home from "./pages/Home.tsx";
@@ -118,5 +119,6 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RouterProvider router={router} />
+    <Analytics />
   </StrictMode>,
 );
